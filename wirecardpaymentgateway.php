@@ -35,30 +35,30 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
  * Class WirecardEEPaymentGateway
  */
 
-class WirecardEEPaymentGateway extends PaymentModule
+class WirecardPaymentGateway extends PaymentModule
 {
     public function __construct()
     {
-        $this->name = 'wirecardeepaymentgateway';
+        $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '0.0.1';
         $this->author = 'Wirecard';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => "1.7.2.4");
         $this->bootstrap = true;
 
         parent::__construct();
 
-        $this->displayName = $this->l('Wirecard payment methods');
+        $this->displayName = $this->l('Wirecard payment proccesing gateway');
         $this->description = $this->l('Wirecard payment methods.');
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
 
     public function install()
     {
-        if (!parent::install()) {
+        if (!parent::install())
+
             return false;
-        }
         return true;
     }
 
