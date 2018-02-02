@@ -34,7 +34,6 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 /**
  * Class WirecardEEPaymentGateway
  */
-
 class WirecardPaymentGateway extends PaymentModule
 {
     public function __construct()
@@ -84,7 +83,6 @@ class WirecardPaymentGateway extends PaymentModule
             'basicdata' => array(
                 'tab' => $this->l('Access data'),
                 'fields' => array(
-
                     array(
                         'name' => 'wirecard_server_url',
                         'label' => $this->l('URL of Wirecard server'),
@@ -107,7 +105,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'name' => 'secret',
                         'label' => $this->l('Secret'),
                         'type' => 'text',
-                        'default' => 'WD PayPal TEST',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                         'required' => true,
                         'sanitize' => 'trim',
                         'doc' => $this->l('Can set the Secret.'),
@@ -131,31 +129,14 @@ class WirecardPaymentGateway extends PaymentModule
                         'doc' => $this->l('Can set the HTTP Password.'),
                     ),
                     array(
-                        'name'=>'enable_method',
-                        'label'=>'Enable and disable this payment method',
-                        'default'=>'1',
-                        'type'=>'onoff',
-                        'doc'=> $this->l('Enable and disable this payment method'),
+                        'name' => 'enable_method',
+                        'label' => 'Enable and disable this payment method',
+                        'default' => '1',
+                        'type' => 'onoff',
+                        'doc' => $this->l('Enable and disable this payment method'),
                     )
                 )
             )
-        );
-    }
-
-    /**
-     * return options for configuration modes select
-     *
-     * @since 0.0.2
-     *
-     * @return array
-     */
-    private function getConfigurationModes()
-    {
-        return array(
-            array('key' => 'production', 'value' => $this->l('Production')),
-            array('key' => 'demo', 'value' => $this->l('Demo')),
-            array('key' => 'test', 'value' => $this->l('Test')),
-            array('key' => 'test3d', 'value' => $this->l('Test 3D'))
         );
     }
 
@@ -166,7 +147,7 @@ class WirecardPaymentGateway extends PaymentModule
      */
     public function getContent()
     {
-       $this->html = '<h2>' . $this->displayName . '</h2>';
+        $this->html = '<h2>' . $this->displayName . '</h2>';
 
         if (Tools::isSubmit('btnSubmit')) {
             $this->postValidation();
@@ -179,27 +160,9 @@ class WirecardPaymentGateway extends PaymentModule
             }
         }
 
-        $context = $this->context;
-        $country = Tools::strtolower($context->country->iso_code);
-        $language = $context->language->iso_code;
-
-        if ($language != $country && $language = 'en') {
-            $language = 'en';
-        }
-
-        if (!in_array($country, array('gb', 'de', 'it', 'es', 'pl', 'nl', 'fr'))) {
-            $country = 'de';
-            $language = 'en';
-        }
-
         $this->context->smarty->assign(
             array(
-                'country' => $country,
-                'language' => $language,
-                'shopversion' => _PS_VERSION_,
-                'pluginversion' => $this->version,
-                'module_dir' => $this->_path,
-                'link' => $this->context->link
+                'module_dir' => $this->_path
             )
         );
 
@@ -347,7 +310,7 @@ class WirecardPaymentGateway extends PaymentModule
                 'submit' => array(
                     'title' => $this->l('Save')
                 )
-            ),
+            )
         );
 
         /** @var HelperFormCore $helper */
@@ -370,9 +333,7 @@ class WirecardPaymentGateway extends PaymentModule
         $helper->tpl_vars = array(
             'fields_value' => $this->getConfigFieldsValues(),
             'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-            'ajax_configtest_url' => $this->context->link->getAdminLink('AdminModules') . '&configure=' . $this->name
-                . '&tab_module=' . $this->tab . '&module_name=' . $this->name
+            'id_language' => $this->context->language->id
         );
         return $helper->generateForm(array($fields_form_settings));
     }
@@ -541,31 +502,25 @@ class WirecardPaymentGateway extends PaymentModule
      */
     private function postProcess()
     {
-        if (Tools::isSubmit('ajax')) {
-            if (Tools::getValue('action') == 'ajaxTestConfig') {
-                $this->ajaxTestConfig();
-            }
-        } else {
-            if (Tools::isSubmit('btnSubmit')) {
-                foreach ($this->getAllConfigurationParameters() as $parameter) {
-                    $val = Tools::getValue($parameter['param_name']);
+        if (Tools::isSubmit('btnSubmit')) {
+            foreach ($this->getAllConfigurationParameters() as $parameter) {
+                $val = Tools::getValue($parameter['param_name']);
 
-                    if (isset($parameter['sanitize'])) {
-                        switch ($parameter['sanitize']) {
-                            case 'trim':
-                                $val = trim($val);
-                                break;
-                        }
+                if (isset($parameter['sanitize'])) {
+                    switch ($parameter['sanitize']) {
+                        case 'trim':
+                            $val = trim($val);
+                            break;
                     }
-
-                    if (is_array($val)) {
-                        $val = Tools::jsonEncode($val);
-                    }
-                    Configuration::updateValue($parameter['param_name'], $val);
                 }
+
+                if (is_array($val)) {
+                    $val = Tools::jsonEncode($val);
+                }
+                Configuration::updateValue($parameter['param_name'], $val);
             }
-            $this->html .= $this->displayConfirmation($this->l('Settings updated'));
         }
+        $this->html .= $this->displayConfirmation($this->l('Settings updated'));
     }
 
     /**
