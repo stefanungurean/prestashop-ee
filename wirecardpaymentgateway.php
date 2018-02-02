@@ -45,7 +45,7 @@ class WirecardPaymentGateway extends PaymentModule
         $this->version = '0.0.2';
         $this->author = 'Wirecard';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => "1.7.2.4");
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7.2.4');
         $this->bootstrap = true;
 
         parent::__construct();
@@ -57,9 +57,9 @@ class WirecardPaymentGateway extends PaymentModule
 
     public function install()
     {
-        if (!parent::install())
-
+        if (!parent::install()){
             return false;
+        }
         return true;
     }
 
@@ -72,7 +72,7 @@ class WirecardPaymentGateway extends PaymentModule
     }
 
     /**
-     * available config params
+     * returns the config array
      *
      * @since 0.0.2
      *
@@ -81,7 +81,6 @@ class WirecardPaymentGateway extends PaymentModule
     protected function config()
     {
         return array(
-
             'basicdata' => array(
                 'tab' => $this->l('Access data'),
                 'fields' => array(
@@ -99,7 +98,6 @@ class WirecardPaymentGateway extends PaymentModule
                         'label' => $this->l('Customer ID'),
                         'type' => 'text',
                         'default' => 'D200001',
-                        // 'maxchar' => 7,
                         'required' => true,
                         'sanitize' => 'trim',
                         'doc' => $this->l('Customer number you received from Wirecard (customerId, i.e. D2#####).'),
@@ -123,8 +121,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'group' => 'pt',
                     )
                 )
-            ),
-
+            )
         );
     }
 
@@ -145,10 +142,14 @@ class WirecardPaymentGateway extends PaymentModule
         );
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     * @throws SmartyException
+     */
     public function getContent()
     {
-        //  $this->createTable();
-        $this->html = '<h2>' . $this->displayName . '</h2>';
+       $this->html = '<h2>' . $this->displayName . '</h2>';
 
         if (Tools::isSubmit('btnSubmit')) {
             $this->postValidation();
@@ -174,20 +175,14 @@ class WirecardPaymentGateway extends PaymentModule
             $language = 'en';
         }
 
-
-        $backendEnabled = Configuration::get('WCS_BASICDATA_BACKENDPW');
         $this->context->smarty->assign(
             array(
                 'country' => $country,
                 'language' => $language,
                 'shopversion' => _PS_VERSION_,
                 'pluginversion' => $this->version,
-                'is_core' => $this->isCore,
                 'module_dir' => $this->_path,
-                'link' => $this->context->link,
-                'backendEnabled' => $backendEnabled != null && Tools::strlen($backendEnabled) > 0,
-                'ajax_configtest_url' => $this->context->link->getAdminLink('AdminModules') . '&configure='
-                    . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name
+                'link' => $this->context->link
             )
         );
 
@@ -225,6 +220,7 @@ class WirecardPaymentGateway extends PaymentModule
 
         $input_fields = array();
         $tabs = array();
+
         foreach ($this->config as $groupKey => $group) {
             $tabs[$groupKey] = $this->l($group['tab']);
             foreach ($group['fields'] as $f) {
@@ -337,7 +333,6 @@ class WirecardPaymentGateway extends PaymentModule
             ),
         );
 
-
         /** @var HelperFormCore $helper */
         $helper = new HelperForm();
         $helper->show_toolbar = false;
@@ -362,7 +357,6 @@ class WirecardPaymentGateway extends PaymentModule
             'ajax_configtest_url' => $this->context->link->getAdminLink('AdminModules') . '&configure=' . $this->name
                 . '&tab_module=' . $this->tab . '&module_name=' . $this->name
         );
-
         return $helper->generateForm(array($fields_form_settings));
     }
 
@@ -507,13 +501,6 @@ class WirecardPaymentGateway extends PaymentModule
                     }
                 }
 
-                /* if ($parameter['name'] == 'customer_id') {
-                     preg_match("/^D2[0-8]\d{4}|9[5-9]\d{3}$/", $val, $output);
-                     if (count($output) !== 1) {
-                         $this->postErrors[] = $this->l('Incorrect customer ID.');
-                     }
-                 }*/
-
                 if (!isset($parameter['validator'])) {
                     continue;
                 }
@@ -557,12 +544,10 @@ class WirecardPaymentGateway extends PaymentModule
                     if (is_array($val)) {
                         $val = Tools::jsonEncode($val);
                     }
-
                     Configuration::updateValue($parameter['param_name'], $val);
                 }
             }
             $this->html .= $this->displayConfirmation($this->l('Settings updated'));
         }
     }
-
 }
