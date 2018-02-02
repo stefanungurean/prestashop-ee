@@ -80,17 +80,22 @@ class WirecardPaymentGateway extends PaymentModule
     protected function config()
     {
         return array(
-            'basicdata' => array(
-                'tab' => $this->l('Access data'),
+            'paypal' => array(
+                'tab' => $this->l('PayPal'),
                 'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => 'Enable and disable this payment method',
+                        'default' => '1',
+                        'type' => 'onoff'
+                    ),
                     array(
                         'name' => 'wirecard_server_url',
                         'label' => $this->l('URL of Wirecard server'),
                         'type' => 'text',
                         'default' => 'https://api-test.wirecard.com',
                         'required' => true,
-                        'sanitize' => 'trim',
-                        'doc' => $this->l('Can set the URL of Wirecard server. '),
+                        'sanitize' => 'trim'
                     ),
                     array(
                         'name' => 'maid',
@@ -98,8 +103,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'type' => 'text',
                         'default' => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
                         'required' => true,
-                        'sanitize' => 'trim',
-                        'doc' => $this->l('Can set the MAID.'),
+                        'sanitize' => 'trim'
                     ),
                     array(
                         'name' => 'secret',
@@ -107,8 +111,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'type' => 'text',
                         'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                         'required' => true,
-                        'sanitize' => 'trim',
-                        'doc' => $this->l('Can set the Secret.'),
+                        'sanitize' => 'trim'
                     ),
                     array(
                         'name' => 'http_user',
@@ -116,8 +119,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'type' => 'text',
                         'default' => '70000-APITEST-AP',
                         'required' => true,
-                        'sanitize' => 'trim',
-                        'doc' => $this->l('Can set the HTTP User.'),
+                        'sanitize' => 'trim'
                     ),
                     array(
                         'name' => 'http_password',
@@ -125,15 +127,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'type' => 'text',
                         'default' => 'qD2wzQ_hrc!8',
                         'required' => true,
-                        'sanitize' => 'trim',
-                        'doc' => $this->l('Can set the HTTP Password.'),
-                    ),
-                    array(
-                        'name' => 'enable_method',
-                        'label' => 'Enable and disable this payment method',
-                        'default' => '1',
-                        'type' => 'onoff',
-                        'doc' => $this->l('Enable and disable this payment method'),
+                        'sanitize' => 'trim'
                     )
                 )
             )
