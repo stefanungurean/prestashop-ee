@@ -128,6 +128,14 @@ class WirecardPaymentGateway extends PaymentModule
                         'default' => 'qD2wzQ_hrc!8',
                         'required' => true,
                         'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'transaction_type',
+                        'label' => $this->l('Transaction type'),
+                        'type' => 'select',
+                        'default' => 'purchase',
+                        'required' => true,
+                        'options' => 'getTransactionTypes'
                     )
                 )
             )
@@ -525,5 +533,18 @@ class WirecardPaymentGateway extends PaymentModule
             }
         }
         return true;
+    }
+
+    /**
+     * return options for transaction types select
+     *
+     * @return array
+     */
+    private function getTransactionTypes()
+    {
+        return array(
+            array('key' => 'authorization', 'value' => $this->l('Authorization')),
+            array('key' => 'purchase', 'value' => $this->l('Purchase'))
+        );
     }
 }
