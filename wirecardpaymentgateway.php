@@ -86,7 +86,7 @@ class WirecardPaymentGateway extends PaymentModule
                     array(
                         'name' => 'enable_method',
                         'label' => 'Enable and disable this payment method',
-                        'default' => '1',
+                        'default' => '0',
                         'type' => 'onoff'
                     ),
                     array(
@@ -409,28 +409,6 @@ class WirecardPaymentGateway extends PaymentModule
         }
 
         return $params;
-    }
-
-    /**
-     * return available country iso codes
-     *
-     * @since 0.0.2
-     *
-     * @return array
-     */
-    protected function getCountries()
-    {
-        $cookie = $this->context->cookie;
-        $countries = Country::getCountries($cookie->id_lang);
-        $ret = array();
-        foreach ($countries as $country) {
-            $ret[] = array(
-                'key' => $country['iso_code'],
-                'value' => $country['name']
-            );
-        }
-
-        return $ret;
     }
 
     /**
