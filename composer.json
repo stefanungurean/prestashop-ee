@@ -15,8 +15,8 @@
   "type": "shopsystem-plugin",
   "scripts": {
     "upload-coverage": "coveralls -v",
-    "cs-check": "phpcs --standard=phpcs.xml .",
-    "cs-fix": "phpcbf --standard=phpcs.xml .",
+    "cs-check": "phpcs",
+    "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
   }
