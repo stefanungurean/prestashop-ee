@@ -37,7 +37,6 @@ install:
 script:
   - composer test-coverage
   - composer cs-check
-  - $PHPCS_DIR/bin/phpcs -p --ignore=Test/*,vendor/* . --standard=WordPress-Core
   - sonar-scanner
 
 after_script:
