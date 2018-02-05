@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Plugins">
-    <description>Generally-applicable sniffs for WordPress plugins</description>
+<ruleset name="PSR Coding Standards for Plugins">
+    <description>Generally-applicable sniffs for PSR code style</description>
 
-    <rule ref="PSR2"/>
+    <rule ref="PSR2" />
 
     <!-- Paths to check -->
     <file>.</file>

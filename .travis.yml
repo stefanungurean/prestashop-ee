@@ -22,8 +22,6 @@ env:
   global:
   - COMPOSER_ARGS="--no-interaction"
 
-
-
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
   - travis_retry composer install $COMPOSER_ARGS
