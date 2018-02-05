@@ -1,6 +1,6 @@
 {
   "name": "wirecard/prestashop-ee",
-  "description": "Shopsystem plugin for Wirecard Payment Processing Gateway",
+  "description": "Prestashop plugin for Wirecard Payment Processing Gateway",
   "license": "GPL-3.0-only",
   "minimum-stability": "beta",
   "prefer-stable": true,
