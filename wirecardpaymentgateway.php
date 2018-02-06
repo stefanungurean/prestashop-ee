@@ -56,7 +56,8 @@ class WirecardPaymentGateway extends PaymentModule
 
     public function install()
     {
-        if (!parent::install() || !$this->setDefaults()) {
+        if (!parent::install() || !$this->setDefaults()
+           || ! $this->registerHook('displayPaymentEU') ) {
             return false;
         }
         return true;
@@ -68,6 +69,26 @@ class WirecardPaymentGateway extends PaymentModule
             return false;
         }
         return true;
+    }
+
+    /**
+     * @since 0.0.2
+     *
+     */
+    public function hookDisplayPaymentEU($params)
+    {
+        if (!$this->active) {
+            return;
+        }
+
+        $payment_options = array(
+            'cta_text' => $this->l('Paypal payment'),
+            'logo' => Media::getMediaPath(
+                dirname(__FILE__) . '/views/img/paymenttypes/paypal.png'),
+            'action' => $this->context->link->getModuleLink($this->name, 'validation', array(), true)
+        );
+
+        return $payment_options;
     }
 
     /**
