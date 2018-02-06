@@ -1,0 +1,36 @@
+sudo: false
+dist: trusty
+language: php
+
+cache:
+  directories:
+    - $HOME/.sonar/cache
+
+addons:
+  sonarcloud:
+    organization: "wirecard"
+    token:
+      secure: "b1tY3aYp3pJHMuK/Dg7VJjyhUU8nUdv2DPmrJlekeChTcnaUxjC9kcQfrqacRsSowWGqANk2PmynGajdlfB+ZYEPAIhtrZ22fTFj4LTm3xKWETKK8rJE2epsrL8NeLLJ9nYnDdPejtQlU1EesCTpk7+bZ8ZywPffkuQ+/9u6frasbJIMOPkPgB6FO17Cor4YHxVzX9uhvrfPaTY9Yq32FFhswzdZDaaZbOSkeVXZ0YjdJAv/6RwNDfNh2ajgiiAAfp3rAqe+Ig309oCcO9oIbyu0g6twt/G9cvJ/mGQW9oBZ2Vw9BsfGPMwseuD7grosfeaUVAmd/U7KkoUioUabkXpzSc02Ql9CROCTTq+EGlUsEseMfvCTSaL74HA2i/quVNAcp3mvqJJKQRwsX/cxxc7yFYjE2Kfj+0BHiUdRRAo/eloElpjlMHaANJn5zxYk5otGFU9x0ZaqRiRDmNk+JMnQ5zGNA3FDtZf79q1z/Na10wiN30It+EjLY8vXVYhXp77Y7918mzSm4/o9PvxlZU0lKQ118cIYA6xTP66T/ux6W4PCesy7ZF+WRCw1tJVRv9UCnQSPf0lZrSr9AFasdbfICesXC9+b1dW3VItjQ8oTmk7HqGspjuY4qwPzAkqkse7bstenfEI9H0u8aWLbJBugsEOWMMzc8N8XevN6XpY="
+    github_token:
+      secure: "Zs12Hz+w+gS64vIfUxDd2KF2dG2lIkMA4FN39ROqJUWMmk6Oq6PQBTCsBTie+wxuwYJrte5vvv2/UVDqzn2ZQUOnyx6vFZzPxYH+CCRK4ybFKop+x0sh0JW/9crU+Ij7ZAzFGkqJ0ejSU3or3WxQz7EPafrDh1isSbXWcPZVO0sDNnHbD/GBSKP3a3icPEeQmPaexejDGEXHMRixAV37M9mWSiGABVi3azU0PYOaSs1/yTIp4hJ7RF3RCT+aj/+UwSwgP3iI5BnIpnNYE6vjlLzOOdYEp/DE9Qiz6lhZBUUTiqmYq4xw7b0KCuGLUxkmZTmKGuRxuZnXH2a7LqiVjAo0RIpj7OeuaoJOCC+dxILcr8i4A3z1jcZCbmmKLPx+rUEoBpXSvo7xFIxHyNNKTCo9j6L8jcYezo1wR/DDxrdEJ3q/gzxLd3K7yxeIjb5NEDY/RJvgPGNWzphIOk/BotqQqVYxAaPFeUfhxh7SJHWNf4tsjr+7WmXjGGWnerA5NzBM+lWiZOUzmOPE2cDEvWh+2yIGH7PdheKYnqSJcDkwqSytPt8ZxqDRalCMNXERXtYldt/O12Od2QkxzJuuPzV7pcANr9TO2rMK/gaPEJUWb5RYabX+GHP4zln3r0wxIxrNDOFB1QDmHkc8Yfj5SuojWtPqI414GVU2Ye1c+3U="
+
+php:
+  - 7.0
+  - 5.6
+
+env:
+  global:
+  - COMPOSER_ARGS="--no-interaction"
+
+install:
+  - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+  - travis_retry composer install $COMPOSER_ARGS
+  - composer show
+
+script:
+  - composer test-coverage
+  - composer cs-check
+  - sonar-scanner
+
+after_script:
+  - composer upload-coverage

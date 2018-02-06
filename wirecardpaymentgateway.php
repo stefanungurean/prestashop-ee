@@ -581,4 +581,5 @@ class WirecardPaymentGateway extends PaymentModule
             Configuration::get($this->buildParamName('paypal','http_password')));
         $transactionService = new TransactionService($config, $this->logger);
     }
+
 }
