@@ -1,6 +1,6 @@
 {
   "name": "wirecard/prestashop-ee",
-  "description": "Prestashop plugin for Wirecard Payment Processing Gateway",
+  "description": "Wirecard Payment Processing Gateway plugin for Prestashop",
   "license": "GPL-3.0-only",
   "minimum-stability": "beta",
   "prefer-stable": true,
