@@ -36,4 +36,41 @@
     <br/><br/>
     {l s='As independent provider of payment solutions, we accompany our customers along the entire business development. Our payment solutions are perfectly tailored to suit e-Commerce requirements and have made us Austria´s leading payment service provider. Customization, competence, and commitment.' mod='wirecardpaymentgateway'}<br/>
     <br/>
+
+    <div class="btn-group">
+        <a class="btn btn-default" id="doWcsConfigTest" href="#">
+            <i class="icon-check"></i>
+            {l s='Test configuration' mod='wirecardceecheckoutseamless'}
+        </a>
+    </div>
 </div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#doWcsConfigTest').on('click', function() {
+            $.ajax({
+                type: 'POST',
+                {** this url doesn't work when escaped *}
+                url: '{$ajax_configtest_url}',
+                dataType: 'json',
+                data: {
+                    controller: 'AdminModules',
+                    action: 'TestConfig',
+                    ajax: true
+                },
+                success: function (jsonData) {
+                    if (jsonData) {
+                        $.fancybox({
+                            fitToView: true,
+                            content: '<div><fieldset><legend>{l s='Test result' mod='wirecardceecheckoutseamless'}</legend>' +
+                            '<label>{l s='Status' mod='wirecardceecheckoutseamless'}:</label>' +
+                            '<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
+                            '<label>{l s='Message' mod='wirecardceecheckoutseamless'}:</label>' +
+                            '<div class="margin-form" style="text-align:left;">' + jsonData.message + '</div></fieldset></div>'
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

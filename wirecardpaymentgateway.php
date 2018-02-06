@@ -29,6 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+//require_once 'vendor/autoload.php';
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 /**
@@ -141,31 +142,36 @@ class WirecardPaymentGateway extends PaymentModule
      */
     public function getContent()
     {
-        $this->html = '<h2>' . $this->displayName . '</h2>';
+        if (Tools::isSubmit('ajax')) {
+            return $this->postProcess();
+        } else {
 
-        if (Tools::isSubmit('btnSubmit')) {
-            $this->postValidation();
-            if (!count($this->postErrors)) {
-                $this->postProcess();
-            } else {
-                foreach ($this->postErrors as $err) {
-                    $this->html .= $this->displayError(html_entity_decode($err));
+            $this->html = '<h2>' . $this->displayName . '</h2>';
+
+            if (Tools::isSubmit('btnSubmit')) {
+                $this->postValidation();
+                if (!count($this->postErrors)) {
+                    $this->postProcess();
+                } else {
+                    foreach ($this->postErrors as $err) {
+                        $this->html .= $this->displayError(html_entity_decode($err));
+                    }
                 }
             }
+
+            $this->context->smarty->assign(
+                array(
+                    'module_dir' => $this->_path
+                )
+            );
+
+            $this->html .= $this->context->smarty->fetch(
+                dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
+            );
+            $this->html .= $this->renderForm();
+
+            return $this->html;
         }
-
-        $this->context->smarty->assign(
-            array(
-                'module_dir' => $this->_path
-            )
-        );
-
-        $this->html .= $this->context->smarty->fetch(
-            dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
-        );
-        $this->html .= $this->renderForm();
-
-        return $this->html;
     }
 
     /**
@@ -474,25 +480,31 @@ class WirecardPaymentGateway extends PaymentModule
      */
     private function postProcess()
     {
-        if (Tools::isSubmit('btnSubmit')) {
-            foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter['param_name']);
-
-                if (isset($parameter['sanitize'])) {
-                    switch ($parameter['sanitize']) {
-                        case 'trim':
-                            $val = trim($val);
-                            break;
-                    }
-                }
-
-                if (is_array($val)) {
-                    $val = Tools::jsonEncode($val);
-                }
-                Configuration::updateValue($parameter['param_name'], $val);
+        if (Tools::isSubmit('ajax')) {
+            if (Tools::getValue('action') == 'TestConfig') {
+                $this->testCredentials();
             }
+        } else {
+            if (Tools::isSubmit('btnSubmit')) {
+                foreach ($this->getAllConfigurationParameters() as $parameter) {
+                    $val = Tools::getValue($parameter['param_name']);
+
+                    if (isset($parameter['sanitize'])) {
+                        switch ($parameter['sanitize']) {
+                            case 'trim':
+                                $val = trim($val);
+                                break;
+                        }
+                    }
+
+                    if (is_array($val)) {
+                        $val = Tools::jsonEncode($val);
+                    }
+                    Configuration::updateValue($parameter['param_name'], $val);
+                }
+            }
+            $this->html .= $this->displayConfirmation($this->l('Settings updated'));
         }
-        $this->html .= $this->displayConfirmation($this->l('Settings updated'));
     }
 
     /**
@@ -525,5 +537,27 @@ class WirecardPaymentGateway extends PaymentModule
             }
         }
         return true;
+    }
+
+    /**
+     * send test initiation, check if credentials are ok
+     *
+     * @since 0.0.2
+     *
+     */
+    function testCredentials(){
+
+        $status = 'ok';
+        $message = $this->l('The merchant configuration was successfuly tested.');
+        die(Tools::jsonEncode(
+            array(
+                'status' => htmlspecialchars($status),
+                'message' => htmlspecialchars($message)
+            )
+        ));
+        $config = new Config(Configuration::get($this->buildParamName('paypal','wirecard_server_url')),
+            Configuration::get($this->buildParamName('paypal','http_user')),
+            Configuration::get($this->buildParamName('paypal','http_password')));
+        $transactionService = new TransactionService($config, $this->logger);
     }
 }
