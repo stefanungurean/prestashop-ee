@@ -153,7 +153,6 @@ class WirecardPaymentGateway extends PaymentModule
         if (Tools::isSubmit('ajax')) {
             return $this->postProcess();
         } else {
-
             $this->html = '<h2>' . $this->displayName . '</h2>';
 
             if (Tools::isSubmit('btnSubmit')) {
@@ -566,8 +565,8 @@ class WirecardPaymentGateway extends PaymentModule
      * @since 0.0.2
      *
      */
-    function testCredentials(){
-
+    private function testCredentials()
+    {
         $status = 'ok';
         $message = $this->l('The merchant configuration was successfuly tested.');
         die(Tools::jsonEncode(
@@ -576,10 +575,11 @@ class WirecardPaymentGateway extends PaymentModule
                 'message' => htmlspecialchars($message)
             )
         ));
-        $config = new Config(Configuration::get($this->buildParamName('paypal','wirecard_server_url')),
+        $config = new Config(
+            Configuration::get($this->buildParamName('paypal','wirecard_server_url')),
             Configuration::get($this->buildParamName('paypal','http_user')),
-            Configuration::get($this->buildParamName('paypal','http_password')));
+            Configuration::get($this->buildParamName('paypal','http_password'))
+        );
         $transactionService = new TransactionService($config, $this->logger);
     }
-
 }
