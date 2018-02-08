@@ -1,5 +1,5 @@
 <?php
-require  __DIR__.'/../../vendor/autoload.php';
+require __DIR__.'/../../vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -12,13 +12,15 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
-class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontController {
+class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontController
+{
 
     private $config;
     /**
      * @see FrontController::postProcess()
      */
-    public function postProcess() {
+    public function postProcess()
+    {
 
         $this->configuration();
 
@@ -28,21 +30,23 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
         $basket = new Basket();
 
         foreach ($cart->getProducts() as $product) {
-             $productInfo = new Item(
-                $product['name'],
-                new Amount(
+            $productInfo = new Item(
+                 $product['name'],
+                 new Amount(
                     number_format(
                         $product['price'],
                         2,
                         '.',
                         ''
                     ),
-                    $currencyIsoCode),
-                $product['cart_quantity']
+                    $currencyIsoCode
+                 ),
+                 $product['cart_quantity']
             );
             $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
             $productInfo->setTaxRate(
-                number_format($product['price_wt'] - $product['price'],
+                number_format(
+                    $product['price_wt'] - $product['price'],
                     2,
                     '.',
                     ''
@@ -62,10 +66,12 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
                 ),
                 $currencyIsoCode
             ),
-            "1");
+            "1"
+        );
         $shipping->setDescription($this->l('Shipping'));
         $shipping->setTaxRate(
-            number_format("0",
+            number_format(
+                "0",
                 2,
                 '.',
                 ''
@@ -110,7 +116,7 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
 
         // The failure state is represented by a FailureResponse object.
         // In this case the returned errors should be stored in your system.
-        } elseif ($response instanceof FailureResponse){
+        } elseif ($response instanceof FailureResponse) {
             // In our example we iterate over all errors and echo them out. You should display them as
             // error, warning or information based on the given severity.
             $errors=array();
@@ -124,7 +130,7 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
                 $errors[]= sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description);
             }
 
-            $messageTemp = implode(',',$errors);
+            $messageTemp = implode(',', $errors);
             if (Tools::strlen($messageTemp)) {
                 $message = $messageTemp;
             }
@@ -139,15 +145,15 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
      * @since 0.0.2
      *
      */
-    function configuration()
+    private function configuration()
     {
-        $currency = new CurrencyCore( $this->context->cart->id_currency);
+        $currency = new CurrencyCore($this->context->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get( $this->module->buildParamName('paypal','wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName('paypal','http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName('paypal','http_password'));
-        $paypalMAID = Configuration::get($this->module->buildParamName('paypal','maid'));
-        $paypalKey = Configuration::get($this->module->buildParamName('paypal','secret')) ;
+        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
+        $paypalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
+        $paypalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $paypalMAID, $paypalKey);
