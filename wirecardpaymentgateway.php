@@ -87,7 +87,7 @@ class WirecardPaymentGateway extends PaymentModule
         $payment_options = array(
             'cta_text' => $this->l('Paypal payment'),
             'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
-            'action' => $this->context->link->getModuleLink($this->name, 'paypal', array(), true)
+            'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
         );
         return $payment_options;
     }

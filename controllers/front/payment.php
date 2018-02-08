@@ -12,7 +12,7 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
-class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontController
+class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontController
 {
 
     private $config;
@@ -31,8 +31,8 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
 
         foreach ($cart->getProducts() as $product) {
             $productInfo = new Item(
-                 $product['name'],
-                 new Amount(
+                $product['name'],
+                new Amount(
                     number_format(
                         $product['price'],
                         2,
@@ -40,8 +40,8 @@ class WirecardPaymentGatewayPayPalModuleFrontController extends ModuleFrontContr
                         ''
                     ),
                     $currencyIsoCode
-                 ),
-                 $product['cart_quantity']
+                ),
+                $product['cart_quantity']
             );
             $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
             $productInfo->setTaxRate(
