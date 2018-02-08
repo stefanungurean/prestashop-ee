@@ -29,7 +29,6 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-//require_once 'vendor/autoload.php';
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 /**
