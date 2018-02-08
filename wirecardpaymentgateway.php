@@ -57,7 +57,9 @@ class WirecardPaymentGateway extends PaymentModule
     public function install()
     {
         if (!parent::install() || !$this->setDefaults()
-           || ! $this->registerHook('displayPaymentEU') ) {
+           || ! $this->registerHook('displayPaymentEU')
+           || !$this->registerHook('actionFrontControllerSetMedia')
+           || !$this->registerHook('displayHeader')) {
             return false;
         }
         return true;
@@ -75,6 +77,7 @@ class WirecardPaymentGateway extends PaymentModule
      * @since 0.0.2
      *
      */
+
     public function hookDisplayPaymentEU($params)
     {
         if (!$this->active) {
@@ -83,11 +86,9 @@ class WirecardPaymentGateway extends PaymentModule
 
         $payment_options = array(
             'cta_text' => $this->l('Paypal payment'),
-            'logo' => Media::getMediaPath(
-                dirname(__FILE__) . '/views/img/paymenttypes/paypal.png'),
-            'action' => $this->context->link->getModuleLink($this->name, 'validation', array(), true)
+            'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
+            'action' => $this->context->link->getModuleLink($this->name, 'paypal', array(), true)
         );
-
         return $payment_options;
     }
 
@@ -371,7 +372,7 @@ class WirecardPaymentGateway extends PaymentModule
      *
      * @return string
      */
-    protected function buildParamName($group, $name)
+    public function buildParamName($group, $name)
     {
         return sprintf(
             'WDEE_%s_%s',
@@ -446,6 +447,7 @@ class WirecardPaymentGateway extends PaymentModule
      * @since 0.0.2
      *
      */
+
     private function postValidation()
     {
         if (Tools::isSubmit('btnSubmit')) {
@@ -567,5 +569,46 @@ class WirecardPaymentGateway extends PaymentModule
             array('key' => 'authorization', 'value' => $this->l('Authorization')),
             array('key' => 'purchase', 'value' => $this->l('Purchase'))
         );
+    }
+
+    public function hookActionFrontControllerSetMedia($params)
+    {
+        $controllerArray = array('order');
+        if (in_array($this->context->controller->php_self, $controllerArray)) {
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-style',
+                'modules/' . $this->name . '/views/css/style.css',
+                array(
+                    'media' => 'all',
+                    'priority' => 200,
+                )
+            );
+        }
+    }
+
+    /**
+     * display error message after checkout failure
+     */
+    public function hookDisplayHeader()
+    {
+        $context = Context::getContext();
+        $controller = $context->controller;
+        if (is_object($controller)
+            && (get_class($controller) == 'OrderController' )
+            && $context->cookie->eeMessage
+        ) {
+            if (strpos($context->cookie->eeMessage, "<br />")) {
+                $msgs = explode("<br />", $context->cookie->eeMessage);
+                foreach ($msgs as $msg) {
+                    if (Tools::strlen($msg) < 5) {
+                        continue;
+                    }
+                    $context->controller->errors[] = Tools::displayError(html_entity_decode($msg));
+                }
+            } else {
+                $context->controller->errors[] = Tools::displayError(html_entity_decode($context->cookie->eeMessage));
+            }
+            unset($context->cookie->eeMessage);
+        }
     }
 }
