@@ -21,7 +21,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
-        if(Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        if (Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $this->configuration();
 
             $cart = $this->context->cart;
@@ -88,13 +88,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
             $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
-            // The redirect URLs determine where the consumer should be redirected by PayPal after approval/cancellation.
             $redirectUrls = new Redirect(
                 $this->context->link->getModuleLink($this->name, 'paypal/success', array(), true),
                 $this->context->link->getModuleLink($this->name, 'paypal/cancel', array(), true)
             );
 
-            // As soon as the transaction status changes, a server-to-server notification will get delivered to this URL.
+
             $notificationUrl =$this->context->link->getModuleLink($this->name, 'paypal/notify', array(), true);
 
             // ## Transaction
@@ -138,7 +137,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $severity = ucfirst($status->getSeverity());
                     $code = $status->getCode();
                     $description = $status->getDescription();
-                    $errors[] = sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description);
+                    $errors[] = sprintf(
+                        '%s with code %s and message "%s" occurred.<br>',
+                        $severity,
+                        $code,
+                        $description
+                    );
                 }
 
                 $messageTemp = implode(',', $errors);
@@ -147,7 +151,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                 }
             }
         }
-        else{
+        else {
             $message="Payment method not avaible";
         }
         $this->context->cookie->eeMessage = $message;

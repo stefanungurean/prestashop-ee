@@ -84,7 +84,7 @@ class WirecardPaymentGateway extends PaymentModule
             return;
         }
         $payment_options=array();
-        if(Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
+        if (Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
             $payment_options[] = array(
                 'cta_text' => $this->l('Paypal payment'),
                 'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
@@ -166,7 +166,8 @@ class WirecardPaymentGateway extends PaymentModule
                         'name' => 'descriptior',
                         'label' => 'Enable and disable descriptior',
                         'default' => '1',
-                        'type' => 'onoff'
+                        'type' => 'onoff',
+                        'required' => true
                     )
                 )
             )
