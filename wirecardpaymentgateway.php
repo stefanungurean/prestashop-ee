@@ -444,7 +444,6 @@ class WirecardPaymentGateway extends PaymentModule
     private function postValidation()
     {
         if (Tools::isSubmit('btnSubmit')) {
-            $configmode = Tools::getValue('WCS_BASICDATA_CONFIGMODE');
 
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter['param_name']);
@@ -458,21 +457,7 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 if (isset($parameter['required']) && $parameter['required'] && !Tools::strlen($val)) {
-                    if (in_array(
-                        $parameter['name'],
-                        array(
-                            'customer_id',
-                            'shop_id',
-                            'secret',
-                            'backendpw'
-                        )
-                    )) {
-                        if ($configmode == 'production') {
-                            $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
-                        }
-                    } else {
-                        $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
-                    }
+                    $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
                 }
 
                 if (!isset($parameter['validator'])) {

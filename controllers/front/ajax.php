@@ -15,9 +15,7 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
     public function postProcess()
     {
         switch (Tools::getValue('action')) {
-
             case 'TestConfig':
-
                 $method = Tools::getValue('method');
                 $status = 'ok';
                 $message = $this->l('The merchant configuration was successfuly tested.');
