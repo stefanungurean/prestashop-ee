@@ -83,12 +83,15 @@ class WirecardPaymentGateway extends PaymentModule
         if (!$this->active) {
             return;
         }
+        $payment_options=array();
+        if(Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
+            $payment_options[] = array(
+                'cta_text' => $this->l('Paypal payment'),
+                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
+                'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
+            );
+        }
 
-        $payment_options = array(
-            'cta_text' => $this->l('Paypal payment'),
-            'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
-            'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
-        );
         return $payment_options;
     }
 
@@ -158,6 +161,12 @@ class WirecardPaymentGateway extends PaymentModule
                         'default' => 'purchase',
                         'required' => true,
                         'options' => 'getTransactionTypes'
+                    ),
+                    array(
+                        'name' => 'descriptior',
+                        'label' => 'Enable and disable descriptior',
+                        'default' => '1',
+                        'type' => 'onoff'
                     )
                 )
             )
@@ -610,5 +619,14 @@ class WirecardPaymentGateway extends PaymentModule
             }
             unset($context->cookie->eeMessage);
         }
+    }
+    /**
+     * return module display name
+     *
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
     }
 }
