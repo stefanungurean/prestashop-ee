@@ -136,6 +136,13 @@ class WirecardPaymentGateway extends PaymentModule
                         'default' => 'purchase',
                         'required' => true,
                         'options' => 'getTransactionTypes'
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => "Test paypal configuration",
+                        'id' => "paypalConfig",
+                        'method' => "paypal",
                     )
                 )
             )
@@ -149,35 +156,33 @@ class WirecardPaymentGateway extends PaymentModule
      */
     public function getContent()
     {
-        if (Tools::isSubmit('ajax')) {
-            return $this->postProcess();
-        } else {
-            $this->html = '<h2>' . $this->displayName . '</h2>';
+        $this->html = '<h2>' . $this->displayName . '</h2>';
 
-            if (Tools::isSubmit('btnSubmit')) {
-                $this->postValidation();
-                if (!count($this->postErrors)) {
-                    $this->postProcess();
-                } else {
-                    foreach ($this->postErrors as $err) {
-                        $this->html .= $this->displayError(html_entity_decode($err));
-                    }
+        if (Tools::isSubmit('btnSubmit')) {
+            $this->postValidation();
+            if (!count($this->postErrors)) {
+                $this->postProcess();
+            } else {
+                foreach ($this->postErrors as $err) {
+                    $this->html .= $this->displayError(html_entity_decode($err));
                 }
             }
-
-            $this->context->smarty->assign(
-                array(
-                    'module_dir' => $this->_path
-                )
-            );
-
-            $this->html .= $this->context->smarty->fetch(
-                dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
-            );
-            $this->html .= $this->renderForm();
-
-            return $this->html;
         }
+
+        $this->context->smarty->assign(
+            array(
+                'module_dir' => $this->_path,
+                'ajax_configtest_url' => $this->context->link->getModuleLink('wirecardpaymentgateway','ajax')
+            )
+        );
+
+        $this->html .= $this->context->smarty->fetch(
+            dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
+        );
+        $this->html .= $this->renderForm();
+
+        return $this->html;
+
     }
 
     /**
@@ -252,6 +257,12 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 switch ($f['type']) {
+                    case 'linkbutton':
+                        $elem['buttonText'] = $f['buttonText'];
+                        $elem['id'] = $f['id'];
+                        $elem['method'] = $f['method'];
+                        break;
+
                     case 'text':
                         if (!isset($elem['class'])) {
                             $elem['class'] = 'fixed-width-xl';
@@ -331,6 +342,7 @@ class WirecardPaymentGateway extends PaymentModule
         ) : 0;
         $helper->id = (int)Tools::getValue('id_carrier');
         $helper->identifier = $this->identifier;
+        $helper->module = $this;
         $helper->submit_action = 'btnSubmit';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
             . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
@@ -354,7 +366,7 @@ class WirecardPaymentGateway extends PaymentModule
      *
      * @return string
      */
-    protected function buildParamName($group, $name)
+    public function buildParamName($group, $name)
     {
         return sprintf(
             'WDEE_%s_%s',
@@ -486,31 +498,25 @@ class WirecardPaymentGateway extends PaymentModule
      */
     private function postProcess()
     {
-        if (Tools::isSubmit('ajax')) {
-            if (Tools::getValue('action') == 'TestConfig') {
-                $this->testCredentials();
-            }
-        } else {
-            if (Tools::isSubmit('btnSubmit')) {
-                foreach ($this->getAllConfigurationParameters() as $parameter) {
-                    $val = Tools::getValue($parameter['param_name']);
+        if (Tools::isSubmit('btnSubmit')) {
+            foreach ($this->getAllConfigurationParameters() as $parameter) {
+                $val = Tools::getValue($parameter['param_name']);
 
-                    if (isset($parameter['sanitize'])) {
-                        switch ($parameter['sanitize']) {
-                            case 'trim':
-                                $val = trim($val);
-                                break;
-                        }
+                if (isset($parameter['sanitize'])) {
+                    switch ($parameter['sanitize']) {
+                        case 'trim':
+                            $val = trim($val);
+                            break;
                     }
-
-                    if (is_array($val)) {
-                        $val = Tools::jsonEncode($val);
-                    }
-                    Configuration::updateValue($parameter['param_name'], $val);
                 }
+
+                if (is_array($val)) {
+                    $val = Tools::jsonEncode($val);
+                }
+                Configuration::updateValue($parameter['param_name'], $val);
             }
-            $this->html .= $this->displayConfirmation($this->l('Settings updated'));
         }
+        $this->html .= $this->displayConfirmation($this->l('Settings updated'));
     }
 
     /**
@@ -556,29 +562,5 @@ class WirecardPaymentGateway extends PaymentModule
             array('key' => 'authorization', 'value' => $this->l('Authorization')),
             array('key' => 'purchase', 'value' => $this->l('Purchase'))
         );
-    }
-
-    /**
-     * send test initiation, check if credentials are ok
-     *
-     * @since 0.0.2
-     *
-     */
-    private function testCredentials()
-    {
-        $status = 'ok';
-        $message = $this->l('The merchant configuration was successfuly tested.');
-        die(Tools::jsonEncode(
-            array(
-                'status' => htmlspecialchars($status),
-                'message' => htmlspecialchars($message)
-            )
-        ));
-        $config = new Config(
-            Configuration::get($this->buildParamName('paypal','wirecard_server_url')),
-            Configuration::get($this->buildParamName('paypal','http_user')),
-            Configuration::get($this->buildParamName('paypal','http_password'))
-        );
-        $transactionService = new TransactionService($config, $this->logger);
     }
 }
