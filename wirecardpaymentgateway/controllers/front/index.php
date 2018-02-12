@@ -1,13 +1,5 @@
 <?php
 /**
- * Plugin Name: Wirecard Payment Processing Gateway
- * Plugin URI: https://github.com/wirecard/prestashop-ee
- * Description: Wirecard Payment Processing Gateway Plugin for Prestashop
- * Version: 0.0.1
- * Author: Wirecard
- * Author URI: https://www.wirecard.at/
- * License: GPL3
- *
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -36,3 +28,13 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
+
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
+header('Location: ../../../../');
+exit;
