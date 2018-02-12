@@ -29,5 +29,6 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-class Prestashop_Payment_Gateway {
+class Prestashop_Payment_Gateway
+{
 }

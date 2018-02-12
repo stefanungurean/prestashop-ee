@@ -32,9 +32,11 @@
 /**
  * Class Prestashop_Gateway_Wirecard_Payment_Gateway
  */
-class Prestashop_Gateway_Wirecard_Payment_Gateway extends Prestashop_Payment_Gateway {
+class Prestashop_Gateway_Wirecard_Payment_Gateway extends Prestashop_Payment_Gateway
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->id                 = 'prestashop_wirecard_payment_gateway';
         $this->method_title       = 'Wirecard Payment Gateway';
         $this->method_description = 'Payment Gateway';

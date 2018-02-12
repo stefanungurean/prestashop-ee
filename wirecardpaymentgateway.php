@@ -157,6 +157,13 @@ class WirecardPaymentGateway extends PaymentModule
                         'default' => 'purchase',
                         'required' => true,
                         'options' => 'getTransactionTypes'
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => "Test paypal configuration",
+                        'id' => "paypalConfig",
+                        'method' => "paypal",
                     )
                 )
             )
@@ -185,7 +192,8 @@ class WirecardPaymentGateway extends PaymentModule
 
         $this->context->smarty->assign(
             array(
-                'module_dir' => $this->_path
+                'module_dir' => $this->_path,
+                'ajax_configtest_url' => $this->context->link->getModuleLink('wirecardpaymentgateway','ajax')
             )
         );
 
@@ -195,6 +203,7 @@ class WirecardPaymentGateway extends PaymentModule
         $this->html .= $this->renderForm();
 
         return $this->html;
+
     }
 
     /**
@@ -269,6 +278,12 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 switch ($f['type']) {
+                    case 'linkbutton':
+                        $elem['buttonText'] = $f['buttonText'];
+                        $elem['id'] = $f['id'];
+                        $elem['method'] = $f['method'];
+                        break;
+
                     case 'text':
                         if (!isset($elem['class'])) {
                             $elem['class'] = 'fixed-width-xl';
@@ -348,6 +363,7 @@ class WirecardPaymentGateway extends PaymentModule
         ) : 0;
         $helper->id = (int)Tools::getValue('id_carrier');
         $helper->identifier = $this->identifier;
+        $helper->module = $this;
         $helper->submit_action = 'btnSubmit';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
             . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
@@ -371,7 +387,7 @@ class WirecardPaymentGateway extends PaymentModule
      *
      * @return string
      */
-    protected function buildParamName($group, $name)
+    public function buildParamName($group, $name)
     {
         return sprintf(
             'WDEE_%s_%s',
@@ -449,7 +465,6 @@ class WirecardPaymentGateway extends PaymentModule
     private function postValidation()
     {
         if (Tools::isSubmit('btnSubmit')) {
-            $configmode = Tools::getValue('WCS_BASICDATA_CONFIGMODE');
 
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter['param_name']);
@@ -463,21 +478,7 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 if (isset($parameter['required']) && $parameter['required'] && !Tools::strlen($val)) {
-                    if (in_array(
-                        $parameter['name'],
-                        array(
-                            'customer_id',
-                            'shop_id',
-                            'secret',
-                            'backendpw'
-                        )
-                    )) {
-                        if ($configmode == 'production') {
-                            $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
-                        }
-                    } else {
-                        $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
-                    }
+                    $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
                 }
 
                 if (!isset($parameter['validator'])) {
