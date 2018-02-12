@@ -37,11 +37,49 @@
       <path value="$PROJECT_DIR$/vendor/phpunit/php-code-coverage" />
       <path value="$PROJECT_DIR$/vendor/phpunit/phpunit" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/guzzle" />
+      <path value="C:\DEV\WWWROOT\prestashop" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/version" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/code-unit-reverse-lookup" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/object-enumerator" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/resource-operations" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/squizlabs/php_codesniffer" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/exporter" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/recursion-context" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/composer" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/comparator" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/environment" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/sebastian/global-state" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/monolog/monolog" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/phpunit" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/phpunit-mock-objects" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/php-code-coverage" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/php-text-template" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/php-token-stream" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/php-file-iterator" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpunit/php-timer" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/webmozart/assert" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/doctrine/instantiator" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/robrichards/xmlseclibs" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpspec/prophecy" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/myclabs/deep-copy" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/myclabs/php-enum" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpdocumentor/reflection-common" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpdocumentor/reflection-docblock" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/phpdocumentor/type-resolver" />
+      <path value="$PROJECT_DIR$/wirecardpaymentgateway/vendor/wirecard/payment-sdk-php" />
     </include_path>
   </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="7.1" />
   <component name="PhpUnit">
     <phpunit_settings>
-      <PhpUnitSettings load_method="CUSTOM_LOADER" custom_loader_path="$PROJECT_DIR$/vendor/autoload.php" />
+      <PhpUnitSettings load_method="CUSTOM_LOADER" custom_loader_path="$PROJECT_DIR$/Test/bootstrap.php" phpunit_phar_path="" />
     </phpunit_settings>
   </component>
 </project>

@@ -29,8 +29,6 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
 /**
  * Class WirecardEEPaymentGateway
  */
@@ -57,9 +55,9 @@ class WirecardPaymentGateway extends PaymentModule
     public function install()
     {
         if (!parent::install() || !$this->setDefaults()
-           || ! $this->registerHook('displayPaymentEU')
-           || !$this->registerHook('actionFrontControllerSetMedia')
-           || !$this->registerHook('displayHeader')) {
+            || !$this->registerHook('displayPaymentEU')
+            || !$this->registerHook('actionFrontControllerSetMedia')
+            || !$this->registerHook('displayHeader')) {
             return false;
         }
         return true;
@@ -83,7 +81,7 @@ class WirecardPaymentGateway extends PaymentModule
         if (!$this->active) {
             return;
         }
-        $payment_options=array();
+        $payment_options = array();
         if (Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
             $payment_options[] = array(
                 'cta_text' => $this->l('Paypal payment'),
@@ -197,7 +195,7 @@ class WirecardPaymentGateway extends PaymentModule
         $this->context->smarty->assign(
             array(
                 'module_dir' => $this->_path,
-                'ajax_configtest_url' => $this->context->link->getModuleLink('wirecardpaymentgateway','ajax')
+                'ajax_configtest_url' => $this->context->link->getModuleLink('wirecardpaymentgateway', 'ajax')
             )
         );
 
@@ -207,7 +205,6 @@ class WirecardPaymentGateway extends PaymentModule
         $this->html .= $this->renderForm();
 
         return $this->html;
-
     }
 
     /**
@@ -470,7 +467,6 @@ class WirecardPaymentGateway extends PaymentModule
     private function postValidation()
     {
         if (Tools::isSubmit('btnSubmit')) {
-
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter['param_name']);
 
@@ -598,7 +594,7 @@ class WirecardPaymentGateway extends PaymentModule
         $context = Context::getContext();
         $controller = $context->controller;
         if (is_object($controller)
-            && (get_class($controller) == 'OrderController' )
+            && (get_class($controller) == 'OrderController')
             && $context->cookie->eeMessage
         ) {
             if (strpos($context->cookie->eeMessage, "<br />")) {
@@ -615,6 +611,7 @@ class WirecardPaymentGateway extends PaymentModule
             unset($context->cookie->eeMessage);
         }
     }
+
     /**
      * return module display name
      *

@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-require __DIR__.'/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -46,6 +46,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 {
 
     private $config;
+
     /**
      * @see FrontController::postProcess()
      */
@@ -124,7 +125,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
             );
 
 
-            $notificationUrl =$this->context->link->getModuleLink($this->name, 'paypal/notify', array(), true);
+            $notificationUrl = $this->context->link->getModuleLink($this->name, 'paypal/notify', array(), true);
 
             // ## Transaction
 
@@ -154,8 +155,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
             if ($response instanceof InteractionResponse) {
                 die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
 
-            // The failure state is represented by a FailureResponse object.
-            // In this case the returned errors should be stored in your system.
+                // The failure state is represented by a FailureResponse object.
+                // In this case the returned errors should be stored in your system.
             } elseif ($response instanceof FailureResponse) {
                 // In our example we iterate over all errors and echo them out. You should display them as
                 // error, warning or information based on the given severity.
@@ -180,9 +181,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $message = $messageTemp;
                 }
             }
-        }
-        else {
-            $message="Payment method not avaible";
+        } else {
+            $message = "Payment method not avaible";
         }
         $this->context->cookie->eeMessage = $message;
         Tools::redirect($this->context->link->getPageLink('order', true, $cart->id_lang));
@@ -203,7 +203,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
         $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
         $paypalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
-        $paypalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+        $paypalKey = Configuration::get($this->module->buildParamName('paypal', 'secret'));
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $paypalMAID, $paypalKey);
