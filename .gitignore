@@ -1,3 +1,4 @@
-wirecardpaymentgateway/vendor/*
+vendor/*
+prestashop-ee/*
 .idea/*
 composer.lock
