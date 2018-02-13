@@ -178,7 +178,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         // The failure state is represented by a FailureResponse object.
                         // In this case the returned errors should be stored in your system.
                     } elseif ($response instanceof FailureResponse) {
-
                         //alter order status to error and return to products quantities
                         $history = new OrderHistory();
                         $history->id_order = (int)$orderNumber;
@@ -208,8 +207,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             $message = $messageTemp;
                         }
                     }
-                }
-                catch (Exception $e) {
+                } catch (Exception $e) {
                     $message=$e->getMessage();
                 }
             }

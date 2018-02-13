@@ -707,8 +707,7 @@ class WirecardPaymentGateway extends PaymentModule
         $dont_touch_amount = false,
         $secure_key = false,
         Shop $shop = null
-    )
-    {
+    ){
         if (self::DEBUG_MODE) {
             PrestaShopLogger::addLog(
                 'PaymentModule::validateOrder - Function called',
@@ -950,7 +949,8 @@ class WirecardPaymentGateway extends PaymentModule
                             false,
                             Cart::BOTH,
                             $order->product_list,
-                            $id_carrier),
+                            $id_carrier
+                        ),
                         _PS_PRICE_COMPUTE_PRECISION_
                     );
                     $order->total_paid_tax_incl = (float)Tools::ps_round(
@@ -984,7 +984,8 @@ class WirecardPaymentGateway extends PaymentModule
                     $result = $order->add();
 
                     if (!$result) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Order cannot be created',
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - Order cannot be created',
                             3,
                             null,
                             'Cart',
@@ -1002,10 +1003,10 @@ class WirecardPaymentGateway extends PaymentModule
                     if ($order_status->logable && number_format(
                         $cart_total_paid,
                         _PS_PRICE_COMPUTE_PRECISION_
-                        )!= number_format(
-                            $amount_paid,
-                            _PS_PRICE_COMPUTE_PRECISION_
-                        )) {
+                    )!= number_format(
+                        $amount_paid,
+                        _PS_PRICE_COMPUTE_PRECISION_
+                    )) {
                         $id_order_state = Configuration::get('PS_OS_ERROR');
                     }
 
@@ -1238,8 +1239,8 @@ class WirecardPaymentGateway extends PaymentModule
                                 $product['price'],
                                 $this->context->currency,
                                 false
-                                )
-                                .' '.$product['unity'];
+                            )
+                            .' '.$product['unity'];
                         } else {
                             $product_var_tpl['unit_price'] = $product_var_tpl['unit_price_full'] = '';
                         }
@@ -1270,8 +1271,8 @@ class WirecardPaymentGateway extends PaymentModule
                                         '%d image(s)',
                                         array(count($customization['datas'][Product::CUSTOMIZE_FILE])),
                                         'Admin.Payment.Notification'
-                                        )
-                                        .'<br />';
+                                    )
+                                    .'<br />';
                                 }
 
                                 $customization_quantity = (int)$customization['quantity'];
@@ -1424,8 +1425,7 @@ class WirecardPaymentGateway extends PaymentModule
                     $order = new Order((int)$order->id);
 
                     // Send an e-mail to customer (one order = one email)
-                    if (
-                        $id_order_state != Configuration::get('PS_OS_ERROR') &&
+                    if ($id_order_state != Configuration::get('PS_OS_ERROR') &&
                         $id_order_state != Configuration::get('PS_OS_CANCELED') &&
                         $this->context->customer->id) {
                         $invoice = new Address((int)$order->id_address_invoice);
@@ -1495,7 +1495,8 @@ class WirecardPaymentGateway extends PaymentModule
                                     $order->total_products :
                                     $order->total_products_wt,
                                 $this->context->currency,
-                                false),
+                                false
+                            ),
                             '{total_discounts}' => Tools::displayPrice(
                                 $order->total_discounts,
                                 $this->context->currency,
@@ -1515,7 +1516,9 @@ class WirecardPaymentGateway extends PaymentModule
                                 ($order->total_products_wt - $order->total_products) +
                                 ($order->total_shipping_tax_incl - $order->total_shipping_tax_excl),
                                 $this->context->currency,
-                                false));
+                                false
+                            )
+                        );
 
                         if (is_array($extra_vars)) {
                             $data = array_merge($data, $extra_vars);
@@ -1532,19 +1535,20 @@ class WirecardPaymentGateway extends PaymentModule
                                 (int)$order->id_lang,
                                 null,
                                 $order->id_shop
-                                )
-                                .sprintf(
-                                    '%06d',
-                                    $order->invoice_number
-                                )
-                                .'.pdf';
+                            )
+                            .sprintf(
+                                '%06d',
+                                $order->invoice_number
+                            )
+                            .'.pdf';
                             $file_attachement['mime'] = 'application/pdf';
                         } else {
                             $file_attachement = null;
                         }
 
                         if (self::DEBUG_MODE) {
-                            PrestaShopLogger::addLog('PaymentModule::validateOrder - Mail is about to be sent',
+                            PrestaShopLogger::addLog(
+                                'PaymentModule::validateOrder - Mail is about to be sent',
                                 1,
                                 null,
                                 'Cart',
@@ -1617,12 +1621,14 @@ class WirecardPaymentGateway extends PaymentModule
             }
 
             if (self::DEBUG_MODE) {
-                PrestaShopLogger::addLog('PaymentModule::validateOrder - End of validateOrder',
+                PrestaShopLogger::addLog(
+                    'PaymentModule::validateOrder - End of validateOrder',
                     1,
                     null,
                     'Cart',
                     (int)$id_cart,
-                    true);
+                    true
+                );
             }
 
             return true;
