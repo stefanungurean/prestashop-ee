@@ -28,7 +28,7 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require __DIR__.'/../../../vendor/autoload.php';
+require __DIR__.'/../../vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -50,19 +50,19 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     public function postProcess()
     {
         if (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
-            $message = $this->l('Payment method not avaible');
+            $message = $this->l('Payment method not available');
         }
-        else{
+        else {
             $cart = $this->context->cart;
             $validation = $this->validations();
-            if($validation['status']!==true) {
+            if ($validation['status']!==true) {
                 $message = $this->l($validation['message']);
             }
-            elseif(!$this->configuration()) {
+            elseif (!$this->configuration()) {
                 $message = $this->l('The merchant configuration is incorrect');
             }
-            else{
-                try{
+            else {
+                try {
                     $this->module->validateOrderImproved(
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
@@ -139,11 +139,16 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
                     $redirectUrls = new Redirect(
-                        $this->context->link->getModuleLink( $this->module->getDisplayName(), 'success', array(), true),
-                        $this->context->link->getModuleLink( $this->module->getDisplayName(), 'cancel', array(), true)
+                        $this->context->link->getModuleLink($this->module->getDisplayName(), 'success', array(), true),
+                        $this->context->link->getModuleLink($this->module->getDisplayName(), 'cancel', array(), true)
                     );
 
-                    $notificationUrl = $this->context->link->getModuleLink($this->module->getDisplayName(), 'notify', array(), true);
+                    $notificationUrl = $this->context->link->getModuleLink(
+                        $this->module->getDisplayName(),
+                        'notify',
+                        array(),
+                        true
+                    );
 
                     // ## Transaction
 
@@ -175,7 +180,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
                         // The failure state is represented by a FailureResponse object.
                         // In this case the returned errors should be stored in your system.
-                    } elseif ($response instanceof FailureResponse) {
+                    }
+                    elseif ($response instanceof FailureResponse) {
 
                         //alter order status to error and return to products quantities
                         $history = new OrderHistory();
@@ -213,14 +219,14 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
             }
         }
         $params=array();
-        if($message!=""){
+        if ($message!="") {
             $this->context->cookie->eeMessage = $message;
             $params = array(
                 'submitReorder' => true,
                 'id_order' => (int)$orderNumber
             );
         }
-        Tools::redirect($this->context->link->getPageLink('order', true, $cart->id_lang,$params));
+        Tools::redirect($this->context->link->getPageLink('order', true, $cart->id_lang, $params));
     }
 
     /**
@@ -245,7 +251,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $transactionService = new TransactionService($this->config, $this->logger);
 
         if (!$transactionService->checkCredentials()) {
-           return false;
+            return false;
         }
 
         $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $paypalMAID, $paypalKey);
@@ -260,9 +266,10 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
      * @since 0.0.2
      *
      */
-    private function validations(){
+    private function validations()
+    {
         $cart = $this->context->cart;
-        if(!$cart->checkQuantities()){
+        if (!$cart->checkQuantities()) {
             return array('status'=> false,'message'=>'Products out of stock');
         }
         return array('status'=> true,'message'=>'');
