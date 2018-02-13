@@ -707,7 +707,7 @@ class WirecardPaymentGateway extends PaymentModule
         $dont_touch_amount = false,
         $secure_key = false,
         Shop $shop = null
-    ){
+    ) {
         if (self::DEBUG_MODE) {
             PrestaShopLogger::addLog(
                 'PaymentModule::validateOrder - Function called',
@@ -1254,7 +1254,9 @@ class WirecardPaymentGateway extends PaymentModule
                         );
                         if (isset($customized_datas[$product['id_product']][$product['id_product_attribute']])) {
                             $product_var_tpl['customization'] = array();
-                            foreach ($customized_datas[$product['id_product']][$product['id_product_attribute']][$order->id_address_delivery] as $customization) {
+                            foreach ($customized_datas[$product['id_product']]
+                                     [$product['id_product_attribute']]
+                                     [$order->id_address_delivery] as $customization) {
                                 $customization_text = '';
                                 if (isset($customization['datas'][Product::CUSTOMIZE_TEXTFIELD])) {
                                     foreach ($customization['datas'][Product::CUSTOMIZE_TEXTFIELD] as $text) {
