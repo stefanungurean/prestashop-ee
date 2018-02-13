@@ -51,17 +51,14 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     {
         if (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
-        }
-        else {
+        } else {
             $cart = $this->context->cart;
             $validation = $this->validations();
             if ($validation['status']!==true) {
                 $message = $this->l($validation['message']);
-            }
-            elseif (!$this->configuration()) {
+            } elseif (!$this->configuration()) {
                 $message = $this->l('The merchant configuration is incorrect');
-            }
-            else {
+            } else {
                 try {
                     $this->module->validateOrderImproved(
                         $cart->id,
@@ -180,8 +177,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
                         // The failure state is represented by a FailureResponse object.
                         // In this case the returned errors should be stored in your system.
-                    }
-                    elseif ($response instanceof FailureResponse) {
+                    } elseif ($response instanceof FailureResponse) {
 
                         //alter order status to error and return to products quantities
                         $history = new OrderHistory();
