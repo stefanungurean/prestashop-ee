@@ -696,12 +696,28 @@ class WirecardPaymentGateway extends PaymentModule
      * @return bool
      * @throws PrestaShopException
      */
-    public function validateOrderImproved($id_cart, $id_order_state, $amount_paid, $payment_method = 'Unknown',
-                                          $message = null, $extra_vars = array(), $currency_special = null, $dont_touch_amount = false,
-                                          $secure_key = false, Shop $shop = null)
+    public function validateOrderImproved(
+        $id_cart,
+        $id_order_state,
+        $amount_paid,
+        $payment_method = 'Unknown',
+        $message = null,
+        $extra_vars = array(),
+        $currency_special = null,
+        $dont_touch_amount = false,
+        $secure_key = false,
+        Shop $shop = null
+    )
     {
         if (self::DEBUG_MODE) {
-            PrestaShopLogger::addLog('PaymentModule::validateOrder - Function called', 1, null, 'Cart', (int)$id_cart, true);
+            PrestaShopLogger::addLog(
+                'PaymentModule::validateOrder - Function called',
+                1,
+                null,
+                'Cart',
+                (int)$id_cart,
+                true
+            );
         }
 
         if (!isset($this->context)) {
@@ -723,13 +739,27 @@ class WirecardPaymentGateway extends PaymentModule
 
         $order_status = new OrderState((int)$id_order_state, (int)$this->context->language->id);
         if (!Validate::isLoadedObject($order_status)) {
-            PrestaShopLogger::addLog('PaymentModule::validateOrder - Order Status cannot be loaded', 3, null, 'Cart', (int)$id_cart, true);
+            PrestaShopLogger::addLog(
+                'PaymentModule::validateOrder - Order Status cannot be loaded',
+                3,
+                null,
+                'Cart',
+                (int)$id_cart,
+                true
+            );
 
             throw new PrestaShopException('Can\'t load Order status');
         }
 
         if (!$this->active) {
-            PrestaShopLogger::addLog('PaymentModule::validateOrder - Module is not active', 3, null, 'Cart', (int)$id_cart, true);
+            PrestaShopLogger::addLog(
+                'PaymentModule::validateOrder - Module is not active',
+                3,
+                null,
+                'Cart',
+                (int)$id_cart,
+                true
+            );
 
             throw new PrestaShopException('PaymentModule::validateOrder - Module is not active');
             //die(Tools::displayError());
@@ -739,7 +769,14 @@ class WirecardPaymentGateway extends PaymentModule
         // Does order already exists ?
         if (Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false) {
             if ($secure_key !== false && $secure_key != $this->context->cart->secure_key) {
-                PrestaShopLogger::addLog('PaymentModule::validateOrder - Secure key does not match', 3, null, 'Cart', (int)$id_cart, true);
+                PrestaShopLogger::addLog(
+                    'PaymentModule::validateOrder - Secure key does not match',
+                    3,
+                    null,
+                    'Cart',
+                    (int)$id_cart,
+                    true
+                );
                 throw new PrestaShopException('PaymentModule::validateOrder - Secure key does not match');
                 return;
                 //die(Tools::displayError());
@@ -752,7 +789,12 @@ class WirecardPaymentGateway extends PaymentModule
 
             // If some delivery options are not defined, or not valid, use the first valid option
             foreach ($delivery_option_list as $id_address => $package) {
-                if (!isset($cart_delivery_option[$id_address]) || !array_key_exists($cart_delivery_option[$id_address], $package)) {
+                if (!isset($cart_delivery_option[$id_address])
+                    || !array_key_exists(
+                        $cart_delivery_option[$id_address],
+                        $package
+                    )
+                ) {
                     foreach ($package as $key => $val) {
                         $cart_delivery_option[$id_address] = $key;
                         break;
@@ -775,7 +817,11 @@ class WirecardPaymentGateway extends PaymentModule
                 foreach ($delivery_option_list[$id_address][$key_carriers]['carrier_list'] as $id_carrier => $data) {
                     foreach ($data['package_list'] as $id_package) {
                         // Rewrite the id_warehouse
-                        $package_list[$id_address][$id_package]['id_warehouse'] = (int)$this->context->cart->getPackageIdWarehouse($package_list[$id_address][$id_package], (int)$id_carrier);
+                        $package_list[$id_address][$id_package]['id_warehouse'] =
+                            (int)$this->context->cart->getPackageIdWarehouse(
+                                $package_list[$id_address][$id_package],
+                                (int)$id_carrier
+                            );
                         $package_list[$id_address][$id_package]['id_carrier'] = $id_carrier;
                     }
                 }
@@ -789,7 +835,10 @@ class WirecardPaymentGateway extends PaymentModule
 
                     if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_delivery') {
                         $address = new Address((int)$id_address);
-                        $this->context->country = new Country((int)$address->id_country, (int)$this->context->cart->id_lang);
+                        $this->context->country = new Country(
+                            (int)$address->id_country,
+                            (int)$this->context->cart->id_lang
+                        );
                         if (!$this->context->country->active) {
                             throw new PrestaShopException('The delivery address country is not active.');
                         }
@@ -828,26 +877,91 @@ class WirecardPaymentGateway extends PaymentModule
                     $amount_paid = !$dont_touch_amount ? Tools::ps_round((float)$amount_paid, 2) : $amount_paid;
                     $order->total_paid_real = 0;
 
-                    $order->total_products = (float)$this->context->cart->getOrderTotal(false, Cart::ONLY_PRODUCTS, $order->product_list, $id_carrier);
-                    $order->total_products_wt = (float)$this->context->cart->getOrderTotal(true, Cart::ONLY_PRODUCTS, $order->product_list, $id_carrier);
-                    $order->total_discounts_tax_excl = (float)abs($this->context->cart->getOrderTotal(false, Cart::ONLY_DISCOUNTS, $order->product_list, $id_carrier));
-                    $order->total_discounts_tax_incl = (float)abs($this->context->cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS, $order->product_list, $id_carrier));
+                    $order->total_products = (float)$this->context->cart->getOrderTotal(
+                        false,
+                        Cart::ONLY_PRODUCTS,
+                        $order->product_list,
+                        $id_carrier
+                    );
+                    $order->total_products_wt = (float)$this->context->cart->getOrderTotal(
+                        true,
+                        Cart::ONLY_PRODUCTS,
+                        $order->product_list,
+                        $id_carrier
+                    );
+                    $order->total_discounts_tax_excl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            false,
+                            Cart::ONLY_DISCOUNTS,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
+                    $order->total_discounts_tax_incl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            true,
+                            Cart::ONLY_DISCOUNTS,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
                     $order->total_discounts = $order->total_discounts_tax_incl;
 
-                    $order->total_shipping_tax_excl = (float)$this->context->cart->getPackageShippingCost((int)$id_carrier, false, null, $order->product_list);
-                    $order->total_shipping_tax_incl = (float)$this->context->cart->getPackageShippingCost((int)$id_carrier, true, null, $order->product_list);
+                    $order->total_shipping_tax_excl = (float)$this->context->cart->getPackageShippingCost(
+                        (int)$id_carrier,
+                        false,
+                        null,
+                        $order->product_list
+                    );
+                    $order->total_shipping_tax_incl = (float)$this->context->cart->getPackageShippingCost(
+                        (int)$id_carrier,
+                        true,
+                        null,
+                        $order->product_list
+                    );
                     $order->total_shipping = $order->total_shipping_tax_incl;
 
                     if (!is_null($carrier) && Validate::isLoadedObject($carrier)) {
-                        $order->carrier_tax_rate = $carrier->getTaxesRate(new Address((int)$this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}));
+                        $order->carrier_tax_rate = $carrier->getTaxesRate(
+                            new Address((int)$this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')})
+                        );
                     }
 
-                    $order->total_wrapping_tax_excl = (float)abs($this->context->cart->getOrderTotal(false, Cart::ONLY_WRAPPING, $order->product_list, $id_carrier));
-                    $order->total_wrapping_tax_incl = (float)abs($this->context->cart->getOrderTotal(true, Cart::ONLY_WRAPPING, $order->product_list, $id_carrier));
+                    $order->total_wrapping_tax_excl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            false,
+                            Cart::ONLY_WRAPPING,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
+                    $order->total_wrapping_tax_incl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            true,
+                            Cart::ONLY_WRAPPING,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
                     $order->total_wrapping = $order->total_wrapping_tax_incl;
 
-                    $order->total_paid_tax_excl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(false, Cart::BOTH, $order->product_list, $id_carrier), _PS_PRICE_COMPUTE_PRECISION_);
-                    $order->total_paid_tax_incl = (float)Tools::ps_round((float)$this->context->cart->getOrderTotal(true, Cart::BOTH, $order->product_list, $id_carrier), _PS_PRICE_COMPUTE_PRECISION_);
+                    $order->total_paid_tax_excl = (float)Tools::ps_round(
+                        (float)$this->context->cart->getOrderTotal(
+                            false,
+                            Cart::BOTH,
+                            $order->product_list,
+                            $id_carrier),
+                        _PS_PRICE_COMPUTE_PRECISION_
+                    );
+                    $order->total_paid_tax_incl = (float)Tools::ps_round(
+                        (float)$this->context->cart->getOrderTotal(
+                            true,
+                            Cart::BOTH,
+                            $order->product_list,
+                            $id_carrier
+                        ),
+                        _PS_PRICE_COMPUTE_PRECISION_
+                    );
                     $order->total_paid = $order->total_paid_tax_incl;
                     $order->round_mode = Configuration::get('PS_PRICE_ROUND_MODE');
                     $order->round_type = Configuration::get('PS_ROUND_TYPE');
@@ -856,38 +970,80 @@ class WirecardPaymentGateway extends PaymentModule
                     $order->delivery_date = '0000-00-00 00:00:00';
 
                     if (self::DEBUG_MODE) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Order is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - Order is about to be added',
+                            1,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                     }
 
                     // Creating order
                     $result = $order->add();
 
                     if (!$result) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Order cannot be created', 3, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Order cannot be created',
+                            3,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                         throw new PrestaShopException('Can\'t save Order');
                     }
 
                     // Amount paid by customer is not the right one -> Status = payment error
-                    // We don't use the following condition to avoid the float precision issues : http://www.php.net/manual/en/language.types.float.php
+                    // We don't use the following condition to avoid the float precision issues :
+                    // http://www.php.net/manual/en/language.types.float.php
                     // if ($order->total_paid != $order->total_paid_real)
                     // We use number_format in order to compare two string
-                    if ($order_status->logable && number_format($cart_total_paid, _PS_PRICE_COMPUTE_PRECISION_) != number_format($amount_paid, _PS_PRICE_COMPUTE_PRECISION_)) {
+                    if ($order_status->logable && number_format(
+                        $cart_total_paid,
+                        _PS_PRICE_COMPUTE_PRECISION_
+                        )!= number_format(
+                            $amount_paid,
+                            _PS_PRICE_COMPUTE_PRECISION_
+                        )) {
                         $id_order_state = Configuration::get('PS_OS_ERROR');
                     }
 
                     $order_list[] = $order;
 
                     if (self::DEBUG_MODE) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - OrderDetail is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - OrderDetail is about to be added',
+                            1,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                     }
 
                     // Insert new Order detail list using cart for the current order
                     $order_detail = new OrderDetail(null, null, $this->context);
-                    $order_detail->createList($order, $this->context->cart, $id_order_state, $order->product_list, 0, true, $package_list[$id_address][$id_package]['id_warehouse']);
+                    $order_detail->createList(
+                        $order,
+                        $this->context->cart,
+                        $id_order_state,
+                        $order->product_list,
+                        0,
+                        true,
+                        $package_list[$id_address][$id_package]['id_warehouse']
+                    );
                     $order_detail_list[] = $order_detail;
 
                     if (self::DEBUG_MODE) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - OrderCarrier is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - OrderCarrier is about to be added',
+                            1,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                     }
 
                     // Adding an entry in order_carrier table
@@ -903,18 +1059,33 @@ class WirecardPaymentGateway extends PaymentModule
                 }
             }
 
-            // The country can only change if the address used for the calculation is the delivery address, and if multi-shipping is activated
+            // The country can only change if the address used for the calculation is the delivery address,
+            // and if multi-shipping is activated
             if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_delivery') {
                 $this->context->country = $context_country;
             }
 
             if (!$this->context->country->active) {
-                PrestaShopLogger::addLog('PaymentModule::validateOrder - Country is not active', 3, null, 'Cart', (int)$id_cart, true);
+                PrestaShopLogger::addLog(
+                    'PaymentModule::validateOrder - Country is not active',
+                    3,
+                    null,
+                    'Cart',
+                    (int)$id_cart,
+                    true
+                );
                 throw new PrestaShopException('The order address country is not active.');
             }
 
             if (self::DEBUG_MODE) {
-                PrestaShopLogger::addLog('PaymentModule::validateOrder - Payment is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                PrestaShopLogger::addLog(
+                    'PaymentModule::validateOrder - Payment is about to be added',
+                    1,
+                    null,
+                    'Cart',
+                    (int)$id_cart,
+                    true
+                );
             }
 
             // Register Payment only if the order status validate the order
@@ -929,7 +1100,14 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 if (!$order->addOrderPayment($amount_paid, null, $transaction_id)) {
-                    PrestaShopLogger::addLog('PaymentModule::validateOrder - Cannot save Order Payment', 3, null, 'Cart', (int)$id_cart, true);
+                    PrestaShopLogger::addLog(
+                        'PaymentModule::validateOrder - Cannot save Order Payment',
+                        3,
+                        null,
+                        'Cart',
+                        (int)$id_cart,
+                        true
+                    );
                     throw new PrestaShopException('Can\'t save Order Payment');
                 }
             }
@@ -947,7 +1125,12 @@ class WirecardPaymentGateway extends PaymentModule
                 $order = $order_list[$key];
                 if (isset($order->id)) {
                     if (!$secure_key) {
-                        $message .= '<br />'.$this->trans('Warning: the secure key is empty, check your payment account before validation', array(), 'Admin.Payment.Notification');
+                        $message .= '<br />'
+                            .$this->trans(
+                                'Warning: the secure key is empty, check your payment account before validation',
+                                array(),
+                                'Admin.Payment.Notification'
+                            );
                     }
                     // Optional message to attach to this order
                     if (isset($message) & !empty($message)) {
@@ -955,7 +1138,14 @@ class WirecardPaymentGateway extends PaymentModule
                         $message = strip_tags($message, '<br>');
                         if (Validate::isCleanHtml($message)) {
                             if (self::DEBUG_MODE) {
-                                PrestaShopLogger::addLog('PaymentModule::validateOrder - Message is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                                PrestaShopLogger::addLog(
+                                    'PaymentModule::validateOrder - Message is about to be added',
+                                    1,
+                                    null,
+                                    'Cart',
+                                    (int)$id_cart,
+                                    true
+                                );
                             }
                             $msg->message = $message;
                             $msg->id_cart = (int)$id_cart;
@@ -976,41 +1166,112 @@ class WirecardPaymentGateway extends PaymentModule
 
                     $product_var_tpl_list = array();
                     foreach ($order->product_list as $product) {
-                        $price = Product::getPriceStatic((int)$product['id_product'], false, ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null), 6, null, false, true, $product['cart_quantity'], false, (int)$order->id_customer, (int)$order->id_cart, (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}, $specific_price, true, true, null, true, $product['id_customization']);
-                        $price_wt = Product::getPriceStatic((int)$product['id_product'], true, ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null), 2, null, false, true, $product['cart_quantity'], false, (int)$order->id_customer, (int)$order->id_cart, (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}, $specific_price, true, true, null, true, $product['id_customization']);
+                        $price = Product::getPriceStatic(
+                            (int)$product['id_product'],
+                            false,
+                            ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null),
+                            6,
+                            null,
+                            false,
+                            true,
+                            $product['cart_quantity'],
+                            false,
+                            (int)$order->id_customer,
+                            (int)$order->id_cart,
+                            (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')},
+                            $specific_price,
+                            true,
+                            true,
+                            null,
+                            true,
+                            $product['id_customization']
+                        );
+                        $price_wt = Product::getPriceStatic(
+                            (int)$product['id_product'],
+                            true,
+                            ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null),
+                            2,
+                            null,
+                            false,
+                            true,
+                            $product['cart_quantity'],
+                            false,
+                            (int)$order->id_customer,
+                            (int)$order->id_cart,
+                            (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')},
+                            $specific_price,
+                            true,
+                            true,
+                            null,
+                            true,
+                            $product['id_customization']
+                        );
 
-                        $product_price = Product::getTaxCalculationMethod() == PS_TAX_EXC ? Tools::ps_round($price, 2) : $price_wt;
+                        $product_price = Product::getTaxCalculationMethod() == PS_TAX_EXC ?
+                            Tools::ps_round($price, 2) :
+                            $price_wt;
 
                         $product_var_tpl = array(
                             'id_product' => $product['id_product'],
                             'reference' => $product['reference'],
-                            'name' => $product['name'].(isset($product['attributes']) ? ' - '.$product['attributes'] : ''),
-                            'price' => Tools::displayPrice($product_price * $product['quantity'], $this->context->currency, false),
+                            'name' => $product['name'].(
+                                isset($product['attributes']) ?
+                                    ' - '.$product['attributes'] :
+                                    ''
+                                ),
+                            'price' => Tools::displayPrice(
+                                $product_price * $product['quantity'],
+                                $this->context->currency,
+                                false
+                            ),
                             'quantity' => $product['quantity'],
                             'customization' => array()
                         );
 
                         if (isset($product['price']) && $product['price']) {
-                            $product_var_tpl['unit_price'] = Tools::displayPrice($product['price'], $this->context->currency, false);
-                            $product_var_tpl['unit_price_full'] = Tools::displayPrice($product['price'], $this->context->currency, false)
+                            $product_var_tpl['unit_price'] = Tools::displayPrice(
+                                $product['price'],
+                                $this->context->currency,
+                                false
+                            );
+                            $product_var_tpl['unit_price_full'] = Tools::displayPrice(
+                                $product['price'],
+                                $this->context->currency,
+                                false
+                                )
                                 .' '.$product['unity'];
                         } else {
                             $product_var_tpl['unit_price'] = $product_var_tpl['unit_price_full'] = '';
                         }
 
-                        $customized_datas = Product::getAllCustomizedDatas((int)$order->id_cart, null, true, null, (int)$product['id_customization']);
+                        $customized_datas = Product::getAllCustomizedDatas(
+                            (int)$order->id_cart,
+                            null,
+                            true,
+                            null,
+                            (int)$product['id_customization']
+                        );
                         if (isset($customized_datas[$product['id_product']][$product['id_product_attribute']])) {
                             $product_var_tpl['customization'] = array();
                             foreach ($customized_datas[$product['id_product']][$product['id_product_attribute']][$order->id_address_delivery] as $customization) {
                                 $customization_text = '';
                                 if (isset($customization['datas'][Product::CUSTOMIZE_TEXTFIELD])) {
                                     foreach ($customization['datas'][Product::CUSTOMIZE_TEXTFIELD] as $text) {
-                                        $customization_text .= '<strong>'.$text['name'].'</strong>: '.$text['value'].'<br />';
+                                        $customization_text .= '<strong>'
+                                            .$text['name']
+                                            .'</strong>: '
+                                            .$text['value']
+                                            .'<br />';
                                     }
                                 }
 
                                 if (isset($customization['datas'][Product::CUSTOMIZE_FILE])) {
-                                    $customization_text .= $this->trans('%d image(s)', array(count($customization['datas'][Product::CUSTOMIZE_FILE])), 'Admin.Payment.Notification').'<br />';
+                                    $customization_text .= $this->trans(
+                                        '%d image(s)',
+                                        array(count($customization['datas'][Product::CUSTOMIZE_FILE])),
+                                        'Admin.Payment.Notification'
+                                        )
+                                        .'<br />';
                                 }
 
                                 $customization_quantity = (int)$customization['quantity'];
@@ -1018,7 +1279,11 @@ class WirecardPaymentGateway extends PaymentModule
                                 $product_var_tpl['customization'][] = array(
                                     'customization_text' => $customization_text,
                                     'customization_quantity' => $customization_quantity,
-                                    'quantity' => Tools::displayPrice($customization_quantity * $product_price, $this->context->currency, false)
+                                    'quantity' => Tools::displayPrice(
+                                        $customization_quantity * $product_price,
+                                        $this->context->currency,
+                                        false
+                                    )
                                 );
                             }
                         }
@@ -1033,8 +1298,16 @@ class WirecardPaymentGateway extends PaymentModule
                     $product_list_txt = '';
                     $product_list_html = '';
                     if (count($product_var_tpl_list) > 0) {
-                        $product_list_txt = $this->getEmailTemplateContent('order_conf_product_list.txt', Mail::TYPE_TEXT, $product_var_tpl_list);
-                        $product_list_html = $this->getEmailTemplateContent('order_conf_product_list.tpl', Mail::TYPE_HTML, $product_var_tpl_list);
+                        $product_list_txt = $this->getEmailTemplateContent(
+                            'order_conf_product_list.txt',
+                            Mail::TYPE_TEXT,
+                            $product_var_tpl_list
+                        );
+                        $product_list_html = $this->getEmailTemplateContent(
+                            'order_conf_product_list.tpl',
+                            Mail::TYPE_HTML,
+                            $product_var_tpl_list
+                        );
                     }
 
                     $cart_rules_list = array();
@@ -1042,8 +1315,16 @@ class WirecardPaymentGateway extends PaymentModule
                     $cart_rules_list_txt = '';
                     $cart_rules_list_html = '';
                     if (count($cart_rules_list) > 0) {
-                        $cart_rules_list_txt = $this->getEmailTemplateContent('order_conf_cart_rules.txt', Mail::TYPE_TEXT, $cart_rules_list);
-                        $cart_rules_list_html = $this->getEmailTemplateContent('order_conf_cart_rules.tpl', Mail::TYPE_HTML, $cart_rules_list);
+                        $cart_rules_list_txt = $this->getEmailTemplateContent(
+                            'order_conf_cart_rules.txt',
+                            Mail::TYPE_TEXT,
+                            $cart_rules_list
+                        );
+                        $cart_rules_list_html = $this->getEmailTemplateContent(
+                            'order_conf_cart_rules.tpl',
+                            Mail::TYPE_HTML,
+                            $cart_rules_list
+                        );
                     }
 
                     // Specify order id for message
@@ -1072,12 +1353,23 @@ class WirecardPaymentGateway extends PaymentModule
                         $customer_message->private = 1;
 
                         if (!$customer_message->add()) {
-                            $this->errors[] = $this->trans('An error occurred while saving message', array(), 'Admin.Payment.Notification');
+                            $this->errors[] = $this->trans(
+                                'An error occurred while saving message',
+                                array(),
+                                'Admin.Payment.Notification'
+                            );
                         }
                     }
 
                     if (self::DEBUG_MODE) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Hook validateOrder is about to be called', 1, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - Hook validateOrder is about to be called',
+                            1,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                     }
 
                     // Hook validate order
@@ -1096,7 +1388,14 @@ class WirecardPaymentGateway extends PaymentModule
                     }
 
                     if (self::DEBUG_MODE) {
-                        PrestaShopLogger::addLog('PaymentModule::validateOrder - Order Status is about to be added', 1, null, 'Cart', (int)$id_cart, true);
+                        PrestaShopLogger::addLog(
+                            'PaymentModule::validateOrder - Order Status is about to be added',
+                            1,
+                            null,
+                            'Cart',
+                            (int)$id_cart,
+                            true
+                        );
                     }
 
                     // Set the order status
@@ -1106,10 +1405,16 @@ class WirecardPaymentGateway extends PaymentModule
                     $new_history->addWithemail(true, $extra_vars);
 
                     // Switch to back order if needed
-                    if (Configuration::get('PS_STOCK_MANAGEMENT') && ($order_detail->getStockState() || $order_detail->product_quantity_in_stock <= 0)) {
+                    if (Configuration::get('PS_STOCK_MANAGEMENT') &&
+                        ($order_detail->getStockState() ||
+                            $order_detail->product_quantity_in_stock <= 0)) {
                         $history = new OrderHistory();
                         $history->id_order = (int)$order->id;
-                        $history->changeIdOrderState(Configuration::get($order->valid ? 'PS_OS_OUTOFSTOCK_PAID' : 'PS_OS_OUTOFSTOCK_UNPAID'), $order, true);
+                        $history->changeIdOrderState(
+                            Configuration::get($order->valid ? 'PS_OS_OUTOFSTOCK_PAID' : 'PS_OS_OUTOFSTOCK_UNPAID'),
+                            $order,
+                            true
+                        );
                         $history->addWithemail();
                     }
 
@@ -1119,7 +1424,10 @@ class WirecardPaymentGateway extends PaymentModule
                     $order = new Order((int)$order->id);
 
                     // Send an e-mail to customer (one order = one email)
-                    if ($id_order_state != Configuration::get('PS_OS_ERROR') && $id_order_state != Configuration::get('PS_OS_CANCELED') && $this->context->customer->id) {
+                    if (
+                        $id_order_state != Configuration::get('PS_OS_ERROR') &&
+                        $id_order_state != Configuration::get('PS_OS_CANCELED') &&
+                        $this->context->customer->id) {
                         $invoice = new Address((int)$order->id_address_invoice);
                         $delivery = new Address((int)$order->id_address_delivery);
                         $delivery_state = $delivery->id_state ? new State((int)$delivery->id_state) : false;
@@ -1164,18 +1472,50 @@ class WirecardPaymentGateway extends PaymentModule
                             '{invoice_other}' => $invoice->other,
                             '{order_name}' => $order->getUniqReference(),
                             '{date}' => Tools::displayDate(date('Y-m-d H:i:s'), null, 1),
-                            '{carrier}' => ($virtual_product || !isset($carrier->name)) ? $this->trans('No carrier', array(), 'Admin.Payment.Notification') : $carrier->name,
+                            '{carrier}' => (
+                                $virtual_product || !isset($carrier->name)) ?
+                                $this->trans(
+                                    'No carrier',
+                                    array(),
+                                    'Admin.Payment.Notification'
+                                ) :
+                                $carrier->name,
                             '{payment}' => Tools::substr($order->payment, 0, 255),
                             '{products}' => $product_list_html,
                             '{products_txt}' => $product_list_txt,
                             '{discounts}' => $cart_rules_list_html,
                             '{discounts_txt}' => $cart_rules_list_txt,
-                            '{total_paid}' => Tools::displayPrice($order->total_paid, $this->context->currency, false),
-                            '{total_products}' => Tools::displayPrice(Product::getTaxCalculationMethod() == PS_TAX_EXC ? $order->total_products : $order->total_products_wt, $this->context->currency, false),
-                            '{total_discounts}' => Tools::displayPrice($order->total_discounts, $this->context->currency, false),
-                            '{total_shipping}' => Tools::displayPrice($order->total_shipping, $this->context->currency, false),
-                            '{total_wrapping}' => Tools::displayPrice($order->total_wrapping, $this->context->currency, false),
-                            '{total_tax_paid}' => Tools::displayPrice(($order->total_products_wt - $order->total_products) + ($order->total_shipping_tax_incl - $order->total_shipping_tax_excl), $this->context->currency, false));
+                            '{total_paid}' => Tools::displayPrice(
+                                $order->total_paid,
+                                $this->context->currency,
+                                false
+                            ),
+                            '{total_products}' => Tools::displayPrice(
+                                Product::getTaxCalculationMethod() == PS_TAX_EXC ?
+                                    $order->total_products :
+                                    $order->total_products_wt,
+                                $this->context->currency,
+                                false),
+                            '{total_discounts}' => Tools::displayPrice(
+                                $order->total_discounts,
+                                $this->context->currency,
+                                false
+                            ),
+                            '{total_shipping}' => Tools::displayPrice(
+                                $order->total_shipping,
+                                $this->context->currency,
+                                false
+                            ),
+                            '{total_wrapping}' => Tools::displayPrice(
+                                $order->total_wrapping,
+                                $this->context->currency,
+                                false
+                            ),
+                            '{total_tax_paid}' => Tools::displayPrice(
+                                ($order->total_products_wt - $order->total_products) +
+                                ($order->total_shipping_tax_incl - $order->total_shipping_tax_excl),
+                                $this->context->currency,
+                                false));
 
                         if (is_array($extra_vars)) {
                             $data = array_merge($data, $extra_vars);
@@ -1187,14 +1527,30 @@ class WirecardPaymentGateway extends PaymentModule
                             Hook::exec('actionPDFInvoiceRender', array('order_invoice_list' => $order_invoice_list));
                             $pdf = new PDF($order_invoice_list, PDF::TEMPLATE_INVOICE, $this->context->smarty);
                             $file_attachement['content'] = $pdf->render(false);
-                            $file_attachement['name'] = Configuration::get('PS_INVOICE_PREFIX', (int)$order->id_lang, null, $order->id_shop).sprintf('%06d', $order->invoice_number).'.pdf';
+                            $file_attachement['name'] = Configuration::get(
+                                'PS_INVOICE_PREFIX',
+                                (int)$order->id_lang,
+                                null,
+                                $order->id_shop
+                                )
+                                .sprintf(
+                                    '%06d',
+                                    $order->invoice_number
+                                )
+                                .'.pdf';
                             $file_attachement['mime'] = 'application/pdf';
                         } else {
                             $file_attachement = null;
                         }
 
                         if (self::DEBUG_MODE) {
-                            PrestaShopLogger::addLog('PaymentModule::validateOrder - Mail is about to be sent', 1, null, 'Cart', (int)$id_cart, true);
+                            PrestaShopLogger::addLog('PaymentModule::validateOrder - Mail is about to be sent',
+                                1,
+                                null,
+                                'Cart',
+                                (int)$id_cart,
+                                true
+                            );
                         }
 
                         $orderLanguage = new Language((int) $order->id_lang);
@@ -1215,7 +1571,10 @@ class WirecardPaymentGateway extends PaymentModule
                                 null,
                                 null,
                                 $file_attachement,
-                                null, _PS_MAIL_DIR_, false, (int)$order->id_shop
+                                null,
+                                _PS_MAIL_DIR_,
+                                false,
+                                (int)$order->id_shop
                             );
                         }
                     }
@@ -1258,12 +1617,21 @@ class WirecardPaymentGateway extends PaymentModule
             }
 
             if (self::DEBUG_MODE) {
-                PrestaShopLogger::addLog('PaymentModule::validateOrder - End of validateOrder', 1, null, 'Cart', (int)$id_cart, true);
+                PrestaShopLogger::addLog('PaymentModule::validateOrder - End of validateOrder',
+                    1,
+                    null,
+                    'Cart',
+                    (int)$id_cart,
+                    true);
             }
 
             return true;
         } else {
-            $error = $this->trans('Cart cannot be loaded or an order has already been placed using this cart', array(), 'Admin.Payment.Notification');
+            $error = $this->trans(
+                'Cart cannot be loaded or an order has already been placed using this cart',
+                array(),
+                'Admin.Payment.Notification'
+            );
             PrestaShopLogger::addLog($error, 4, '0000001', 'Cart', intval($this->context->cart->id));
             throw new PrestaShopException($error);
             return;
