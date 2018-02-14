@@ -84,11 +84,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
                     foreach ($cart->getProducts() as $product) {
+
                         $productInfo = new Item(
                             $product['name'],
                             new Amount(
                                 number_format(
-                                    $product['price'],
+                                    $product['price_wt'],
                                     2,
                                     '.',
                                     ''
@@ -98,9 +99,10 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             $product['cart_quantity']
                         );
                         $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
+                        $tax=($product['price_wt'] - $product['price'])*100/$product['price_wt'];
                         $productInfo->setTaxRate(
                             number_format(
-                                $product['price_wt'] - $product['price'],
+                                $tax,
                                 2,
                                 '.',
                                 ''
