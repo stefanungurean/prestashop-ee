@@ -197,12 +197,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             $severity = ucfirst($status->getSeverity());
                             $code = $status->getCode();
                             $description = $status->getDescription();
-                            $errors[] = sprintf(
-                                '%s with code %s and message "%s" occurred.<br>',
-                                $severity,
-                                $code,
-                                $description
-                            );
+                            $errors[] =$description;
                         }
 
                         $messageTemp = implode(',', $errors);
