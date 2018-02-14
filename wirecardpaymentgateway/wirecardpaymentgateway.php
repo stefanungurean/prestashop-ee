@@ -617,6 +617,8 @@ class WirecardPaymentGateway extends PaymentModule
     /**
      * return options for transaction types select
      *
+     * @since 0.0.2
+     *
      * @return array
      */
     private function getTransactionTypes()
@@ -671,6 +673,8 @@ class WirecardPaymentGateway extends PaymentModule
     /**
      * return module display name
      *
+     * @since 0.0.2
+     *
      * @return string
      */
     public function getDisplayName()
@@ -679,8 +683,22 @@ class WirecardPaymentGateway extends PaymentModule
     }
 
     /**
+     * return module name
+     *
+     * @since 0.0.2
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
      * Validate an order in database
      * Function called from a payment module
+     *
+     * @since 0.0.2
      *
      * @param int     $id_cart
      * @param int     $id_order_state

@@ -136,12 +136,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
                     $redirectUrls = new Redirect(
-                        $this->context->link->getModuleLink($this->module->getDisplayName(), 'success', array(), true),
-                        $this->context->link->getModuleLink($this->module->getDisplayName(), 'cancel', array(), true)
+                        $this->context->link->getModuleLink($this->module->getName(), 'success', array(), true),
+                        $this->context->link->getModuleLink($this->module->getName(), 'cancel', array(), true)
                     );
 
                     $notificationUrl = $this->context->link->getModuleLink(
-                        $this->module->getDisplayName(),
+                        $this->module->getName(),
                         'notify',
                         array(),
                         true
@@ -172,7 +172,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     // In case of an `InteractionResponse`, a browser interaction by the consumer is required
                     // in order to continue the payment process. In this example we proceed with a header redirect
                     // to the given _redirectUrl_. IFrame integration using this URL is also possible.
-
                     if ($response instanceof InteractionResponse) {
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
                         // The failure state is represented by a FailureResponse object.
