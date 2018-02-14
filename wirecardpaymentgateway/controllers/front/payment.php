@@ -77,7 +77,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     $basket = new Basket();
 
-                    $orderNumber=$this->module->currentOrder;
+                    $orderNumber = $this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
                     $descriptor = "";
                     if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
@@ -99,7 +99,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             $product['cart_quantity']
                         );
                         $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
-                        $tax=($product['price_wt'] - $product['price'])*100/$product['price_wt'];
+                        $tax = ($product['price_wt'] - $product['price']) * 100 / $product['price_wt'];
                         $productInfo->setTaxRate(
                             number_format(
                                 $tax,
@@ -111,29 +111,31 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         $basket->add($productInfo);
                     }
 
-                    $shipping = new Item(
-                        "Shipping",
-                        new Amount(
+                    if ($cart->getTotalShippingCost() != 0) {
+                        $shipping = new Item(
+                            "Shipping",
+                            new Amount(
+                                number_format(
+                                    $cart->getTotalShippingCost(),
+                                    2,
+                                    '.',
+                                    ''
+                                ),
+                                $currencyIsoCode
+                            ),
+                            "1"
+                        );
+                        $shipping->setDescription($this->l('Shipping'));
+                        $shipping->setTaxRate(
                             number_format(
-                                $cart->getTotalShippingCost(),
+                                "0",
                                 2,
                                 '.',
                                 ''
-                            ),
-                            $currencyIsoCode
-                        ),
-                        "1"
-                    );
-                    $shipping->setDescription($this->l('Shipping'));
-                    $shipping->setTaxRate(
-                        number_format(
-                            "0",
-                            2,
-                            '.',
-                            ''
-                        )
-                    );
-                    $basket->add($shipping);
+                            )
+                        );
+                        $basket->add($shipping);
+                    }
 
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
