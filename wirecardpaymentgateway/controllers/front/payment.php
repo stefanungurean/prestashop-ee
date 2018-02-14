@@ -77,10 +77,10 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     $basket = new Basket();
 
-                    $orderNumber=intval($this->module->currentOrder);
+                    $orderNumber=$this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
                     $descriptor = "";
-                    if (Configuration::get($this->module->buildParamName('paypal', 'descriptior'))) {
+                    if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
                     foreach ($cart->getProducts() as $product) {

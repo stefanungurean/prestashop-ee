@@ -210,8 +210,8 @@ class WirecardPaymentGateway extends PaymentModule
                         'options' => 'getTransactionTypes'
                     ),
                     array(
-                        'name' => 'descriptior',
-                        'label' => 'Enable and disable descriptior',
+                        'name' => 'descriptor',
+                        'label' => 'Enable and disable descriptor',
                         'default' => '1',
                         'type' => 'onoff',
                         'required' => true
