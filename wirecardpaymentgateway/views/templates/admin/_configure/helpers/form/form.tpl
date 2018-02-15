@@ -31,41 +31,44 @@
 {extends file="helpers/form/form.tpl"}
 
 {block name="input"}
-	{if $input.type == 'linkbutton'}
+    {if $input.type == 'linkbutton'}
 		<a class="btn btn-default" id="{$input.id}" href="#">
 			<i class="icon-check"></i>
-			{l s=$input.buttonText mod='wirecardpaymentgateway'}
+            {l s=$input.buttonText mod='wirecardpaymentgateway'}
 		</a>
 		<script type="text/javascript">
-			$(function () {
-				$('#{$input.id}').on('click', function() {
-					$.ajax({
-						type: 'POST',
-						{** this url doesn't work when escaped *}
-						url: '{$ajax_configtest_url}',
-						dataType: 'json',
-						data: {
-							action: 'TestConfig',
-							method: '{$input.method}',
-							ajax: true
-						},
-						success: function (jsonData) {
-							if (jsonData) {
-								$.fancybox({
-									fitToView: true,
-									content: '<div><fieldset><legend>{l s='Test result' mod='wirecardceecheckoutseamless'}</legend>' +
-									'<label>{l s='Status' mod='wirecardpaymentgateway'}:</label>' +
-									'<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
-									'<label>{l s='Message' mod='wirecardpaymentgateway'}:</label>' +
-									'<div class="margin-form" style="text-align:left;">' + jsonData.message + '</div></fieldset></div>'
-								});
-							}
-						}
-					});
-				});
-			 });
+            $(function () {
+                $('#{$input.id}').on('click', function() {
+                    $.ajax({
+                        type: 'POST',
+                        {** this url doesn't work when escaped *}
+                        url: '{$ajax_configtest_url}',
+                        dataType: 'json',
+                        data: {
+                            action: 'TestConfig',
+                    {foreach $input.send as $datasend}
+                    {$datasend}:$('input[name={$datasend}]').val(),
+                    {/foreach}
+                        method: '{$input.method}',
+                        ajax: true
+                },
+                    success: function (jsonData) {
+                        if (jsonData) {
+                            $.fancybox({
+                                fitToView: true,
+                                content: '<div><fieldset><legend>{l s='Test result' mod='wirecardceecheckoutseamless'}</legend>' +
+                                '<label>{l s='Status' mod='wirecardpaymentgateway'}:</label>' +
+                                '<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
+                                '<label>{l s='Message' mod='wirecardpaymentgateway'}:</label>' +
+                                '<div class="margin-form" style="text-align:left;">' + jsonData.message + '</div></fieldset></div>'
+                            });
+                        }
+                    }
+                });
+                });
+            });
 		</script>
-	{else}
-		{$smarty.block.parent}
-	{/if}
+    {else}
+        {$smarty.block.parent}
+    {/if}
 {/block}

@@ -49,7 +49,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
-        $orderNumber="";
+        $orderNumber='';
         if (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
         } else {
@@ -80,7 +80,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     $orderNumber = $this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
-                    $descriptor = "";
+                    $descriptor = '';
                     if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
@@ -114,7 +114,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     if ($cart->getTotalShippingCost() != 0) {
                         $shipping = new Item(
-                            "Shipping",
+                            'Shipping',
                             new Amount(
                                 number_format(
                                     $cart->getTotalShippingCost(),
@@ -124,12 +124,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                                 ),
                                 $currencyIsoCode
                             ),
-                            "1"
+                            '1'
                         );
                         $shipping->setDescription($this->l('Shipping'));
                         $shipping->setTaxRate(
                             number_format(
-                                "0",
+                                '0',
                                 2,
                                 '.',
                                 ''
@@ -210,7 +210,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
             }
         }
         $params=array();
-        if ($message!="") {
+        if ($message!='') {
             $this->context->cookie->eeMessage = $message;
             $params = array(
                 'submitReorder' => true,

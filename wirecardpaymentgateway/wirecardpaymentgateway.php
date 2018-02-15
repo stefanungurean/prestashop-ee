@@ -217,11 +217,16 @@ class WirecardPaymentGateway extends PaymentModule
                         'required' => true
                     ),
                     array(
-                          'type' => 'linkbutton',
-                          'required' => false,
-                          'buttonText' => $this->l("Test paypal configuration"),
-                          'id' => "paypalConfig",
-                          'method' => "paypal"
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => $this->l('Test paypal configuration'),
+                        'id' => 'paypalConfig',
+                        'method' => 'paypal',
+                        'send' => array(
+                            $this->buildParamName('paypal', 'wirecard_server_url'),
+                            $this->buildParamName('paypal', 'http_user'),
+                            $this->buildParamName('paypal', 'http_password')
+                        )
                     )
                 )
             )
@@ -339,6 +344,7 @@ class WirecardPaymentGateway extends PaymentModule
                         $elem['buttonText'] = $f['buttonText'];
                         $elem['id'] = $f['id'];
                         $elem['method'] = $f['method'];
+                        $elem['send'] = $f['send'];
                         break;
 
                     case 'text':
@@ -655,8 +661,8 @@ class WirecardPaymentGateway extends PaymentModule
             && (get_class($controller) == 'OrderController')
             && $context->cookie->eeMessage
         ) {
-            if (strpos($context->cookie->eeMessage, "<br />")) {
-                $msgs = explode("<br />", $context->cookie->eeMessage);
+            if (strpos($context->cookie->eeMessage, '<br />')) {
+                $msgs = explode('<br />', $context->cookie->eeMessage);
                 foreach ($msgs as $msg) {
                     if (Tools::strlen($msg) < 5) {
                         continue;
@@ -1457,8 +1463,8 @@ class WirecardPaymentGateway extends PaymentModule
                             '{firstname}' => $this->context->customer->firstname,
                             '{lastname}' => $this->context->customer->lastname,
                             '{email}' => $this->context->customer->email,
-                            '{delivery_block_txt}' => $this->_getFormatedAddress($delivery, "\n"),
-                            '{invoice_block_txt}' => $this->_getFormatedAddress($invoice, "\n"),
+                            '{delivery_block_txt}' => $this->_getFormatedAddress($delivery, '\n'),
+                            '{invoice_block_txt}' => $this->_getFormatedAddress($invoice, '\n'),
                             '{delivery_block_html}' => $this->_getFormatedAddress($delivery, '<br />', array(
                                 'firstname'    => '<span style="font-weight:bold;">%s</span>',
                                 'lastname'    => '<span style="font-weight:bold;">%s</span>'
