@@ -29,11 +29,17 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use PrestaShop\PrestaShop\Adapter\StockManager;
+
 /**
  * Class WirecardEEPaymentGateway
  */
 class WirecardPaymentGateway extends PaymentModule
 {
+    const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
+    const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
+
     public function __construct()
     {
         $this->config = $this->config();
@@ -59,6 +65,49 @@ class WirecardPaymentGateway extends PaymentModule
             || !$this->registerHook('actionFrontControllerSetMedia')
             || !$this->registerHook('displayHeader')) {
             return false;
+        }
+        if (!Configuration::get(self::WDEE_OS_AWAITING)) {
+
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment awaiting';
+            }
+            $orderState->send_email = false;
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->add();
+            Configuration::updateValue(
+                self::WDEE_OS_AWAITING,
+                (int)($orderState->id)
+            );
+        }
+
+        if (!Configuration::get(self::WDEE_OS_FRAUD)) {
+
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway fraud detected';
+            }
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->module_name = 'wirecardpaymentgateway';
+            $orderState->add();
+
+            Configuration::updateValue(
+                self::WDEE_OS_FRAUD,
+                (int)($orderState->id)
+            );
         }
         return true;
     }
@@ -108,7 +157,7 @@ class WirecardPaymentGateway extends PaymentModule
                 'fields' => array(
                     array(
                         'name' => 'enable_method',
-                        'label' => 'Enable and disable this payment method',
+                        'label' => $this->l('Enable'),
                         'default' => '0',
                         'type' => 'onoff'
                     ),
@@ -161,15 +210,29 @@ class WirecardPaymentGateway extends PaymentModule
                         'options' => 'getTransactionTypes'
                     ),
                     array(
+                        'name' => 'descriptor',
+                        'label' => $this->l('Send descriptor'),
+                        'default' => '1',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'name' => 'basket_send',
+                        'label' => $this->l('Send basket data'),
+                        'default' => '0',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
                         'type' => 'linkbutton',
                         'required' => false,
-                        'buttonText' => "Test paypal configuration",
-                        'id' => "paypalConfig",
-                        'method' => "paypal",
+                        'buttonText' => $this->l('Test paypal configuration'),
+                        'id' => 'paypalConfig',
+                        'method' => 'paypal',
                         'send' => array(
-                            $this->buildParamName("paypal", "wirecard_server_url"),
-                            $this->buildParamName("paypal", "http_user"),
-                            $this->buildParamName("paypal", "http_password")
+                            $this->buildParamName('paypal', 'wirecard_server_url'),
+                            $this->buildParamName('paypal', 'http_user'),
+                            $this->buildParamName('paypal', 'http_password')
                         )
                     )
                 )
@@ -567,6 +630,8 @@ class WirecardPaymentGateway extends PaymentModule
     /**
      * return options for transaction types select
      *
+     * @since 0.0.2
+     *
      * @return array
      */
     private function getTransactionTypes()
@@ -603,8 +668,8 @@ class WirecardPaymentGateway extends PaymentModule
             && (get_class($controller) == 'OrderController')
             && $context->cookie->eeMessage
         ) {
-            if (strpos($context->cookie->eeMessage, "<br />")) {
-                $msgs = explode("<br />", $context->cookie->eeMessage);
+            if (strpos($context->cookie->eeMessage, '<br />')) {
+                $msgs = explode('<br />', $context->cookie->eeMessage);
                 foreach ($msgs as $msg) {
                     if (Tools::strlen($msg) < 5) {
                         continue;
@@ -621,10 +686,24 @@ class WirecardPaymentGateway extends PaymentModule
     /**
      * return module display name
      *
+     * @since 0.0.2
+     *
      * @return string
      */
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    /**
+     * return module name
+     *
+     * @since 0.0.2
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 }
