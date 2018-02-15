@@ -166,6 +166,11 @@ class WirecardPaymentGateway extends PaymentModule
                         'buttonText' => "Test paypal configuration",
                         'id' => "paypalConfig",
                         'method' => "paypal",
+                        'send' => array(
+                            $this->buildParamName("paypal", "wirecard_server_url"),
+                            $this->buildParamName("paypal", "http_user"),
+                            $this->buildParamName("paypal", "http_password")
+                        )
                     )
                 )
             )
@@ -283,6 +288,7 @@ class WirecardPaymentGateway extends PaymentModule
                         $elem['buttonText'] = $f['buttonText'];
                         $elem['id'] = $f['id'];
                         $elem['method'] = $f['method'];
+                        $elem['send'] = $f['send'];
                         break;
 
                     case 'text':
