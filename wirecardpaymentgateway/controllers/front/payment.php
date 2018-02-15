@@ -50,7 +50,13 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     public function postProcess()
     {
         $orderNumber='';
-        if (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        if (!$this->module->active) {
+            $message = $this->l('Module is not active');
+        }
+        elseif (!(Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false)) {
+            $message = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
+        }
+        elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
         } else {
             $cart = $this->context->cart;
@@ -61,7 +67,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                 $message = $this->l('The merchant configuration is incorrect');
             } else {
                 try {
-                    $this->module->validateOrderImproved(
+                    $this->module->validateOrder(
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
