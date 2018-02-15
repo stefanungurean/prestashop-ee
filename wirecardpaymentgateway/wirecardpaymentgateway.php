@@ -157,7 +157,7 @@ class WirecardPaymentGateway extends PaymentModule
                 'fields' => array(
                     array(
                         'name' => 'enable_method',
-                        'label' => 'Enable and disable this payment method',
+                        'label' => $this->l('Enable and disable this payment method'),
                         'default' => '0',
                         'type' => 'onoff'
                     ),
@@ -211,7 +211,7 @@ class WirecardPaymentGateway extends PaymentModule
                     ),
                     array(
                         'name' => 'descriptor',
-                        'label' => 'Enable and disable descriptor',
+                        'label' => $this->l('Enable and disable descriptor'),
                         'default' => '1',
                         'type' => 'onoff',
                         'required' => true
@@ -219,7 +219,7 @@ class WirecardPaymentGateway extends PaymentModule
                     array(
                           'type' => 'linkbutton',
                           'required' => false,
-                          'buttonText' => "Test paypal configuration",
+                          'buttonText' => $this->l("Test paypal configuration"),
                           'id' => "paypalConfig",
                           'method' => "paypal"
                     )
@@ -765,7 +765,7 @@ class WirecardPaymentGateway extends PaymentModule
                 true
             );
 
-            throw new PrestaShopException('Can\'t load Order status');
+            throw new PrestaShopException($this->l('Can\'t load Order status'));
         }
 
         if (!$this->active) {
@@ -778,7 +778,7 @@ class WirecardPaymentGateway extends PaymentModule
                 true
             );
 
-            throw new PrestaShopException('PaymentModule::validateOrder - Module is not active');
+            throw new PrestaShopException($this->l('PaymentModule::validateOrder - Module is not active'));
             //die(Tools::displayError());
             return;
         }
@@ -794,7 +794,7 @@ class WirecardPaymentGateway extends PaymentModule
                     (int)$id_cart,
                     true
                 );
-                throw new PrestaShopException('PaymentModule::validateOrder - Secure key does not match');
+                throw new PrestaShopException($this->l('PaymentModule::validateOrder - Secure key does not match'));
                 return;
                 //die(Tools::displayError());
             }
@@ -857,7 +857,7 @@ class WirecardPaymentGateway extends PaymentModule
                             (int)$this->context->cart->id_lang
                         );
                         if (!$this->context->country->active) {
-                            throw new PrestaShopException('The delivery address country is not active.');
+                            throw new PrestaShopException($this->l('The delivery address country is not active.'));
                         }
                     }
 
@@ -1010,7 +1010,7 @@ class WirecardPaymentGateway extends PaymentModule
                             (int)$id_cart,
                             true
                         );
-                        throw new PrestaShopException('Can\'t save Order');
+                        throw new PrestaShopException($this->l('Can\'t save Order'));
                     }
 
                     // Amount paid by customer is not the right one -> Status = payment error
@@ -1093,7 +1093,7 @@ class WirecardPaymentGateway extends PaymentModule
                     (int)$id_cart,
                     true
                 );
-                throw new PrestaShopException('The order address country is not active.');
+                throw new PrestaShopException($this->l('The order address country is not active.'));
             }
 
             if (self::DEBUG_MODE) {
@@ -1127,7 +1127,7 @@ class WirecardPaymentGateway extends PaymentModule
                         (int)$id_cart,
                         true
                     );
-                    throw new PrestaShopException('Can\'t save Order Payment');
+                    throw new PrestaShopException($this->l('Can\'t save Order Payment'));
                 }
             }
 
@@ -1626,7 +1626,7 @@ class WirecardPaymentGateway extends PaymentModule
                         (int)$order->id
                     );
                 } else {
-                    $error = $this->trans('Order creation failed', array(), 'Admin.Payment.Notification');
+                    $error = $this->l('Order creation failed');
                     PrestaShopLogger::addLog($error, 4, '0000002', 'Cart', intval($order->id_cart));
 
                     throw new PrestaShopException($error);
@@ -1653,11 +1653,7 @@ class WirecardPaymentGateway extends PaymentModule
 
             return true;
         } else {
-            $error = $this->trans(
-                'Cart cannot be loaded or an order has already been placed using this cart',
-                array(),
-                'Admin.Payment.Notification'
-            );
+            $error = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
             PrestaShopLogger::addLog($error, 4, '0000001', 'Cart', intval($this->context->cart->id));
             throw new PrestaShopException($error);
             return;

@@ -49,6 +49,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
+        $orderNumber="";
         if (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
         } else {
@@ -83,8 +84,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
-                    foreach ($cart->getProducts() as $product) {
 
+                    foreach ($cart->getProducts() as $product) {
                         $productInfo = new Item(
                             $product['name'],
                             new Amount(
@@ -194,10 +195,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             /**
                              * @var $status \Wirecard\PaymentSdk\Entity\Status
                              */
-                            $severity = ucfirst($status->getSeverity());
-                            $code = $status->getCode();
                             $description = $status->getDescription();
-                            $errors[] =$description;
+                            $errors[] = $description;
                         }
 
                         $messageTemp = implode(',', $errors);
@@ -227,7 +226,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
      * @since 0.0.2
      *
      */
-
     private function configuration()
     {
         $currency = new CurrencyCore($this->context->cart->id_currency);
@@ -235,19 +233,18 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
         $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
         $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
-        $paypalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
-        $paypalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
+        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-
-        $transactionService = new TransactionService($this->config, $this->logger);
+        $transactionService = new TransactionService($this->config);
 
         if (!$transactionService->checkCredentials()) {
             return false;
         }
 
-        $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $paypalMAID, $paypalKey);
-        $this->config->add($paypalConfig);
+        $payPalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $payPalMAID, $payPalKey);
+        $this->config->add($payPalConfig);
         return true;
     }
 
@@ -262,7 +259,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     {
         $cart = $this->context->cart;
         if (!$cart->checkQuantities()) {
-            return array('status'=> false,'message'=>'Products out of stock');
+            return array('status'=> false,'message'=>$this->l('Products out of stock'));
         }
         return array('status'=> true,'message'=>'');
     }
