@@ -157,7 +157,7 @@ class WirecardPaymentGateway extends PaymentModule
                 'fields' => array(
                     array(
                         'name' => 'enable_method',
-                        'label' => $this->l('Enable and disable this payment method'),
+                        'label' => $this->l('Enable'),
                         'default' => '0',
                         'type' => 'onoff'
                     ),
@@ -211,14 +211,14 @@ class WirecardPaymentGateway extends PaymentModule
                     ),
                     array(
                         'name' => 'descriptor',
-                        'label' => $this->l('Enable and disable SDK descriptor'),
+                        'label' => $this->l('Send descriptor'),
                         'default' => '1',
                         'type' => 'onoff',
                         'required' => true
                     ),
                     array(
                         'name' => 'basket_send',
-                        'label' => $this->l('Enable and disable basket send to SDK'),
+                        'label' => $this->l('Send basket data'),
                         'default' => '0',
                         'type' => 'onoff',
                         'required' => true
