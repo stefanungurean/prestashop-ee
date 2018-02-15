@@ -76,7 +76,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $currency = new CurrencyCore($cart->id_currency);
                     $currencyIsoCode = $currency->iso_code;
 
-                    $basket = new Basket();
+
 
                     $orderNumber = $this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
@@ -84,60 +84,62 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
+                    if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
+                        $basket = new Basket();
 
-                    foreach ($cart->getProducts() as $product) {
-                        $productInfo = new Item(
-                            $product['name'],
-                            new Amount(
+                        foreach ($cart->getProducts() as $product) {
+                            $productInfo = new Item(
+                                $product['name'],
+                                new Amount(
+                                    number_format(
+                                        $product['price_wt'],
+                                        2,
+                                        '.',
+                                        ''
+                                    ),
+                                    $currencyIsoCode
+                                ),
+                                $product['cart_quantity']
+                            );
+                            $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
+                            $tax = ($product['price_wt'] - $product['price']) * 100 / $product['price_wt'];
+                            $productInfo->setTaxRate(
                                 number_format(
-                                    $product['price_wt'],
+                                    $tax,
                                     2,
                                     '.',
                                     ''
-                                ),
-                                $currencyIsoCode
-                            ),
-                            $product['cart_quantity']
-                        );
-                        $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
-                        $tax = ($product['price_wt'] - $product['price']) * 100 / $product['price_wt'];
-                        $productInfo->setTaxRate(
-                            number_format(
-                                $tax,
-                                2,
-                                '.',
-                                ''
-                            )
-                        );
-                        $basket->add($productInfo);
-                    }
+                                )
+                            );
+                            $basket->add($productInfo);
+                        }
 
-                    if ($cart->getTotalShippingCost() != 0) {
-                        $shipping = new Item(
-                            'Shipping',
-                            new Amount(
+                        if ($cart->getTotalShippingCost() != 0) {
+                            $shipping = new Item(
+                                'Shipping',
+                                new Amount(
+                                    number_format(
+                                        $cart->getTotalShippingCost(),
+                                        2,
+                                        '.',
+                                        ''
+                                    ),
+                                    $currencyIsoCode
+                                ),
+                                '1'
+                            );
+                            $shipping->setDescription($this->l('Shipping'));
+                            $shipping->setTaxRate(
                                 number_format(
-                                    $cart->getTotalShippingCost(),
+                                    '0',
                                     2,
                                     '.',
                                     ''
-                                ),
-                                $currencyIsoCode
-                            ),
-                            '1'
-                        );
-                        $shipping->setDescription($this->l('Shipping'));
-                        $shipping->setTaxRate(
-                            number_format(
-                                '0',
-                                2,
-                                '.',
-                                ''
-                            )
-                        );
-                        $basket->add($shipping);
+                                )
+                            );
+                            $basket->add($shipping);
+                        }
                     }
-
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
                     $redirectUrls = new Redirect(
@@ -159,7 +161,9 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $transaction->setNotificationUrl($notificationUrl);
                     $transaction->setRedirect($redirectUrls);
                     $transaction->setAmount($amount);
-                    $transaction->setBasket($basket);
+                    if (!Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
+                        $transaction->setBasket($basket);
+                    }
                     $transaction->setOrderNumber($orderNumber);
                     $transaction->setOrderDetail($orderDetail);
                     $transaction->setDescriptor($descriptor);

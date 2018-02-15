@@ -211,8 +211,15 @@ class WirecardPaymentGateway extends PaymentModule
                     ),
                     array(
                         'name' => 'descriptor',
-                        'label' => $this->l('Enable and disable descriptor'),
+                        'label' => $this->l('Enable and disable SDK descriptor'),
                         'default' => '1',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'name' => 'basket_send',
+                        'label' => $this->l('Enable and disable basket send to SDK'),
+                        'default' => '0',
                         'type' => 'onoff',
                         'required' => true
                     ),
