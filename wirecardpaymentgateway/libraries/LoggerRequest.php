@@ -34,6 +34,16 @@ use Psr\Log\LoggerInterface;
 
 class LoggerRequest implements  LoggerInterface
 {
+    private $log;
+
+    public function __construct()
+    {
+        $this->log= new PrestaShopLogger();
+        $this->log->error_code = null;
+        $this->log->date_add = date('Y-m-d H:i:s');
+        $this->log->date_upd = date('Y-m-d H:i:s');
+    }
+
     /**
      * System is unusable.
      *
@@ -43,13 +53,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function emergency($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 4;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 4;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -64,13 +70,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function alert($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 4;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 4;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -84,13 +86,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function critical($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 4;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 4;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -103,13 +101,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function error($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 3;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 3;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -124,13 +118,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function warning($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 2;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 2;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -142,13 +132,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function notice($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 1;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 1;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -162,13 +148,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function info($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 1;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 1;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -180,13 +162,9 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function debug($message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = 1;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = 1;
+        $this->log->message = $message;
+        $this->log->add();
     }
 
     /**
@@ -199,12 +177,8 @@ class LoggerRequest implements  LoggerInterface
      * @return void
      */
     public function log($level, $message, array $context = array()){
-        $log = new PrestaShopLogger();
-        $log->severity = (int)$level;
-        $log->error_code = null;
-        $log->message = $message;
-        $log->date_add = date('Y-m-d H:i:s');
-        $log->date_upd = date('Y-m-d H:i:s');
-        $log->add();
+        $this->log->severity = $level;
+        $this->log->message = $message;
+        $this->log->add();
     }
 }
