@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require __DIR__.'/../../vendor/autoload.php';
-require __DIR__.'/../../libraries/LoggerRequest.php';
+require __DIR__.'/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -180,8 +180,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
 
                     // The service is used to execute the payment operation itself. A response object is returne
-                    $LoggerRequest=new LoggerRequest();
-                    $transactionService = new TransactionService($this->config,$LoggerRequest);
+                    $Logger=new Logger();
+                    $transactionService = new TransactionService($this->config,$Logger);
                     $response = $transactionService->pay($transaction);
 
                     // ## Response handling
