@@ -144,7 +144,8 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function debug($message, array $context = array()){
+    public function debug($message, array $context = array())
+    {
         $this->log(1, $message, $context);
     }
 
