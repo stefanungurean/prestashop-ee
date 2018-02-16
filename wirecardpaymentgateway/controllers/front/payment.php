@@ -29,6 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require __DIR__.'/../../vendor/autoload.php';
+require __DIR__.'/../../libraries/LoggerRequest.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -167,7 +168,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $transaction->setNotificationUrl($notificationUrl);
                     $transaction->setRedirect($redirectUrls);
                     $transaction->setAmount($amount);
-                    if (!Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
+                    if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
                         $transaction->setBasket($basket);
                     }
                     $transaction->setOrderNumber($orderNumber);
@@ -177,8 +178,10 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     // ### Transaction Service
 
+
                     // The service is used to execute the payment operation itself. A response object is returne
-                    $transactionService = new TransactionService($this->config);
+                    $LoggerRequest=new LoggerRequest();
+                    $transactionService = new TransactionService($this->config,$LoggerRequest);
                     $response = $transactionService->pay($transaction);
 
                     // ## Response handling
