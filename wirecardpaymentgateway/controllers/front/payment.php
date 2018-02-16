@@ -180,8 +180,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
 
                     // The service is used to execute the payment operation itself. A response object is returne
-                    $Logger=new Logger();
-                    $transactionService = new TransactionService($this->config,$Logger);
+                    $logger = new Logger();
+                    $transactionService = new TransactionService($this->config, $logger);
                     $response = $transactionService->pay($transaction);
 
                     // ## Response handling
