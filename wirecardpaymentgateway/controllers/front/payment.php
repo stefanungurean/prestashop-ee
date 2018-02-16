@@ -53,11 +53,9 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $orderNumber='';
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
-        }
-        elseif (!(Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false)) {
+        } elseif (!(Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false)) {
             $message = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
-        }
-        elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
         } else {
             $cart = $this->context->cart;
@@ -83,8 +81,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $currency = new CurrencyCore($cart->id_currency);
                     $currencyIsoCode = $currency->iso_code;
 
-
-
                     $orderNumber = $this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
                     $descriptor = '';
@@ -108,7 +104,13 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                                 ),
                                 $product['cart_quantity']
                             );
-                            $productInfo->setDescription(Tools::substr(strip_tags($product['description_short']), 0, 127));
+                            $productInfo->setDescription(
+                                Tools::substr(
+                                    strip_tags($product['description_short']),
+                                    0,
+                                    127
+                                )
+                            );
                             $tax = ($product['price_wt'] - $product['price']) * 100 / $product['price_wt'];
                             $productInfo->setTaxRate(
                                 number_format(
