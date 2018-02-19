@@ -37,6 +37,8 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Device;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
@@ -87,6 +89,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
+
                     if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
                         $basket = new Basket();
 
@@ -163,7 +166,40 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         true
                     );
 
+                    $customer = new Customer($cart->id_customer);
+                    $addressDelivery = new Address(intval($cart->id_address_delivery));
+                    $carrier = new Carrier($cart->id_carrier);
+                    $countryDelivery = Country::getIsoById($addressDelivery->id_country);
+                    // no sdk function for it
+                    //$addressInvoice = new Address(intval($cart->id_address_invoice));
+
+                    $customerData = new AccountHolder();
+                    $customerData->setFirstName($customer->firstname);
+                    $customerData->setLastName($customer->lastname);
+                    $customerData->setEmail($customer->email);
+                    $customerData->setGender($customer->id_gender);
+                    if($customer->birthday!="0000-00-00") {
+                        $birthday = new DateTime($customer->birthday);
+                        $customerData->setDateOfBirth($birthday);
+                    }
+
+                    $cityDelivery = $addressDelivery->city;
+                    $streetDelivery = $addressDelivery->address1;
+                    $postcodeDelivery = $addressDelivery->postcode;
+                    $addressDeliverySdk = new \Wirecard\PaymentSdk\Entity\Address($countryDelivery, $cityDelivery, $streetDelivery);
+                    $addressDeliverySdk->setPostalCode($postcodeDelivery);
+
+                    $shippingData = new AccountHolder();
+                    $shippingData->setFirstName($addressDelivery->firstname);
+                    $shippingData->setLastName($addressDelivery->lastname);
+                    $shippingData->setAddress($addressDeliverySdk);
+                    $shippingData->setShippingMethod($carrier->getShippingMethod());
+
+                    $Device=new Device();
+                    $Device->setFingerprint(md5($cart->id_customer . "_" . microtime()));
+
                     // ## Transaction
+
 
                     // The PayPal transaction holds all transaction relevant data for the payment process.
                     $transaction = new PayPalTransaction();
@@ -173,14 +209,20 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
                         $transaction->setBasket($basket);
                     }
+                    //transaction identification
                     $transaction->setOrderNumber($orderNumber);
                     $transaction->setOrderDetail($orderDetail);
                     $transaction->setDescriptor($descriptor);
                     $transaction->setEntryMode('ecommerce');
 
+                    //fraud detection
+                    $transaction->setIpAddress($_SERVER['REMOTE_ADDR']);
+                    $transaction->setAccountHolder($customerData);
+                    $transaction->setShipping($shippingData);
+                    $transaction->setConsumerId($cart->id_customer);
+                    $transaction->setDevice($Device);
+
                     // ### Transaction Service
-
-
                     // The service is used to execute the payment operation itself. A response object is returne
                     $logger = new Logger();
                     $transactionService = new TransactionService($this->config, $logger);
