@@ -256,8 +256,11 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             /**
                              * @var $status \Wirecard\PaymentSdk\Entity\Status
                              */
+                            $severity = ucfirst($status->getSeverity());
+                            $code = $status->getCode();
                             $description = $status->getDescription();
                             $errors[] = $description;
+                            $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
                         }
 
                         $messageTemp = implode(',', $errors);
@@ -298,7 +301,9 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $transactionService = new TransactionService($this->config);
+
+        $logger = new Logger();
+        $transactionService = new TransactionService($this->config,$logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;
