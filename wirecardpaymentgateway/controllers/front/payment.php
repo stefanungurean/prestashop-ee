@@ -178,7 +178,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $customerData->setLastName($customer->lastname);
                     $customerData->setEmail($customer->email);
                     $customerData->setGender($customer->id_gender);
-                    if($customer->birthday!="0000-00-00") {
+                    if ($customer->birthday!="0000-00-00") {
                         $birthday = new DateTime($customer->birthday);
                         $customerData->setDateOfBirth($birthday);
                     }
@@ -186,7 +186,11 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $cityDelivery = $addressDelivery->city;
                     $streetDelivery = $addressDelivery->address1;
                     $postcodeDelivery = $addressDelivery->postcode;
-                    $addressDeliverySdk = new \Wirecard\PaymentSdk\Entity\Address($countryDelivery, $cityDelivery, $streetDelivery);
+                    $addressDeliverySdk = new \Wirecard\PaymentSdk\Entity\Address(
+                        $countryDelivery,
+                        $cityDelivery,
+                        $streetDelivery
+                    );
                     $addressDeliverySdk->setPostalCode($postcodeDelivery);
 
                     $shippingData = new AccountHolder();
