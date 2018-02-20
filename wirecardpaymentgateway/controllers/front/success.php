@@ -31,24 +31,80 @@
 require __DIR__.'/../../vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use \Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
+
+define("PAYPAL_PAYMENTH_METHOD", "paypal");
+define("SEPA_PAYMENT_METHOD", "sepa");
+define("CREDIT_CARD_METHOD", "creditcard");
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
 {
+
+
     /**
      * @see FrontController::postProcess()
      */
     public function postProcess()
     {
-        echo "success in development";
-        exit;
+
+        $config = new Config();
+        $service = new TransactionService($config);
+        if($_POST) {
+            $response = $service->handleResponse($_POST);
+            if($response instanceof SuccessResponse) {
+                $xmlResponse = new SimpleXMLElement($response->getRawData());
+                $responseArray = json_decode(json_encode($xmlResponse), 1);
+                switch ( $response->getPaymentMethod() ) {
+                    case PAYPAL_PAYMENTH_METHOD:
+                        $this->payPalResponse($responseArray, $response->getCustomFields());
+                        break;
+                    case SEPA_PAYMENT_METHOD:
+                        $this->sepaResponse($responseArray , $response->getCustomFields());
+                        break;
+                    case CREDIT_CARD_METHOD:
+                        $this->creditCardResponse($responseArray, $response->getCustomFields());
+                        break;
+                }
+            }
+        }
+        Tools::redirect("order-confirmation");
+    }
+
+    private function payPalResponse($response, $customFields) {
+
+        $orderId = $response["order-number"];
+        if($response["statuses"] != null &&
+            $response["statuses"]["status"] != null &&
+            $response["statuses"]["status"]["@attributes"] != null &&
+            $response["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
+            $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
+        }
+
+        $customer = $this->context->customer;
+
+        Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . $customFields->get("cart_id") .'&id_module='. $this->module->id .'&id_order=' . $orderId . '&key=' . $customer->secure_key);
+            //update status order
+            //create payment for order
+
+    }
+
+    private function sepaResponse($response, $customFields) {
+//update status order
+        //create payment for order
+    }
+
+    private function creditCardResponse($response, $customFields) {
+//update status order
+        //create payment for order
+    }
+
+    private function updateStatus($orderNumber, $status) {
+
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($status), $history->id_order, true);
+        $history->add();
+
     }
 }

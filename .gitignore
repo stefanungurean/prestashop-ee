@@ -1,3 +1,4 @@
 wirecardpaymentgateway/vendor/*
 .idea/*
 composer.lock
+wirecardpaymentgateway/controllers/front/success.php

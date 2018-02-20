@@ -40,6 +40,10 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
+
 
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
 {
@@ -48,7 +52,59 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        echo "notify in development";
-        exit;
+        $config = new Config();
+        $service = new TransactionService($config);
+
+       $log = new Logger('Wirecard notifications');
+       $log->pushHandler(new StreamHandler(__DIR__ . '/../../logs/notify.log', Logger::INFO));
+
+
+        $notification = $service->handleNotification(file_get_contents('php://input'));
+
+        $orderId=$notification->getData()["order-number"];
+
+        if ($notification instanceof SuccessResponse) {
+            $log->info(sprintf(
+                'Transaction with id %s was successful and validation status is %s.',
+                $notification->getTransactionId()
+
+            //     $notification->isValidSignature() ? 'true' : 'false'
+            ));
+
+
+            $this->updateStatus($orderId, _PS_OS_PAYMENT_);
+
+        } elseif ($notification instanceof FailureResponse) {
+            $this->updateStatus($orderId, _PS_OS_ERROR_);
+
+           // $history->changeIdOrderState((_PS_OS_ERROR_), $history->id_order, true);
+            die('work in progress');
+            $log->info(sprintf(
+                'Transaction with id %s was failure and validation status is %s.',
+                $notification->getTransactionId()
+            //     $notification->isValidSignature() ? 'true' : 'false'
+            ));
+
+            foreach ($notification->getStatusCollection() as $status) {
+                /**
+                 * @var $status \Wirecard\PaymentSdk\Entity\Status
+                  */
+                $severity = ucfirst($status->getSeverity());
+                $code = $status->getCode();
+                $description = $status->getDescription();
+                $log->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+          }
+
+     }
+
+        exit();
     }
+    private function updateStatus($orderNumber, $status) {
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($status), $history->id_order, true);
+        $history->add();
+
+    }
+
 }

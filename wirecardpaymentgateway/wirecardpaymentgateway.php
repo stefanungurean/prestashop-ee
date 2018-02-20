@@ -39,6 +39,7 @@ class WirecardPaymentGateway extends PaymentModule
 {
     const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
+    const WDEE_OS_PENDING = 'WDEE_OS_PENDING';
 
     public function __construct()
     {
@@ -83,6 +84,27 @@ class WirecardPaymentGateway extends PaymentModule
             $orderState->add();
             Configuration::updateValue(
                 self::WDEE_OS_AWAITING,
+                (int)($orderState->id)
+            );
+        }
+
+        if (!Configuration::get(self::WDEE_OS_PENDING)) {
+
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment pending';
+            }
+            $orderState->send_email = false;
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->add();
+            Configuration::updateValue(
+                self::WDEE_OS_PENDING,
                 (int)($orderState->id)
             );
         }
