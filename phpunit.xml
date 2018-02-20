@@ -14,6 +14,8 @@
             <directory suffix=".php">./wirecardpaymentgateway/*</directory>
             <exclude>
                 <directory>wirecardpaymentgateway/vendor</directory>
+                <file>wirecardpaymentgateway/controllers/index.php</file>
+                <file>wirecardpaymentgateway/controllers/front/index.php</file>
             </exclude>
         </whitelist>
     </filter>
