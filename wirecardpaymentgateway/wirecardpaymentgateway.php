@@ -137,6 +137,7 @@ class WirecardPaymentGateway extends PaymentModule
                 'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
                 'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
             );
+        }
 
         if (Configuration::get($this->buildParamName('Sepa', 'enable_method'))) {
             $payment_options[] = array(
@@ -154,8 +155,8 @@ class WirecardPaymentGateway extends PaymentModule
             );
         }
 
-            return $payment_options;
-        }
+        return $payment_options;
+
     }
 
     /**
