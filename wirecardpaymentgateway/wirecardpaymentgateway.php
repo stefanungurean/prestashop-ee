@@ -45,7 +45,7 @@ class WirecardPaymentGateway extends PaymentModule
         $this->config = $this->config();
         $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
-        $this->version = '0.0.2';
+        $this->version = '0.0.3';
         $this->author = 'Wirecard';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7.2.4');
@@ -135,7 +135,14 @@ class WirecardPaymentGateway extends PaymentModule
             $payment_options[] = array(
                 'cta_text' => $this->l('Paypal payment'),
                 'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
-                'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
+                'action' => $this->context->link->getModuleLink($this->name, 'payment?paymentType=paypal', array(), true)
+            );
+        }
+        if (Configuration::get($this->buildParamName('sofort', 'enable_method'))) {
+            $payment_options[] = array(
+                'cta_text' => $this->l('Sofort payment'),
+                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sofortbanking.png'),
+                'action' => $this->context->link->getModuleLink($this->name, 'payment?paymentType=sofort', array(), true)
             );
         }
 
@@ -233,6 +240,69 @@ class WirecardPaymentGateway extends PaymentModule
                             $this->buildParamName('paypal', 'wirecard_server_url'),
                             $this->buildParamName('paypal', 'http_user'),
                             $this->buildParamName('paypal', 'http_password')
+                        )
+                    )
+                )
+            ),
+            'sofort' => array(
+                'tab' => $this->l('Sofort'),
+                'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => $this->l('Enable'),
+                        'default' => '0',
+                        'type' => 'onoff'
+                    ),
+                    array(
+                        'name' => 'wirecard_server_url',
+                        'label' => $this->l('URL of Wirecard server'),
+                        'type' => 'text',
+                        'default' => 'https://api-test.wirecard.com',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'maid',
+                        'label' => $this->l('MAID'),
+                        'type' => 'text',
+                        'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'secret',
+                        'label' => $this->l('Secret'),
+                        'type' => 'text',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_user',
+                        'label' => $this->l('HTTP user'),
+                        'type' => 'text',
+                        'default' => '70000-APITEST-AP',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_password',
+                        'label' => $this->l('HTTP Password'),
+                        'type' => 'text',
+                        'default' => 'qD2wzQ_hrc!8',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => $this->l('Test sofort configuration'),
+                        'id' => 'sofortConfig',
+                        'method' => 'sofort',
+                        'send' => array(
+                            $this->buildParamName('sofort', 'wirecard_server_url'),
+                            $this->buildParamName('sofort', 'http_user'),
+                            $this->buildParamName('sofort', 'http_password')
                         )
                     )
                 )
@@ -705,5 +775,155 @@ class WirecardPaymentGateway extends PaymentModule
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * return paymenttype objects
+     *
+     * @param null $paymentType
+     *
+     * @return array
+     */
+    private function getPaymentTypes($paymentType = null)
+    {
+        $types = array();
+        foreach ($this->config as $group) {
+            foreach ($group['fields'] as $f) {
+                if (array_key_exists('class', $f)) {
+                    if ($paymentType !== null && $f['name'] != $paymentType) {
+                        continue;
+                    }
+                    $className = 'Payment' . $f['class'];
+                    $f['group'] = 'pt';
+                    $pt = new $className($this, $f, $this->getTransaction());
+                    $types[] = $pt;
+                }
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * initiate payment
+     *
+     * @param $paymentTypeName
+     * @param $additionalData
+     *
+     * @throws Exception
+     */
+    public function initiatePayment($paymentTypeName, $additionalData)
+    {
+        if (!$this->context->cookie->wcsRedirectUrl) {
+            $paymentType = $this->getPaymentType($paymentTypeName);
+            if ($paymentType === null) {
+                throw new Exception($this->l('This payment method is not available.'));
+            }
+
+            if (!$this->context->cookie->id_cart) {
+                throw new Exception($this->l('Unable to load basket.'));
+            }
+
+            $id_cart = $this->context->cookie->id_cart;
+            $cart = new Cart($id_cart);
+
+            if (isset($additionalData['birthdate'])
+                && preg_match(
+                    '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/',
+                    $additionalData['birthdate']
+                )
+            ) {
+                $c = new Customer($cart->id_customer);
+                $c->birthday = $additionalData['birthdate'];
+                $c->save();
+            }
+
+            if (!$paymentType->isAvailable($cart)) {
+                throw new Exception($this->l('Payment method not enabled.'));
+            }
+
+            $id_order = null;
+            try {
+                if ($this->getConfigValue('options', 'order_creation') == 'before') {
+                    $id_order = $this->getOrderManagement()->createOder($cart, $this->getAwaitingState());
+                    $this->getOrderManagement()->updatePaymentInformation($id_order, $paymentType);
+
+                    $initResponse = $paymentType->initiate($id_cart, $id_order, $additionalData);
+                } else {
+                    $initResponse = $paymentType->initiate($id_cart, null, $additionalData);
+                }
+
+                unset($this->context->cookie->wcsConsumerDeviceId);
+
+                if ($initResponse->getStatus() == \WirecardCEE_QMore_Response_Initiation::STATE_FAILURE) {
+                    $message = $this->l('An error occurred during the payment process');
+                    if ($initResponse->getNumberOfErrors() > 0) {
+                        $msg = implode(
+                            ',',
+                            array_map(
+                                function ($e) {
+                                    /** @var \WirecardCEEQMoreError $e */
+                                    return $e->getConsumerMessage();
+                                },
+                                $initResponse->getErrors()
+                            )
+                        );
+
+                        if (Tools::strlen($msg)) {
+                            $message = $msg;
+                        }
+
+                        $this->log(__METHOD__ . ':' . $msg);
+                    }
+
+                    $params = array();
+                    if ($id_order !== null) {
+                        $this->getOrderManagement()->setOrderState($id_order, _PS_OS_ERROR_);
+                        $params = array(
+                            'submitReorder' => true,
+                            'id_order' => (int)$id_order
+                        );
+                    }
+                    $this->context->cookie->wcsMessage = $message;
+                    Tools::redirect(
+                        $this->context->link->getPageLink('order', true, $cart->id_lang, $params)
+                    );
+                }
+
+                $this->context->cookie->wcsRedirectUrl = $initResponse->getRedirectUrl();
+                $this->context->cookie->write();
+            } catch (Exception $e) {
+                $params = array();
+                if ($id_order !== null) {
+                    $this->getOrderManagement()->setOrderState($id_order, _PS_OS_ERROR_);
+                    $params = array(
+                        'submitReorder' => true,
+                        'id_order' => (int)$id_order
+                    );
+                }
+                $this->context->cookie->wcsMessage = $this->l('An error occurred during the payment process');
+                $this->log(__METHOD__ . ':' . $e->getMessage());
+                $this->log(__METHOD__ . ':' . $e->getTraceAsString());
+
+                Tools::redirect(
+                    $this->context->link->getPageLink('order', true, $cart->id_lang, $params)
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $paymentType
+     *
+     * @return WirecardCheckoutSeamlessPayment |null
+     */
+    private function getPaymentType($paymentType)
+    {
+        $found = $this->getPaymentTypes($paymentType);
+        if (count($found) != 1) {
+            return null;
+        }
+
+        return $found[0];
     }
 }

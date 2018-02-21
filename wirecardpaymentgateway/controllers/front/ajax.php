@@ -30,6 +30,7 @@
  */
 
 require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
@@ -45,6 +46,7 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
 
     public function postProcess()
     {
+        $logger = new Logger();
         switch (Tools::getValue('action')) {
             case 'TestConfig':
                 $method = Tools::getValue('method');
@@ -54,8 +56,9 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
                 $baseUrl = Tools::getValue($this->module->buildParamName($method, 'wirecard_server_url'));
                 $httpUser = Tools::getValue($this->module->buildParamName($method, 'http_user'));
                 $httpPass = Tools::getValue($this->module->buildParamName($method, 'http_password'));
+
                 $config = new Config($baseUrl, $httpUser, $httpPass, "RON");
-                $transactionService = new TransactionService($config, $this->logger);
+                $transactionService = new TransactionService($config, $logger);
                 if (!$transactionService->checkCredentials()) {
                     $status = 'error';
                     $message = $this->l('The merchant configuration is incorrect');

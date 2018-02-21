@@ -82,9 +82,9 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                         'Order with id %s does not exist',
                         $orderId
                     ));
-                } elseif ($order->getCurrentOrderState() == $this->getStatus($responseArray['transaction-state']) ||
-                    $order->getCurrentOrderState() == _PS_OS_PAYMENT_ ||
-                    $order->getCurrentOrderState() == _PS_OS_CANCELED_) {
+                } elseif ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
+                    $order->current_state == _PS_OS_PAYMENT_ ||
+                    $order->current_state == _PS_OS_CANCELED_) {
                     $logger->warning(sprintf(
                         'Order with id %s was already notified',
                         $orderId
