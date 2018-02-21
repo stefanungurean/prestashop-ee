@@ -77,29 +77,25 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                 $order = new Order($orderId);
                 if ($order == null) {
                     $logger->error(sprintf(
-                            'Order with id %s does not exist',
-                            $orderId
-                        )
-                    );
+                        'Order with id %s does not exist',
+                        $orderId
+                    ));
                 } elseif ($order->getCurrentOrderState() == $this->getStatus($responseArray['transaction-state']) ||
                     $order->getCurrentOrderState() == _PS_OS_PAYMENT_ ||
                     $order->getCurrentOrderState() == _PS_OS_CANCELED_) {
                     $logger->warning(sprintf(
-                            'Order with id %s was already notified',
-                            $orderId
-                        )
-                    );
+                        'Order with id %s was already notified',
+                        $orderId
+                    ));
                 } else {
                     $this->updateStatus($orderId, $this->getStatus($responseArray['transaction-state']));
                     $logger->info(sprintf(
-                            'Order with id %s  was notified',
-                            $orderId
-                        )
-                    );
+                        'Order with id %s  was notified',
+                        $orderId
+                    ));
                 }
                 // Log the notification for a failed transaction.
             } elseif ($notification instanceof FailureResponse) {
-
                 // In our example we iterate over all errors and echo them out.
                 // You should display them as error, warning or information based on the given severity.
                 foreach ($notification->getStatusCollection() as $status) {
@@ -109,10 +105,14 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                     $severity = ucfirst($status->getSeverity());
                     $code = $status->getCode();
                     $description = $status->getDescription();
-                    $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+                    $logger->warning(sprintf(
+                        '%s with code %s and message "%s" occurred.<br>',
+                        $severity,
+                        $code,
+                        $description
+                    ));
                 }
             }
-
         }
     }
 
@@ -134,7 +134,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger('Wirecard notifications');
-        $transactionService = new TransactionService($this->config,$logger);
+        $transactionService = new TransactionService($this->config, $logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;
@@ -165,9 +165,10 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
      * @since 0.0.2
      *
      */
-    private function getStatus($status){
+    private function getStatus($status)
+    {
         $statusResult=_PS_OS_PAYMENT_;
-        switch ($status){
+        switch ($status) {
             case "error ":
             case "failure":
                 $statusResult=_PS_OS_ERROR_;

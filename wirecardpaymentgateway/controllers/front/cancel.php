@@ -33,11 +33,8 @@ require __DIR__.'/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-
 
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {
@@ -62,7 +59,6 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                 $message = $this->l('Order do not exist: '. $_GET['order']);
                 $logger->error($message);
             } else {
-
                 $logger->error($this->l('Cancelled order : '. $_GET['order']));
                 if ($order->getCurrentOrderState() != _PS_OS_CANCELED_) {
                     $this->updateStatus($order->id, _PS_OS_CANCELED_);
@@ -115,8 +111,8 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
      * @since 0.0.2
      *
      */
-    private function updateStatus($orderNumber, $status) {
-
+    private function updateStatus($orderNumber, $status)
+    {
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;
         $history->changeIdOrderState($status, $history->id_order, true);
