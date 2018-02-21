@@ -54,12 +54,13 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             $message = $this->l('Payment method not available');
             $logger->error($message);
         } else {
-            $order = new Order($_GET['order']);
+            $orderNumber=$_GET['order'];
+            $order = new Order($orderNumber);
             if ($order == null) {
-                $message = $this->l('Order do not exist: '. $_GET['order']);
+                $message = $this->l('Order do not exist: '. $orderNumber);
                 $logger->error($message);
             } else {
-                $logger->error($this->l('Cancelled order : '. $_GET['order']));
+                $logger->error($this->l('Cancelled order : '. $orderNumber));
                 if ($order->getCurrentOrderState() != _PS_OS_CANCELED_) {
                     $this->updateStatus($order->id, _PS_OS_CANCELED_);
                 }
@@ -73,36 +74,6 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             'message' => $message
         ));
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/cancel.tpl');
-    }
-
-    /**
-     * sets the configuration for the payment method
-     *
-     * @since 0.0.2
-     *
-     */
-    private function configuration()
-    {
-        $currency = new CurrencyCore($this->context->cart->id_currency);
-        $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
-        $logger = new Logger('Wirecard success');
-
-
-        $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $transactionService = new TransactionService($this->config, $logger);
-
-        if (!$transactionService->checkCredentials()) {
-            return false;
-        }
-
-        $payPalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $payPalMAID, $payPalKey);
-        $this->config->add($payPalConfig);
-        return true;
     }
 
     /**

@@ -41,6 +41,7 @@ use Wirecard\PaymentSdk\TransactionService;
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
 {
     private $config;
+    private $paymentMethod;
     /**
      * @see FrontController::postProcess()
      */
@@ -48,10 +49,11 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
     {
         $logger = new Logger();
 
+        $this->paymentMethod='paypal';
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
             $logger->error($message);
-        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName($this->paymentMethod, 'enable_method'))) {
             $message = $this->l('Payment method not available');
             $logger->error($message);
         } elseif (!$this->configuration()) {
@@ -68,7 +70,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
             // The notification are transmitted as _POST_ request and is handled via the `handleNotification` method.
             $notification = $service->handleNotification(file_get_contents('php://input'));
 
-            if ($notification->isValidSignature() == false) {
+            if (!$notification->isValidSignature()) {
                 $message = $this->l('The data has been modified by 3rd Party');
                 $logger->error($message);
             } elseif ($notification instanceof SuccessResponse) {
@@ -126,11 +128,11 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
     {
         $currency = new CurrencyCore($this->context->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+        $baseUrl = Configuration::get($this->module->buildParamName($this->paymentMethod, 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_password'));
+        $payPalMAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
+        $payPalKey = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger('Wirecard notifications');
@@ -167,11 +169,13 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
      */
     private function getStatus($status)
     {
-        $statusResult=_PS_OS_PAYMENT_;
         switch ($status) {
             case "error ":
             case "failure":
                 $statusResult=_PS_OS_ERROR_;
+                break;
+            default:
+                $statusResult=_PS_OS_PAYMENT_;
                 break;
         }
         return $statusResult;
