@@ -138,21 +138,21 @@ class WirecardPaymentGateway extends PaymentModule
                 'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
             );
 
-		if (Configuration::get($this->buildParamName('Sepa', 'enable_method'))) {
-			$payment_options[] = array(
-				'cta_text' => $this->l('Sepa payment'),
-				'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sepa.png'),
-				'action' => $this->context->link->getModuleLink($this->name, 'sepa', array(), true)
-			);
-		}
+        if (Configuration::get($this->buildParamName('Sepa', 'enable_method'))) {
+            $payment_options[] = array(
+                'cta_text' => $this->l('Sepa payment'),
+                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sepa.png'),
+                'action' => $this->context->link->getModuleLink($this->name, 'sepa', array(), true)
+            );
+        }
 
-		if (Configuration::get($this->buildParamName('creditcard', 'enable_method'))) {
-			$payment_options[] = array(
-				'cta_text' => $this->l('Credit Card payment'),
-				'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/cc.png'),
-				'action' => $this->context->link->getModuleLink($this->name, 'creditcard', array(), true)
-			);
-         }
+        if (Configuration::get($this->buildParamName('creditcard', 'enable_method'))) {
+            $payment_options[] = array(
+                'cta_text' => $this->l('Credit Card payment'),
+                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/cc.png'),
+                'action' => $this->context->link->getModuleLink($this->name, 'creditcard', array(), true)
+            );
+        }
 
             return $payment_options;
         }
