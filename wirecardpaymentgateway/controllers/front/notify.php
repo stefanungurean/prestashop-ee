@@ -29,26 +29,150 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require __DIR__.'/../../vendor/autoload.php';
+require __DIR__.'/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
 {
+    private $config;
     /**
      * @see FrontController::postProcess()
      */
     public function postProcess()
     {
-        echo "notify in development";
-        exit;
+        $logger = new Logger();
+
+        if (!$this->module->active) {
+            $message = $this->l('Module is not active');
+            $logger->error($message);
+        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+            $message = $this->l('Payment method not available');
+            $logger->error($message);
+        } elseif (!$this->configuration()) {
+            $message = $this->l('The merchant configuration is incorrect');
+            $logger->error($message);
+        } else {
+            $this->config->setPublicKey(file_get_contents(__DIR__ . '/../../certificates/api-test.wirecard.com.crt'));
+            // ## Transaction
+            // ### Transaction Service
+            // The `TransactionService` is used to determine the response from the service provider.
+            $service = new TransactionService($this->config, $logger);
+            // ## Notification status
+
+            // The notification are transmitted as _POST_ request and is handled via the `handleNotification` method.
+            $notification = $service->handleNotification(file_get_contents('php://input'));
+
+            if ($notification->isValidSignature() == false) {
+                $message = $this->l('The data has been modified by 3rd Party');
+                $logger->error($message);
+            } elseif ($notification instanceof SuccessResponse) {
+                $responseArray = $notification->getData();
+                $orderId = $notification->getCustomFields()->get('customOrderNumber');
+                $order = new Order($orderId);
+                if ($order == null) {
+                    $logger->error(sprintf(
+                            'Order with id %s does not exist',
+                            $orderId
+                        )
+                    );
+                } elseif ($order->getCurrentOrderState() == $this->getStatus($responseArray['transaction-state']) ||
+                    $order->getCurrentOrderState() == _PS_OS_PAYMENT_ ||
+                    $order->getCurrentOrderState() == _PS_OS_CANCELED_) {
+                    $logger->warning(sprintf(
+                            'Order with id %s was already notified',
+                            $orderId
+                        )
+                    );
+                } else {
+                    $this->updateStatus($orderId, $this->getStatus($responseArray['transaction-state']));
+                    $logger->info(sprintf(
+                            'Order with id %s  was notified',
+                            $orderId
+                        )
+                    );
+                }
+                // Log the notification for a failed transaction.
+            } elseif ($notification instanceof FailureResponse) {
+
+                // In our example we iterate over all errors and echo them out.
+                // You should display them as error, warning or information based on the given severity.
+                foreach ($notification->getStatusCollection() as $status) {
+                    /**
+                     * @var $status \Wirecard\PaymentSdk\Entity\Status
+                     */
+                    $severity = ucfirst($status->getSeverity());
+                    $code = $status->getCode();
+                    $description = $status->getDescription();
+                    $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+                }
+            }
+
+        }
+    }
+
+    /**
+     * sets the configuration for the payment method
+     *
+     * @since 0.0.2
+     *
+     */
+    private function configuration()
+    {
+        $currency = new CurrencyCore($this->context->cart->id_currency);
+        $currencyIsoCode = $currency->iso_code;
+        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
+        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
+        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+
+        $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
+        $logger = new Logger('Wirecard notifications');
+        $transactionService = new TransactionService($this->config,$logger);
+
+        if (!$transactionService->checkCredentials()) {
+            return false;
+        }
+
+        $payPalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $payPalMAID, $payPalKey);
+        $this->config->add($payPalConfig);
+        return true;
+    }
+
+    /**
+     * updates order status
+     *
+     * @since 0.0.2
+     *
+     */
+    private function updateStatus($orderNumber, $status)
+    {
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState($status, $history->id_order, true);
+        $history->addWithemail();
+    }
+
+    /**
+     * geupdates order status
+     *
+     * @since 0.0.2
+     *
+     */
+    private function getStatus($status){
+        $statusResult=_PS_OS_PAYMENT_;
+        switch ($status){
+            case "error ":
+            case "failure":
+                $statusResult=_PS_OS_ERROR_;
+                break;
+        }
+        return $statusResult;
     }
 }

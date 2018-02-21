@@ -29,26 +29,97 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require __DIR__.'/../../vendor/autoload.php';
+require __DIR__.'/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
+
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {
+    private $config;
+
     /**
      * @see FrontController::postProcess()
      */
     public function postProcess()
     {
-        echo "cancel in development";
-        exit;
+        $logger = new Logger('Wirecard success');
+        $message = "";
+        if (!$this->module->active) {
+            $message = $this->l('Module is not active');
+            $logger->error($message);
+        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+            $message = $this->l('Payment method not available');
+            $logger->error($message);
+        } else {
+            $order = new Order($_GET['order']);
+            if ($order == null) {
+                $message = $this->l('Order do not exist: '. $_GET['order']);
+                $logger->error($message);
+            } else {
+
+                $logger->error($this->l('Cancelled order : '. $_GET['order']));
+                if ($order->getCurrentOrderState() != _PS_OS_CANCELED_) {
+                    $this->updateStatus($order->id, _PS_OS_CANCELED_);
+                }
+                $this->context->smarty->assign(array(
+                    'reference' => $order->reference,
+                    'payment' => $order->payment
+                ));
+            }
+        }
+        $this->context->smarty->assign(array(
+            'message' => $message
+        ));
+        $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/cancel.tpl');
+    }
+
+    /**
+     * sets the configuration for the payment method
+     *
+     * @since 0.0.2
+     *
+     */
+    private function configuration()
+    {
+        $currency = new CurrencyCore($this->context->cart->id_currency);
+        $currencyIsoCode = $currency->iso_code;
+        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
+        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
+        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+        $logger = new Logger('Wirecard success');
+
+
+        $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
+        $transactionService = new TransactionService($this->config, $logger);
+
+        if (!$transactionService->checkCredentials()) {
+            return false;
+        }
+
+        $payPalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $payPalMAID, $payPalKey);
+        $this->config->add($payPalConfig);
+        return true;
+    }
+
+    /**
+     * updates order status
+     *
+     * @since 0.0.2
+     *
+     */
+    private function updateStatus($orderNumber, $status) {
+
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState($status, $history->id_order, true);
+        $history->sendEmail($orderNumber);
     }
 }
