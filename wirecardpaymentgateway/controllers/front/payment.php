@@ -173,9 +173,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         true
                     );
 
-                   // ECHO $notificationUrl;
-
-
                     $customer = new Customer($cart->id_customer);
                     $addressDelivery = new Address(intval($cart->id_address_delivery));
                     $carrier = new Carrier($cart->id_carrier);
