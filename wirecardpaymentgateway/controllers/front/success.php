@@ -41,32 +41,29 @@ use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
 {
-    private $config;
-    private $paymentMethod;
     /**
      * @see FrontController::postProcess()
      */
     public function postProcess()
     {
-        $this->paymentMethod='paypal';
         $logger = new Logger('Wirecard success');
         $message = "";
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
             $logger->error($message);
-        } elseif (!Configuration::get($this->module->buildParamName($this->paymentMethod, 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
             $message = $this->l('Payment method not available');
             $logger->error($message);
-        } elseif (!$this->configuration()) {
+        } elseif (($config = $this->configuration())===false) {
             $message = $this->l('The merchant configuration is incorrect');
             $logger->error($message);
         } else {
             if ($_POST) {
-                $this->config->setPublicKey(file_get_contents(
+                $config->setPublicKey(file_get_contents(
                     __DIR__ . '/../../certificates/api-test.wirecard.com.crt'
                 ));
 
-                $service = new TransactionService($this->config, $logger);
+                $service = new TransactionService($config, $logger);
                 $response = $service->handleResponse($_POST);
                 // ## Payment results
                 // The response from the service can be used for disambiguation.
@@ -132,24 +129,25 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
 
     private function configuration()
     {
+        $paymentMethod="paypal";
         $currency = new CurrencyCore($this->context->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName($this->paymentMethod, 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_password'));
-        $MAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
-        $Key = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
+        $baseUrl = Configuration::get($this->module->buildParamName($paymentMethod, 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName($paymentMethod, 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName($paymentMethod, 'http_password'));
+        $MAID = Configuration::get($this->module->buildParamName($paymentMethod, 'maid'));
+        $Key = Configuration::get($this->module->buildParamName($paymentMethod, 'secret')) ;
 
-        $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
+        $config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger();
-        $transactionService = new TransactionService($this->config, $logger);
+        $transactionService = new TransactionService($config, $logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;
         }
 
-        $payPalConfig = new PaymentMethodConfig($this->paymentMethod, $MAID, $Key);
-        $this->config->add($payPalConfig);
-        return true;
+        $ConfigPayment = new PaymentMethodConfig(PayPalTransaction::NAME, $MAID, $Key);
+        $config->add($ConfigPayment);
+        return $config;
     }
 }
