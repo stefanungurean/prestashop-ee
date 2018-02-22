@@ -43,7 +43,6 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-
         $logger = new Logger('Wirecard success');
         $message = "";
         if (!$this->module->active) {
@@ -55,14 +54,13 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
         } else {
             $orderNumber=$_GET['order'];
             $order = new Order($orderNumber);
-            if ($order == null||$order == "") {
+            if ($orderNumber == null||$order == null) {
                 $message = $this->l(sprintf(
                     'Order %s do not exist %s',
                     $orderNumber
                 ));
                 $logger->error($message);
             } else {
-
                 if ($order->current_state != _PS_OS_CANCELED_) {
                     $this->updateStatus($order->id, _PS_OS_CANCELED_);
                     $logger->error($this->l(sprintf('Cancelled order %s',  $orderNumber)));

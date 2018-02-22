@@ -142,7 +142,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
             return false;
         }
 
-        $payPalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $payPalMAID, $payPalKey);
+        $payPalConfig = new PaymentMethodConfig($this->paymentMethod, $payPalMAID, $payPalKey);
         $this->config->add($payPalConfig);
         return true;
     }
