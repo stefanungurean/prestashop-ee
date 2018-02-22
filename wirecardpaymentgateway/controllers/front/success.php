@@ -55,7 +55,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
             $logger->error($message);
-        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName($this->paymentMethod, 'enable_method'))) {
             $message = $this->l('Payment method not available');
             $logger->error($message);
         } elseif (!$this->configuration()) {
@@ -131,8 +131,8 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         $baseUrl = Configuration::get($this->module->buildParamName($this->paymentMethod, 'wirecard_server_url'));
         $httpUser = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_user'));
         $httpPass = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
+        $MAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
+        $Key = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger();
@@ -142,7 +142,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             return false;
         }
 
-        $payPalConfig = new PaymentMethodConfig($this->paymentMethod, $payPalMAID, $payPalKey);
+        $payPalConfig = new PaymentMethodConfig($this->paymentMethod, $MAID, $Key);
         $this->config->add($payPalConfig);
         return true;
     }

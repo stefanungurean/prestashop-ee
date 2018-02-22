@@ -36,11 +36,7 @@ use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\CustomField;
 use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Device;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
@@ -61,7 +57,6 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
         } elseif (!(Validate::isLoadedObject($this->context->cart) && !$this->context->cart->OrderExists())) {
             $message = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
         } elseif (!Configuration::get($this->module->buildParamName($this->method, 'enable_method'))) {
-
             $message = $this->l('Payment method not available');
         } else {
             $cart = $this->context->cart;
