@@ -140,16 +140,6 @@ class WirecardPaymentGateway extends PaymentModule
                 'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
             );
         }
-        if (Configuration::get($this->buildParamName('sofort', 'enable_method'))) {
-            $payment_options[] = array(
-                'cta_text' => $this->l('Sofort payment'),
-                'logo' => Media::getMediaPath(
-                    _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sofortbanking.png'
-                ),
-                'action' => $this->context->link->getModuleLink($this->name, 'Sofort', array(), true)
-            );
-        }
-
         return $payment_options;
     }
 
@@ -244,69 +234,6 @@ class WirecardPaymentGateway extends PaymentModule
                             $this->buildParamName('paypal', 'wirecard_server_url'),
                             $this->buildParamName('paypal', 'http_user'),
                             $this->buildParamName('paypal', 'http_password')
-                        )
-                    )
-                )
-            ),
-            'sofort' => array(
-                'tab' => $this->l('Sofort'),
-                'fields' => array(
-                    array(
-                        'name' => 'enable_method',
-                        'label' => $this->l('Enable'),
-                        'default' => '0',
-                        'type' => 'onoff'
-                    ),
-                    array(
-                        'name' => 'wirecard_server_url',
-                        'label' => $this->l('URL of Wirecard server'),
-                        'type' => 'text',
-                        'default' => 'https://api-test.wirecard.com',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'maid',
-                        'label' => $this->l('MAID'),
-                        'type' => 'text',
-                        'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'secret',
-                        'label' => $this->l('Secret'),
-                        'type' => 'text',
-                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_user',
-                        'label' => $this->l('HTTP user'),
-                        'type' => 'text',
-                        'default' => '70000-APITEST-AP',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_password',
-                        'label' => $this->l('HTTP Password'),
-                        'type' => 'text',
-                        'default' => 'qD2wzQ_hrc!8',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'type' => 'linkbutton',
-                        'required' => false,
-                        'buttonText' => $this->l('Test sofort configuration'),
-                        'id' => 'sofortConfig',
-                        'method' => 'sofort',
-                        'send' => array(
-                            $this->buildParamName('sofort', 'wirecard_server_url'),
-                            $this->buildParamName('sofort', 'http_user'),
-                            $this->buildParamName('sofort', 'http_password')
                         )
                     )
                 )

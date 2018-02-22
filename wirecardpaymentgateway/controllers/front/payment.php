@@ -75,7 +75,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
-                        $this->module->getDisplayName(),
+                        $this->method,
                         null,
                         array(),
                         null,
