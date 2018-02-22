@@ -227,7 +227,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $customFields->add($customOrderNumber);
                     $transaction->setCustomFields($customFields);
 
-                    //$transaction->setOrderNumber($orderNumber);
+                    $transaction->setOrderNumber($orderNumber);
                     $transaction->setOrderDetail($orderDetail);
                     $transaction->setDescriptor($descriptor);
                     $transaction->setEntryMode('ecommerce');

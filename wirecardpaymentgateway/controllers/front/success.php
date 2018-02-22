@@ -82,7 +82,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                         $message = $this->l('The data has been modified by 3rd Party');
                         $logger->error($message);
                     } else {
-                        $logger->log(1,sprintf(
+                        $logger->log(1, sprintf(
                             'Order %s confirm successfully ',
                             $orderId
                         ));

@@ -64,7 +64,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                 if ($order->current_state != _PS_OS_CANCELED_) {
                     $this->updateStatus($order->id, _PS_OS_CANCELED_);
                     $logger->error($this->l(sprintf('Cancelled order %s', $orderNumber)));
-                } else{
+                } else {
                     $logger->error($this->l(sprintf('Order %s is already cancelled', $orderNumber)));
                 }
                 $this->context->smarty->assign(array(
