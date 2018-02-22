@@ -33,6 +33,8 @@ require __DIR__.'/../../libraries/Logger.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\CustomField;
+use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Item;
@@ -47,6 +49,7 @@ use Wirecard\PaymentSdk\TransactionService;
 class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontController
 {
     private $config;
+    private $method="paypal";
     /**
      * @see FrontController::postProcess()
      */
@@ -55,9 +58,9 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $orderNumber='';
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
-        } elseif (!(Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false)) {
+        } elseif (!(Validate::isLoadedObject($this->context->cart) && !$this->context->cart->OrderExists())) {
             $message = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
-        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName($this->method, 'enable_method'))) {
             $message = $this->l('Payment method not available');
         } else {
             $cart = $this->context->cart;
@@ -68,7 +71,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                 $message = $this->l('The merchant configuration is incorrect');
             } else {
                 try {
-                    $this->module->validateOrder(
+                   $this->module->validateOrder(
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
@@ -86,11 +89,11 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $orderNumber = $this->module->currentOrder;
                     $orderDetail = $this->module->getDisplayName();
                     $descriptor = '';
-                    if (Configuration::get($this->module->buildParamName('paypal', 'descriptor'))) {
+                    if (Configuration::get($this->module->buildParamName($this->method, 'descriptor'))) {
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
 
-                    if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
+                    if (Configuration::get($this->module->buildParamName($this->method, 'basket_send'))) {
                         $basket = new Basket();
 
                         foreach ($cart->getProducts() as $product) {
@@ -153,18 +156,25 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                         }
                     }
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
-
-                    $redirectUrls = new Redirect(
-                        $this->context->link->getModuleLink($this->module->getName(), 'success', array(), true),
-                        $this->context->link->getModuleLink($this->module->getName(), 'cancel', array(), true)
+                    $params = array(
+                        'id_cart' => (int)$cart->id,
+                        'id_module' => (int)$this->module->id,
+                        'key' => $cart->secure_key,
+                        'order' => $orderNumber
                     );
-
+                    $redirectUrls = new Redirect(
+                        $this->context->link->getModuleLink($this->module->getName(), 'success', $params, true),
+                        $this->context->link->getModuleLink($this->module->getName(), 'cancel', $params, true)
+                    );
                     $notificationUrl = $this->context->link->getModuleLink(
                         $this->module->getName(),
                         'notify',
-                        array(),
+                        $params,
                         true
                     );
+
+                   // ECHO $notificationUrl;
+
 
                     $customer = new Customer($cart->id_customer);
                     $addressDelivery = new Address(intval($cart->id_address_delivery));
@@ -210,17 +220,23 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $transaction->setNotificationUrl($notificationUrl);
                     $transaction->setRedirect($redirectUrls);
                     $transaction->setAmount($amount);
-                    if (Configuration::get($this->module->buildParamName('paypal', 'basket_send'))) {
+                    if (Configuration::get($this->module->buildParamName($this->method, 'basket_send'))) {
                         $transaction->setBasket($basket);
                     }
                     //transaction identification
-                    $transaction->setOrderNumber($orderNumber);
+
+                    $customOrderNumber = new CustomField('customOrderNumber', $orderNumber);
+                    $customFields = new CustomFieldCollection();
+                    $customFields->add($customOrderNumber);
+                    $transaction->setCustomFields($customFields);
+
+                    //$transaction->setOrderNumber($orderNumber);
                     $transaction->setOrderDetail($orderDetail);
                     $transaction->setDescriptor($descriptor);
                     $transaction->setEntryMode('ecommerce');
 
                     //fraud detection
-                    $transaction->setIpAddress($_SERVER['REMOTE_ADDR']);
+                    $transaction->setIpAddress(Tools::getRemoteAddr());
                     $transaction->setAccountHolder($customerData);
                     $transaction->setShipping($shippingData);
                     $transaction->setConsumerId($cart->id_customer);
@@ -228,7 +244,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     // ### Transaction Service
                     // The service is used to execute the payment operation itself. A response object is returne
-                    $logger = new Logger();
+                    $logger = new Logger('');
                     $transactionService = new TransactionService($this->config, $logger);
                     $response = $transactionService->pay($transaction);
 
@@ -256,8 +272,11 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             /**
                              * @var $status \Wirecard\PaymentSdk\Entity\Status
                              */
+                            $severity = ucfirst($status->getSeverity());
+                            $code = $status->getCode();
                             $description = $status->getDescription();
                             $errors[] = $description;
+                            $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
                         }
 
                         $messageTemp = implode(',', $errors);
@@ -291,14 +310,16 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     {
         $currency = new CurrencyCore($this->context->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName('paypal', 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName('paypal', 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName('paypal', 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName('paypal', 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName('paypal', 'secret')) ;
+        $baseUrl = Configuration::get($this->module->buildParamName($this->method, 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName($this->method, 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName($this->method, 'http_password'));
+        $payPalMAID = Configuration::get($this->module->buildParamName($this->method, 'maid'));
+        $payPalKey = Configuration::get($this->module->buildParamName($this->method, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $transactionService = new TransactionService($this->config);
+
+        $logger = new Logger();
+        $transactionService = new TransactionService($this->config,$logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;
