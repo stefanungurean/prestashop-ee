@@ -71,7 +71,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                 $message = $this->l('The merchant configuration is incorrect');
             } else {
                 try {
-                   $this->module->validateOrder(
+                    $this->module->validateOrder(
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
@@ -276,7 +276,12 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                             $code = $status->getCode();
                             $description = $status->getDescription();
                             $errors[] = $description;
-                            $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+                            $logger->warning(sprintf(
+                                '%s with code %s and message "%s" occurred.<br>',
+                                $severity,
+                                $code,
+                                $description
+                            ));
                         }
 
                         $messageTemp = implode(',', $errors);
@@ -319,7 +324,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
 
         $logger = new Logger();
-        $transactionService = new TransactionService($this->config,$logger);
+        $transactionService = new TransactionService($this->config, $logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;

@@ -67,7 +67,7 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
                 $message = $this->l('The merchant configuration is incorrect');
             } else {
                 try {
-                   $this->module->validateOrder(
+                    $this->module->validateOrder(
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
@@ -113,7 +113,7 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
                     $transaction->setCustomFields($customFields);
 
                     $logger = new Logger('');
-                    $transactionService = new TransactionService($this->config,$logger);
+                    $transactionService = new TransactionService($this->config, $logger);
                     $response = $transactionService->pay($transaction);
 
                     // ## Response handling
@@ -140,7 +140,12 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
                             $code = $status->getCode();
                             $description = $status->getDescription();
                             $errors[] = $description;
-                            $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+                            $logger->warning(sprintf(
+                                '%s with code %s and message "%s" occurred.<br>',
+                                $severity,
+                                $code,
+                                $description
+                            ));
                         }
 
                         $messageTemp = implode(',', $errors);
@@ -184,7 +189,7 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
 
         $logger = new Logger();
-        $transactionService = new TransactionService($this->config,$logger);
+        $transactionService = new TransactionService($this->config, $logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;

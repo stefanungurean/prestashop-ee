@@ -39,7 +39,6 @@ use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
-
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
 {
     private $config;
@@ -63,7 +62,9 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             $logger->error($message);
         } else {
             if ($_POST) {
-                $this->config->setPublicKey(file_get_contents(__DIR__ . '/../../certificates/api-test.wirecard.com.crt'));
+                $this->config->setPublicKey(file_get_contents(
+                    __DIR__ . '/../../certificates/api-test.wirecard.com.crt'
+                ));
 
                 $service = new TransactionService($this->config, $logger);
                 $response = $service->handleResponse($_POST);
@@ -77,7 +78,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                     $orderId = $response->getCustomFields()->get('customOrderNumber');
 
                     $order = new Order((int)($orderId));
-                    if ($order== null || $orderId!=$_GET['order']){
+                    if ($order== null || $orderId!=$_GET['order']) {
                         $message = $this->l('The data has been modified by 3rd Party');
                         $logger->error($message);
                     } else {
@@ -108,7 +109,12 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                         $code = $status->getCode();
                         $description = $status->getDescription();
                         $message = $description;
-                        $logger->warning(sprintf('%s with code %s and message "%s" occurred.<br>', $severity, $code, $description));
+                        $logger->warning(sprintf(
+                            '%s with code %s and message "%s" occurred.<br>',
+                            $severity,
+                            $code,
+                            $description
+                        ));
                     }
                 }
                 // Otherwise a cancel information is printed
@@ -147,4 +153,3 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         return true;
     }
 }
-

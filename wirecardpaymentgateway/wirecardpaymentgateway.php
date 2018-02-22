@@ -134,14 +134,18 @@ class WirecardPaymentGateway extends PaymentModule
         if (Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
             $payment_options[] = array(
                 'cta_text' => $this->l('Paypal payment'),
-                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
+                'logo' => Media::getMediaPath(
+                    _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'
+                ),
                 'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
             );
         }
         if (Configuration::get($this->buildParamName('sofort', 'enable_method'))) {
             $payment_options[] = array(
                 'cta_text' => $this->l('Sofort payment'),
-                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sofortbanking.png'),
+                'logo' => Media::getMediaPath(
+                    _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/sofortbanking.png'
+                ),
                 'action' => $this->context->link->getModuleLink($this->name, 'Sofort', array(), true)
             );
         }
