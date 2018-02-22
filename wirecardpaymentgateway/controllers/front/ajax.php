@@ -37,10 +37,7 @@ use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontController
 {
-
-    private $config;
-
-    /**
+  /**
      * @see FrontController::postProcess()
      */
 
