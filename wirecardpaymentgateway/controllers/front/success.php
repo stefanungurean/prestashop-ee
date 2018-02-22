@@ -46,7 +46,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
-        $logger = new Logger('Wirecard success');
+        $logger = new Logger();
         $message = "";
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
@@ -66,14 +66,11 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                 $service = new TransactionService($config, $logger);
                 $response = $service->handleResponse($_POST);
                 // ## Payment results
-                // The response from the service can be used for disambiguation.
-                // In case of a successful transaction, a `SuccessResponse` object is returned.
-                if (!$response->isValidSignature()) {
+                 if (!$response->isValidSignature()) {
                     $message = $this->l('The data has been modified by 3rd Party');
                     $logger->error($message);
                 } elseif ($response instanceof SuccessResponse) {
                     $orderId = $response->getCustomFields()->get('customOrderNumber');
-
                     $order = new Order((int)($orderId));
                     if ($order== null || $orderId!=$_GET['order']) {
                         $message = $this->l('The data has been modified by 3rd Party');
@@ -94,14 +91,8 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                             'delay' => $carrier->delay
                         ));
                     }
-                    // In case of a failed transaction, a `FailureResponse` object is returned.
                 } elseif ($response instanceof FailureResponse) {
-                    // In our example we iterate over all errors and echo them out.
-                    // You should display them as error, warning or information based on the given severity.
                     foreach ($response->getStatusCollection() as $status) {
-                        /**
-                         * @var $status \Wirecard\PaymentSdk\Entity\Status
-                         */
                         $severity = ucfirst($status->getSeverity());
                         $code = $status->getCode();
                         $description = $status->getDescription();

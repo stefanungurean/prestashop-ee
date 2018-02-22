@@ -59,11 +59,9 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         } else {
             $config->setPublicKey(file_get_contents(__DIR__ . '/../../certificates/api-test.wirecard.com.crt'));
             // ## Transaction
-            // ### Transaction Service
-            // The `TransactionService` is used to determine the response from the service provider.
             $service = new TransactionService($config, $logger);
-            // ## Notification status
 
+            // ## Notification status
             // The notification are transmitted as _POST_ request and is handled via the `handleNotification` method.
             $notification = $service->handleNotification(file_get_contents('php://input'));
 
@@ -95,12 +93,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                 }
                 // Log the notification for a failed transaction.
             } elseif ($notification instanceof FailureResponse) {
-                // In our example we iterate over all errors and echo them out.
-                // You should display them as error, warning or information based on the given severity.
-                foreach ($notification->getStatusCollection() as $status) {
-                    /**
-                     * @var $status \Wirecard\PaymentSdk\Entity\Status
-                     */
+               foreach ($notification->getStatusCollection() as $status) {
                     $severity = ucfirst($status->getSeverity());
                     $code = $status->getCode();
                     $description = $status->getDescription();

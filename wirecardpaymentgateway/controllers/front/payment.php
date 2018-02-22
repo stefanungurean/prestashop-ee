@@ -177,8 +177,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $addressDelivery = new Address(intval($cart->id_address_delivery));
                     $carrier = new Carrier($cart->id_carrier);
                     $countryDelivery = Country::getIsoById($addressDelivery->id_country);
-                    // no sdk function for it
-                    //$addressInvoice = new Address(intval($cart->id_address_invoice));
 
                     $customerData = new AccountHolder();
                     $customerData->setFirstName($customer->firstname);
@@ -211,8 +209,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
 
                     // ## Transaction
 
-
-                    // The PayPal transaction holds all transaction relevant data for the payment process.
                     $transaction = new PayPalTransaction();
                     $transaction->setNotificationUrl($notificationUrl);
                     $transaction->setRedirect($redirectUrls);
@@ -220,8 +216,8 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     if (Configuration::get($this->module->buildParamName($this->method, 'basket_send'))) {
                         $transaction->setBasket($basket);
                     }
-                    //transaction identification
 
+                    //transaction identification
                     $customOrderNumber = new CustomField('customOrderNumber', $orderNumber);
                     $customFields = new CustomFieldCollection();
                     $customFields->add($customOrderNumber);
@@ -240,35 +236,22 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                     $transaction->setDevice($Device);
 
                     // ### Transaction Service
-                    // The service is used to execute the payment operation itself. A response object is returne
-                    $logger = new Logger('');
+                    $logger = new Logger();
                     $transactionService = new TransactionService($this->config, $logger);
                     $response = $transactionService->pay($transaction);
 
                     // ## Response handling
 
-                    // The response of the service must be handled depending on it's class
-                    // In case of an `InteractionResponse`, a browser interaction by the consumer is required
-                    // in order to continue the payment process. In this example we proceed with a header redirect
-                    // to the given _redirectUrl_. IFrame integration using this URL is also possible.
-                    if ($response instanceof InteractionResponse) {
+                     if ($response instanceof InteractionResponse) {
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
-                        // The failure state is represented by a FailureResponse object.
-                        // In this case the returned errors should be stored in your system.
-                    } elseif ($response instanceof FailureResponse) {
-                        //alter order status to error and return to products quantities
+                     } elseif ($response instanceof FailureResponse) {
                         $history = new OrderHistory();
                         $history->id_order = (int)$orderNumber;
                         $history->changeIdOrderState((_PS_OS_ERROR_), $history->id_order, true);
 
-                        // In our example we iterate over all errors and echo them out. You should display them as
-                        // error, warning or information based on the given severity.
                         $errors = array();
 
                         foreach ($response->getStatusCollection() as $status) {
-                            /**
-                             * @var $status \Wirecard\PaymentSdk\Entity\Status
-                             */
                             $severity = ucfirst($status->getSeverity());
                             $code = $status->getCode();
                             $description = $status->getDescription();
@@ -280,7 +263,6 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
                                 $description
                             ));
                         }
-
                         $messageTemp = implode(',', $errors);
                         if (Tools::strlen($messageTemp)) {
                             $message = $messageTemp;
