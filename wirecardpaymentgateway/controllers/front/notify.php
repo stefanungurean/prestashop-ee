@@ -131,19 +131,19 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         $baseUrl = Configuration::get($this->module->buildParamName($this->paymentMethod, 'wirecard_server_url'));
         $httpUser = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_user'));
         $httpPass = Configuration::get($this->module->buildParamName($this->paymentMethod, 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
+        $MAID = Configuration::get($this->module->buildParamName($this->paymentMethod, 'maid'));
+        $Key = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $logger = new Logger('Wirecard notifications');
+        $logger = new Logger();
         $transactionService = new TransactionService($this->config, $logger);
 
         if (!$transactionService->checkCredentials()) {
             return false;
         }
 
-        $payPalConfig = new PaymentMethodConfig($this->paymentMethod, $payPalMAID, $payPalKey);
-        $this->config->add($payPalConfig);
+        $Config = new PaymentMethodConfig($this->paymentMethod, $MAID, $Key);
+        $this->config->add($Config);
         return true;
     }
 

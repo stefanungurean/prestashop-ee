@@ -57,7 +57,7 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
                 $httpUser = Tools::getValue($this->module->buildParamName($method, 'http_user'));
                 $httpPass = Tools::getValue($this->module->buildParamName($method, 'http_password'));
 
-                $config = new Config($baseUrl, $httpUser, $httpPass, "RON");
+                $config = new Config($baseUrl, $httpUser, $httpPass, "EUR");
                 $transactionService = new TransactionService($config, $logger);
                 if (!$transactionService->checkCredentials()) {
                     $status = 'error';

@@ -43,7 +43,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        $logger = new Logger('Wirecard success');
+        $logger = new Logger();
         $message = "";
         if (!$this->module->active) {
             $message = $this->l('Module is not active');

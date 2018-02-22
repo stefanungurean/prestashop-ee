@@ -70,7 +70,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                 // ## Payment results
                 // The response from the service can be used for disambiguation.
                 // In case of a successful transaction, a `SuccessResponse` object is returned.
-                if ($response->isValidSignature() == false) {
+                if (!$response->isValidSignature()) {
                     $message = $this->l('The data has been modified by 3rd Party');
                     $logger->error($message);
                 } elseif ($response instanceof SuccessResponse) {
@@ -135,7 +135,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         $payPalKey = Configuration::get($this->module->buildParamName($this->paymentMethod, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $logger = new Logger('Wirecard notifications');
+        $logger = new Logger();
         $transactionService = new TransactionService($this->config, $logger);
 
         if (!$transactionService->checkCredentials()) {

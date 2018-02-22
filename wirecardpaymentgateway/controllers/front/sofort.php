@@ -49,6 +49,7 @@ use Wirecard\PaymentSdk\TransactionService;
 class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontController
 {
     private $config;
+    private $method="sofort";
     /**
      * @see FrontController::postProcess()
      */
@@ -57,9 +58,10 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
         $orderNumber='';
         if (!$this->module->active) {
             $message = $this->l('Module is not active');
-        } elseif (!(Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists() == false)) {
+        } elseif (!(Validate::isLoadedObject($this->context->cart) && !$this->context->cart->OrderExists())) {
             $message = $this->l('Cart cannot be loaded or an order has already been placed using this cart');
-        } elseif (!Configuration::get($this->module->buildParamName('sofort', 'enable_method'))) {
+        } elseif (!Configuration::get($this->module->buildParamName($this->method, 'enable_method'))) {
+
             $message = $this->l('Payment method not available');
         } else {
             $cart = $this->context->cart;
@@ -121,10 +123,6 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
 
                     // ## Response handling
 
-                    // The response of the service must be handled depending on it's class
-                    // In case of an `InteractionResponse`, a browser interaction by the consumer is required
-                    // in order to continue the payment process. In this example we proceed with a header redirect
-                    // to the given _redirectUrl_. IFrame integration using this URL is also possible.
                     if ($response instanceof InteractionResponse) {
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
                         // The failure state is represented by a FailureResponse object.
@@ -182,11 +180,11 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
     {
         $currency = new CurrencyCore($this->context->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName('sofort', 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName('sofort', 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName('sofort', 'http_password'));
-        $payPalMAID = Configuration::get($this->module->buildParamName('sofort', 'maid'));
-        $payPalKey = Configuration::get($this->module->buildParamName('sofort', 'secret')) ;
+        $baseUrl = Configuration::get($this->module->buildParamName($this->method, 'wirecard_server_url'));
+        $httpUser = Configuration::get($this->module->buildParamName($this->method, 'http_user'));
+        $httpPass = Configuration::get($this->module->buildParamName($this->method, 'http_password'));
+        $MAID = Configuration::get($this->module->buildParamName($this->method, 'maid'));
+        $Key = Configuration::get($this->module->buildParamName($this->method, 'secret')) ;
 
         $this->config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
 
@@ -197,8 +195,8 @@ class WirecardPaymentGatewaySofortModuleFrontController extends ModuleFrontContr
             return false;
         }
 
-        $payPalConfig = new PaymentMethodConfig(SofortTransaction::NAME, $payPalMAID, $payPalKey);
-        $this->config->add($payPalConfig);
+        $SofortConfig = new PaymentMethodConfig(SofortTransaction::NAME, $MAID, $Key);
+        $this->config->add($SofortConfig);
         return true;
     }
 
