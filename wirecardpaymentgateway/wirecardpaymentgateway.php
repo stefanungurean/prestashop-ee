@@ -30,7 +30,7 @@
  */
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PrestaShop\PrestaShop\Adapter\StockManager;
+
 
 /**
  * Class WirecardEEPaymentGateway
@@ -39,9 +39,18 @@ class WirecardPaymentGateway extends PaymentModule
 {
     const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
+    private $postErrors;
 
     public function __construct()
     {
+        ini_set(
+            'include_path',
+            ini_get('include_path')
+            . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'vendor'
+            . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'models'
+        );
+        require_once 'wirecardee_autoload.php';
+
         $this->config = $this->config();
         $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
@@ -130,15 +139,19 @@ class WirecardPaymentGateway extends PaymentModule
         if (!$this->active) {
             return;
         }
-        $payment_options = array();
-        if (Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
-            $payment_options[] = array(
-                'cta_text' => $this->l('Paypal payment'),
-                'logo' => Media::getMediaPath(
-                    _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'
-                ),
-                'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
-            );
+        $payment_options=array();
+
+        foreach($this->getPaymentTypes() as $paymentType){
+
+            if ($paymentType->isAvailable()) {
+                $payment_options[] = array(
+                    'cta_text' => $this->l($paymentType->getLabel()),
+                    'logo' => Media::getMediaPath(
+                        _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/'. $paymentType->getLogo()
+                    ),
+                    'action' => $this->context->link->getModuleLink($this->name, 'payment?paymentType='.$paymentType->getMethod(), array(), true)
+                );
+            }
         }
         return $payment_options;
     }
@@ -160,7 +173,11 @@ class WirecardPaymentGateway extends PaymentModule
                         'name' => 'enable_method',
                         'label' => $this->l('Enable'),
                         'default' => '0',
-                        'type' => 'onoff'
+                        'type' => 'onoff',
+                        'className' => 'Paypal',
+                        'logo' => 'paypal.png',
+                        'labelMethod' => $this->l('Paypal'),
+
                     ),
                     array(
                         'name' => 'wirecard_server_url',
@@ -230,10 +247,79 @@ class WirecardPaymentGateway extends PaymentModule
                         'buttonText' => $this->l('Test paypal configuration'),
                         'id' => 'paypalConfig',
                         'method' => 'paypal',
+                        'name' => 'paypal',
                         'send' => array(
                             $this->buildParamName('paypal', 'wirecard_server_url'),
                             $this->buildParamName('paypal', 'http_user'),
                             $this->buildParamName('paypal', 'http_password')
+                        )
+                    )
+                )
+            ),
+            'sofort' => array(
+                'tab' => $this->l('Sofort'),
+                'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => $this->l('Enable'),
+                        'default' => '0',
+                        'type' => 'onoff',
+                        'className' => 'Sofort',
+                        'logo' => 'sofortbanking.png',
+                        'labelMethod' => $this->l('Sofort'),
+
+                    ),
+                    array(
+                        'name' => 'wirecard_server_url',
+                        'label' => $this->l('URL of Wirecard server'),
+                        'type' => 'text',
+                        'default' => 'https://api-test.wirecard.com',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'maid',
+                        'label' => $this->l('MAID'),
+                        'type' => 'text',
+                        'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'secret',
+                        'label' => $this->l('Secret'),
+                        'type' => 'text',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_user',
+                        'label' => $this->l('HTTP user'),
+                        'type' => 'text',
+                        'default' => '70000-APITEST-AP',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_password',
+                        'label' => $this->l('HTTP Password'),
+                        'type' => 'text',
+                        'default' => 'qD2wzQ_hrc!8',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => $this->l('Test sofort configuration'),
+                        'id' => 'sofortConfig',
+                        'method' => 'sofort',
+                        'name' => 'sofort',
+                        'send' => array(
+                            $this->buildParamName('sofort', 'wirecard_server_url'),
+                            $this->buildParamName('sofort', 'http_user'),
+                            $this->buildParamName('sofort', 'http_password')
                         )
                     )
                 )
@@ -313,7 +399,7 @@ class WirecardPaymentGateway extends PaymentModule
 
                 $elem = array(
                     'name' => $this->buildParamName($configGroup, $f['name']),
-                    'label' => $this->l($f['label']),
+                    'label' => isset($f['label'])?$this->l($f['label']):"",
                     'tab' => $groupKey,
                     'type' => $f['type'],
                     'required' => isset($f['required']) && $f['required']
@@ -706,5 +792,156 @@ class WirecardPaymentGateway extends PaymentModule
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @param $paymentType
+     *
+     * @return WirecardCheckoutSeamlessPayment |null
+     */
+    public function getPaymentType($paymentType)
+    {
+        $found = $this->getPaymentTypes($paymentType);
+        if (count($found) != 1) {
+            return null;
+        }
+
+        return $found[0];
+    }
+
+    /**
+     * return paymenttype objects
+     *
+     * @param null $paymentType
+     *
+     * @return array
+     */
+    public function getPaymentTypes($paymentType = null)
+    {
+        $types = array();
+        foreach ($this->config as $group) {
+            foreach ($group['fields'] as $f) {
+                if (array_key_exists('className', $f)) {
+                    if ($paymentType !== null && (!isset($f['className'])||$f['className'] != $paymentType)) {
+                        continue;
+                    }
+
+                    $className = 'WirecardPaymentGatewayPayment' . $f['className'];
+                    $f['group'] = 'pt';
+                    $pt = new $className($this, $f);
+
+                    $types[] = $pt;
+                }
+            }
+        }
+
+
+        return $types;
+    }
+
+    public function initiatePayment($paymentTypeName='')
+    {
+        try {
+            if (!$this->active) {
+                throw new Exception($this->l('Module is not active'));
+            } elseif (!(Validate::isLoadedObject($this->getContext()->cart) &&
+                !$this->getContext()->cart->OrderExists())) {
+                throw new Exception($this->l(
+                    'Cart cannot be loaded or an order has already been placed using this cart'
+                ));
+            } elseif (!$this->context->cookie->id_cart) {
+                throw new Exception($this->l('Unable to load basket.'));
+            }
+            $paymentType = $this->getPaymentType($paymentTypeName);
+            if ($paymentType === null) {
+                throw new Exception($this->l('This payment method is not available.'));
+            } elseif (!$paymentType->isAvailable()) {
+                throw new Exception($this->l('Payment method not enabled.'));
+            } elseif (!$paymentType->configuration()) {
+                throw new Exception($this->l('The merchant configuration is incorrect'));
+            }
+            $validation = $paymentType->validations();
+            if ($validation['status']!==true) {
+                throw new Exception($this->l($validation['message']));
+            }
+            $orderNumber = $this->addOrder($this->getContext()->cart, $paymentType->getMethod());
+
+            $paymentType->initiate($this->getContext()->cart, $orderNumber);
+        } catch (Exception $e) {
+            $message=$e->getMessage();
+        }
+
+        $params=array();
+        if ($message!='') {
+            if (isset($orderNumber)) {
+                $this->updateOrder($orderNumber, _PS_OS_ERROR_);
+            } else {
+                $orderNumber="";
+            }
+
+            $this->module->getContext()->cookie->eeMessage = $message;
+            $params = array(
+                'submitReorder' => true,
+                'id_order' => (int)$orderNumber
+            );
+        }
+        Tools::redirect($this->getContext()->link->getPageLink('order', true, $this->getContext()->cart->id_lang, $params));
+    }
+
+    function addOrder($cart, $paymentMethod){
+        $this->validateOrder(
+            $cart->id,
+            Configuration::get(self::WDEE_OS_AWAITING),
+            $cart->getOrderTotal(true),
+            $paymentMethod,
+            null,
+            array(),
+            null,
+            false,
+            $cart->secure_key
+        );
+        return $this->currentOrder;
+    }
+
+    function updateOrder($orderNumber,$orderStatus){
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($orderStatus), $orderNumber, true);
+    }
+
+    /**
+     * get context
+     *
+     * @return Context
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * get config value, take presets into account
+     *
+     * @param $group
+     * @param $field
+     *
+     * @return string
+     */
+    public function getConfigValue($group, $field)
+    {
+        if ($group == 'basicdata') {
+            $mode = Configuration::get(
+                $this->buildParamName(
+                    'basicdata',
+                    'configmode'
+                )
+            );
+
+            if (isset($this->presets[$mode]) && isset($this->presets[$mode][$field])) {
+                return $this->presets[$mode][$field];
+            }
+        }
+
+        return Configuration::get($this->buildParamName($group, $field));
     }
 }

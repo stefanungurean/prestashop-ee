@@ -44,101 +44,88 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
     /**
      * @see FrontController::postProcess()
      */
+
     public function postProcess()
     {
         $logger = new Logger();
         $message = "";
-        if (!$this->module->active) {
-            $message = $this->l('Module is not active');
-            $logger->error($message);
-        } elseif (!Configuration::get($this->module->buildParamName('paypal', 'enable_method'))) {
-            $message = $this->l('Payment method not available');
-            $logger->error($message);
-        } elseif (($config = $this->configuration())===false) {
-            $message = $this->l('The merchant configuration is incorrect');
-            $logger->error($message);
-        } else {
-            if ($_POST) {
-                $config->setPublicKey(file_get_contents(
-                    __DIR__ . '/../../certificates/api-test.wirecard.com.crt'
-                ));
+        try {
+            if (!$this->module->active) {
+                throw new Exception($this->l('Module is not activ'));
+            } else {
+                $orderNumber = $_GET['order'];
+                $order = new Order($orderNumber);
+                if ($orderNumber == null || $order == null) {
+                    throw new Exception($this->l(sprintf(
+                        'Order %s do not exist',
+                        $orderNumber
+                    )));
+                } else {
+                    $paymentType = $this->module->getPaymentType($order->payment);
+                    if ($paymentType === null) {
+                        throw new Exception($this->l('This payment method is not available.'));
+                    } elseif (!$paymentType->isAvailable()) {
+                        throw new Exception($this->l('Payment method not enabled.'));
+                    } elseif (!$paymentType->configuration()) {
+                        throw new Exception($this->l('The merchant configuration is incorrect'));
+                    } else{
+                        if ($_POST) {
+                            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+                            $service = new TransactionService($paymentType->config, $logger);
+                            $response = $service->handleResponse($_POST);
+                            if (!$response->isValidSignature()) {
+                                throw new Exception($this->l('The data has been modified by 3rd Party'));
+                            } elseif ($response instanceof SuccessResponse) {
+                                $orderId = $response->getCustomFields()->get('customOrderNumber');
+                                if ( $orderId!=$_GET['order']) {
+                                    throw new Exception($this->l('The data has been modified by 3rd Party'));
+                                } else {
+                                    $logger->log(1, sprintf(
+                                        'Order %s confirm successfully ',
+                                        $orderId
+                                    ));
+                                    $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
+                                    $customer = new Customer($order->id_customer);
 
-                $service = new TransactionService($config, $logger);
-                $response = $service->handleResponse($_POST);
-                // ## Payment results
-                 if (!$response->isValidSignature()) {
-                    $message = $this->l('The data has been modified by 3rd Party');
-                    $logger->error($message);
-                } elseif ($response instanceof SuccessResponse) {
-                    $orderId = $response->getCustomFields()->get('customOrderNumber');
-                    $order = new Order((int)($orderId));
-                    if ($order== null || $orderId!=$_GET['order']) {
-                        $message = $this->l('The data has been modified by 3rd Party');
-                        $logger->error($message);
-                    } else {
-                        $logger->log(1, sprintf(
-                            'Order %s confirm successfully ',
-                            $orderId
-                        ));
-                        $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
-                        $customer = new Customer($order->id_customer);
-
-                        $this->context->smarty->assign(array(
-                            'email' => $customer->email,
-                            'reference' => $order->reference,
-                            'payment' => $order->payment,
-                            'carrier' => $carrier->name,
-                            'delay' => $carrier->delay
-                        ));
-                    }
-                } elseif ($response instanceof FailureResponse) {
-                    foreach ($response->getStatusCollection() as $status) {
-                        $severity = ucfirst($status->getSeverity());
-                        $code = $status->getCode();
-                        $description = $status->getDescription();
-                        $message = $description;
-                        $logger->warning(sprintf(
-                            '%s with code %s and message "%s" occurred.<br>',
-                            $severity,
-                            $code,
-                            $description
-                        ));
+                                    $this->context->smarty->assign(array(
+                                        'email' => $customer->email,
+                                        'reference' => $order->reference,
+                                        'payment' => $order->payment,
+                                        'carrier' => $carrier->name,
+                                        'delay' => $carrier->delay
+                                    ));
+                                }
+                            } elseif ($response instanceof FailureResponse) {
+                                foreach ($response->getStatusCollection() as $status) {
+                                    $severity = ucfirst($status->getSeverity());
+                                    $code = $status->getCode();
+                                    $description = $status->getDescription();
+                                    $logger->warning(sprintf(
+                                        '%s with code %s and message "%s" occurred.<br>',
+                                        $severity,
+                                        $code,
+                                        $description
+                                    ));
+                                    throw new Exception($this->l($description));
+                                }
+                            }
+                        } else{
+                            throw new Exception($this->l('The order has been cancelled.'));
+                        }
                     }
                 }
-                // Otherwise a cancel information is printed
-            } else {
-                $message = $this->l('The transaction has been cancelled.');
-                $logger->warning($message);
             }
         }
+        catch (Exception $e) {
+            $message=$e->getMessage();
+        }
 
+        if ($message!="") {
+            $logger->error($message);
+        }
         $this->context->smarty->assign(array(
             'message' => $message
         ));
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation.tpl');
-    }
-
-    private function configuration()
-    {
-        $paymentMethod="paypal";
-        $currency = new CurrencyCore($this->context->cart->id_currency);
-        $currencyIsoCode = $currency->iso_code;
-        $baseUrl = Configuration::get($this->module->buildParamName($paymentMethod, 'wirecard_server_url'));
-        $httpUser = Configuration::get($this->module->buildParamName($paymentMethod, 'http_user'));
-        $httpPass = Configuration::get($this->module->buildParamName($paymentMethod, 'http_password'));
-        $MAID = Configuration::get($this->module->buildParamName($paymentMethod, 'maid'));
-        $Key = Configuration::get($this->module->buildParamName($paymentMethod, 'secret')) ;
-
-        $config = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-        $logger = new Logger();
-        $transactionService = new TransactionService($config, $logger);
-
-        if (!$transactionService->checkCredentials()) {
-            return false;
-        }
-
-        $ConfigPayment = new PaymentMethodConfig(PayPalTransaction::NAME, $MAID, $Key);
-        $config->add($ConfigPayment);
-        return $config;
     }
 }

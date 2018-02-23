@@ -51,19 +51,21 @@
 {/block}
 
 {block name='page_content_container'}
-    <section id="content" class="page-content page-order-confirmation card">
-        <div class="card-block">
-            <div class="row">
-                {block name='order_details'}
-                    <div id="order-details" class="col-md-12">
-                        <h3 class="h3 card-title">{l s='Order details' d='Shop.Theme.Checkout'}:{$reference}</h3>
-                        <ul>
-                            <li>{l s='Order reference: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference]}</li>
-                            <li>{l s='Payment method: %method%' d='Shop.Theme.Checkout' sprintf=['%method%' => $payment]}</li>
-                        </ul>
-                    </div>
-                {/block}
+    {if $message==""}
+        <section id="content" class="page-content page-order-confirmation card">
+            <div class="card-block">
+                <div class="row">
+                    {block name='order_details'}
+                        <div id="order-details" class="col-md-12">
+                            <h3 class="h3 card-title">{l s='Order details' d='Shop.Theme.Checkout'}:{$reference}</h3>
+                            <ul>
+                                <li>{l s='Order reference: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference]}</li>
+                                <li>{l s='Payment method: %method%' d='Shop.Theme.Checkout' sprintf=['%method%' => $payment]}</li>
+                            </ul>
+                        </div>
+                    {/block}
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    {/if}
 {/block}
