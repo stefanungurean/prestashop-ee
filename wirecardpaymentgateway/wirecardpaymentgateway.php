@@ -29,8 +29,11 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PrestaShop\PrestaShop\Adapter\StockManager;
 
 /**
  * Class WirecardEEPaymentGateway
@@ -39,6 +42,7 @@ class WirecardPaymentGateway extends PaymentModule
 {
     const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
+    const WDEE_OS_PENDING = 'WDEE_OS_PENDING';
 
     public function __construct()
     {
@@ -61,7 +65,7 @@ class WirecardPaymentGateway extends PaymentModule
     public function install()
     {
         if (!parent::install() || !$this->setDefaults()
-            || !$this->registerHook('displayPaymentEU')
+            || !$this->registerHook('paymentOptions')
             || !$this->registerHook('actionFrontControllerSetMedia')
             || !$this->registerHook('displayHeader')) {
             return false;
@@ -83,6 +87,27 @@ class WirecardPaymentGateway extends PaymentModule
             $orderState->add();
             Configuration::updateValue(
                 self::WDEE_OS_AWAITING,
+                (int)($orderState->id)
+            );
+        }
+
+        if (!Configuration::get(self::WDEE_OS_PENDING)) {
+
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment pending';
+            }
+            $orderState->send_email = false;
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->add();
+            Configuration::updateValue(
+                self::WDEE_OS_PENDING,
                 (int)($orderState->id)
             );
         }
@@ -120,25 +145,48 @@ class WirecardPaymentGateway extends PaymentModule
         return true;
     }
 
+    public function getTotalPaymentMethods() {
+        return count($this->config);
+    }
+
     /**
      * @since 0.0.2
      *
      */
 
-    public function hookDisplayPaymentEU($params)
+    public function hookPaymentOptions($params)
     {
         if (!$this->active) {
             return;
         }
-        $payment_options = array();
-        if (Configuration::get($this->buildParamName('paypal', 'enable_method'))) {
-            $payment_options[] = array(
-                'cta_text' => $this->l('Paypal payment'),
-                'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/paypal.png'),
-                'action' => $this->context->link->getModuleLink($this->name, 'payment', array(), true)
-            );
-        }
 
+        $paymentsMethods = $this->config();
+
+        $payment_options = array();
+        foreach($paymentsMethods as $key => $value) {
+            if(Configuration::get($this->buildParamName($key, 'enable_method'))) {
+                $paymentOption = new PaymentOption();
+                $paymentOption->setCallToActionText($key . " Payment");
+                $paymentOption->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/' . $key . '.png'));
+                if(!$value['is_form']) {
+                    $paymentOption->setInputs([
+                        'payment-type' => [
+                            'name' =>'payment-type',
+                            'type' =>'hidden',
+                            'value' => $key,
+                        ]]);
+                    $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
+                } else {
+                    $paymentOption->setBinary(true);
+                    require_once __DIR__ . '/service/impl/' . ucfirst($key) . 'Form.inc';
+                    $formClassName = ucfirst($key) . "Form";
+                    $formClass = new $formClassName();
+                    $paymentOption->setForm($formClass->generateForm());
+                }
+                $payment_options[] = $paymentOption;
+            }
+
+        }
         return $payment_options;
     }
 
@@ -153,6 +201,7 @@ class WirecardPaymentGateway extends PaymentModule
     {
         return array(
             'paypal' => array(
+                'is_form' => false,
                 'tab' => $this->l('PayPal'),
                 'fields' => array(
                     array(
@@ -236,7 +285,228 @@ class WirecardPaymentGateway extends PaymentModule
                         )
                     )
                 )
-            )
+            ),
+            'creditcard' => array(
+                'is_form' => true,
+                'tab' => $this->l('Credit Card'),
+                'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => 'Enable and disable this payment method',
+                        'default' => '0',
+                        'type' => 'onoff'
+                    ),
+                    array(
+                        'name' => 'wirecard_server_url',
+                        'label' => $this->l('URL of Wirecard server'),
+                        'type' => 'text',
+                        'default' => 'https://api-test.wirecard.com',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'maid',
+                        'label' => $this->l('Merchant Account ID'),
+                        'type' => 'text',
+                        'default' => '53f2895a-e4de-4e82-a813-0d87a10e55e6',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'secret',
+                        'label' => $this->l('Secret Key'),
+                        'type' => 'text',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => '3dmaid',
+                        'label' => $this->l('3DS Merchant Account ID'),
+                        'type' => 'text',
+                        'default' => '53f2895a-e4de-4e82-a813-0d87a10e55e6',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => '3dssecret',
+                        'label' => $this->l('3DS Secret Key'),
+                        'type' => 'text',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'SSLmax',
+                        'label' => $this->l('SSL Max Limit'),
+                        'type' => 'text',
+                        'default' => 100.0,
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => '3dmin',
+                        'label' => $this->l('3DS Min Limit'),
+                        'type' => 'text',
+                        'default' => 50.0,
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_user',
+                        'label' => $this->l('HTTP user'),
+                        'type' => 'text',
+                        'default' => '70000-APITEST-AP',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_password',
+                        'label' => $this->l('HTTP Password'),
+                        'type' => 'text',
+                        'default' => 'qD2wzQ_hrc!8',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'transaction_type',
+                        'label' => $this->l('Transaction type'),
+                        'type' => 'select',
+                        'default' => 'purchase',
+                        'required' => true,
+                        'options' => 'getTransactionTypes'
+                    ),
+                    array(
+                        'name' => 'descriptor',
+                        'label' => 'Enable and disable descriptor',
+                        'default' => '1',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'name' => 'currency',
+                        'label' => $this->l('Default currency for limit detection'),
+                        'type' => 'select',
+                        'default' => 'EURO',
+                        'required' => false,
+                        'options' => 'getTransaction'
+                    ),
+                    array(
+                        'name' => 'sortoder',
+                        'label' => $this->l('Sort Order'),
+                        'type' => 'text',
+                        'default' => '1',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'basket_send',
+                        'label' => $this->l('Send basket data'),
+                        'default' => '0',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => $this->l('Test creditcard configuration'),
+                        'id' => 'creditcardConfig',
+                        'method' => 'creditcard',
+                        'send' => array(
+                            $this->buildParamName('creditcard', 'wirecard_server_url'),
+                            $this->buildParamName('creditcard', 'http_user'),
+                            $this->buildParamName('creditcard', 'http_password')
+                        )
+                    )
+                )
+            ),
+            'sepa' => array(
+                'is_form' => true,
+                'tab' => $this->l('Sepa'),
+                'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => 'Enable and disable this payment method',
+                        'default' => '0',
+                        'type' => 'onoff'
+                    ),array(
+                        'name' => 'wirecard_server_url',
+                        'label' => $this->l('URL of Wirecard server'),
+                        'type' => 'text',
+                        'default' => 'https://api-test.wirecard.com',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'maid',
+                        'label' => $this->l('MAID'),
+                        'type' => 'text',
+                        'default' => '4c901196-eff7-411e-82a3-5ef6b6860d64',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'secret',
+                        'label' => $this->l('Secret'),
+                        'type' => 'text',
+                        'default' => 'ecdf5990-0372-47cd-a55d-037dccfe9d25',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'http_user',
+                        'label' => $this->l('HTTP user'),
+                        'type' => 'text',
+                        'default' => '70000-APITEST-AP',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'http_password',
+                        'label' => $this->l('HTTP Password'),
+                        'type' => 'text',
+                        'default' => 'qD2wzQ_hrc!8',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'transaction_type',
+                        'label' => $this->l('Transaction type'),
+                        'type' => 'select',
+                        'default' => 'purchase',
+                        'required' => true,
+                        'options' => 'getTransactionTypes'
+                    ),array(
+                        'name' => 'Creditorid',
+                        'label' => $this->l('creditor ID'),
+                        'type' => 'text',
+                        'default' => 'DE98ZZZ09999999999',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'Name',
+                        'label' => $this->l('Name'),
+                        'type' => 'text',
+                        'default' => '',
+                        'required' => false,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'Address',
+                        'label' => $this->l('Address'),
+                        'type' => 'text',
+                        'default' => '',
+                        'required' => false,
+                        'sanitize' => 'trim'
+                    ),array(
+                        'name' => 'descriptor',
+                        'label' => 'Enable and disable descriptor',
+                        'default' => '1',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => "Test sepa configuration",
+                        'id' => "sepalConfig",
+                        'method' => "sepa",
+                    )
+                )
+            ),
         );
     }
 

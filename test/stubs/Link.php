@@ -3,10 +3,10 @@
  * Created by IntelliJ IDEA.
  * User: iustin.morosan
  * Date: 02/24/18
- * Time: 10:29 PM
+ * Time: 11:06 PM
  */
 
-class ModuleFrontController
+class Link
 {
-
+    public function getModuleLink() {}
 }

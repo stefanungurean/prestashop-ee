@@ -29,26 +29,31 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require __DIR__.'/../../vendor/autoload.php';
-
+require_once __DIR__.'/../../includes/module.common.inc';
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use \Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
+
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
 {
+
+
     /**
      * @see FrontController::postProcess()
      */
     public function postProcess()
     {
-        echo "success in development";
-        exit;
+        $config = new Config();
+        $service = new TransactionService($config);
+        if($_POST) {
+            $response = $service->handleResponse($_POST);
+            if($response instanceof SuccessResponse) {
+                manageResponse($response, $this->context, $this->module);
+            }
+        }
+        Tools::redirect("order-confirmation");
     }
+
+
 }

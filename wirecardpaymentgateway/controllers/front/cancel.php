@@ -48,7 +48,24 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        echo "cancel in development";
-        exit;
+        if($_GET["id_order"]) {
+            $orderId = $_GET["id_order"];
+            $this->updateStatus($orderId, _PS_OS_CANCELED_);
+
+
+            $customer = $this->context->customer;
+
+            Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-detail&id_module='. $this->module->id .'&id_order=' . $orderId);
+            //update status order
+
+        }
+
+        Tools::redirectLink(__PS_BASE_URI__ . 'index.php');
+    }
+
+    private function updateStatus($orderNumber, $status) {
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($status), $history->id_order, true);
     }
 }

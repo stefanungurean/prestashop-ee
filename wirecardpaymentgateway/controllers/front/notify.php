@@ -48,7 +48,61 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        echo "notify in development";
-        exit;
+        error_log("start process notify");
+        $config = new Config();
+        $service = new TransactionService($config);
+        if($_POST) {
+
+            $response = $service->handleResponse($_POST);
+            error_log(var_dump($response, true));
+            if($response instanceof SuccessResponse) {
+                $xmlResponse = new SimpleXMLElement($response->getRawData());
+                $responseArray = json_decode(json_encode($xmlResponse), 1);
+                switch ( $response->getPaymentMethod() ) {
+                    case PAYPAL_PAYMENTH_METHOD:
+                        $this->payPalResponse($responseArray);
+                        break;
+                    case SEPA_PAYMENT_METHOD:
+                        $this->sepaResponse($responseArray);
+                        break;
+                    case CREDIT_CARD_METHOD:
+                        $this->creditCardResponse($responseArray);
+                        break;
+                }
+            }
+        }
+        Tools::redirect("order-confirmation");
+    }
+
+    private function payPalResponse($response) {
+        error_log(var_dump($response, true));
+        if($response["statuses"] != null &&
+            $response["statuses"]["status"] != null &&
+            $response["statuses"]["status"]["@attributes"] != null &&
+            $response["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
+
+        }
+        $this->updateStatus($response["order-number"], _PS_OS_PAYMENT_);
+
+        die();
+        //update status order
+        //create payment for order
+
+    }
+
+    private function sepaResponse($response) {
+//update status order
+        //create payment for order
+    }
+
+    private function creditCardResponse($response) {
+//update status order
+        //create payment for order
+    }
+
+    private function updateStatus($orderNumber, $status) {
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($status), $history->id_order, true);
     }
 }
