@@ -31,7 +31,6 @@
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
-
 /**
  * Class WirecardEEPaymentGateway
  */
@@ -141,15 +140,19 @@ class WirecardPaymentGateway extends PaymentModule
         }
         $payment_options=array();
 
-        foreach($this->getPaymentTypes() as $paymentType){
-
+        foreach ($this->getPaymentTypes() as $paymentType) {
             if ($paymentType->isAvailable()) {
                 $payment_options[] = array(
                     'cta_text' => $this->l($paymentType->getLabel()),
                     'logo' => Media::getMediaPath(
                         _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/'. $paymentType->getLogo()
                     ),
-                    'action' => $this->context->link->getModuleLink($this->name, 'payment?paymentType='.$paymentType->getMethod(), array(), true)
+                    'action' => $this->context->link->getModuleLink(
+                        $this->name,
+                        'payment?paymentType='.$paymentType->getMethod(),
+                        array(),
+                        true
+                    )
                 );
             }
         }
@@ -839,7 +842,7 @@ class WirecardPaymentGateway extends PaymentModule
         return $types;
     }
 
-    public function initiatePayment($paymentTypeName='')
+    public function initiatePayment($paymentTypeName = '')
     {
         try {
             if (!$this->active) {
@@ -885,10 +888,15 @@ class WirecardPaymentGateway extends PaymentModule
                 'id_order' => (int)$orderNumber
             );
         }
-        Tools::redirect($this->getContext()->link->getPageLink('order', true, $this->getContext()->cart->id_lang, $params));
+        Tools::redirect($this->getContext()->link->getPageLink(
+            'order',
+            true,
+            $this->getContext()->cart->id_lang,
+            $params
+        ));
     }
 
-    function addOrder($cart, $paymentMethod)
+    public function addOrder($cart, $paymentMethod)
     {
         $this->validateOrder(
             $cart->id,
@@ -904,7 +912,7 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->currentOrder;
     }
 
-    function updateOrder($orderNumber, $orderStatus)
+    public function updateOrder($orderNumber, $orderStatus)
     {
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;

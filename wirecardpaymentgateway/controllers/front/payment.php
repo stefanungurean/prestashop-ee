@@ -28,26 +28,6 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-/*
-require __DIR__.'/../../vendor/autoload.php';
-require __DIR__.'/../../libraries/Logger.php';
-*/
-/*
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\CustomField;
-use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Device;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\TransactionService;*/
-
 class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontController
 {
     /**

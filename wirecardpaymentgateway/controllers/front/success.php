@@ -31,12 +31,8 @@
 require __DIR__.'/../../vendor/autoload.php';
 require __DIR__.'/../../libraries/Logger.php';
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
@@ -68,16 +64,16 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                         throw new Exception($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
                         throw new Exception($this->l('The merchant configuration is incorrect'));
-                    } else{
+                    } else {
                         if ($_POST) {
                             $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
-                            $service = new TransactionService($paymentType->config, $logger);
+                            $service = new TransactionService($paymentType->getConnection(), $logger);
                             $response = $service->handleResponse($_POST);
                             if (!$response->isValidSignature()) {
                                 throw new Exception($this->l('The data has been modified by 3rd Party'));
                             } elseif ($response instanceof SuccessResponse) {
                                 $orderId = $response->getCustomFields()->get('customOrderNumber');
-                                if ( $orderId!=$_GET['order']) {
+                                if ($orderId!=$_GET['order']) {
                                     throw new Exception($this->l('The data has been modified by 3rd Party'));
                                 } else {
                                     $logger->log(1, sprintf(
@@ -109,14 +105,13 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                                     throw new Exception($this->l($description));
                                 }
                             }
-                        } else{
+                        } else {
                             throw new Exception($this->l('The order has been cancelled.'));
                         }
                     }
                 }
             }
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $message=$e->getMessage();
         }
 

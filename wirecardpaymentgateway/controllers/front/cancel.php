@@ -59,7 +59,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                         throw new Exception($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
                         throw new Exception($this->l('The merchant configuration is incorrect'));
-                    } else{
+                    } else {
                         $this->context->smarty->assign(array(
                             'reference' => $order->reference,
                             'payment' => $order->payment
@@ -73,8 +73,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                     }
                 }
             }
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $message=$e->getMessage();
         }
 

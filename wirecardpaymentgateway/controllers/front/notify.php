@@ -31,11 +31,8 @@
 require __DIR__.'/../../vendor/autoload.php';
 require __DIR__.'/../../libraries/Logger.php';
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
@@ -67,50 +64,51 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                         throw new Exception($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
                         throw new Exception($this->l('The merchant configuration is incorrect'));
-                    } else{
-                            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
-                            $service = new TransactionService($paymentType->config, $logger);
-                            $notification = $service->handleNotification(file_get_contents('php://input'));
-                            if (!$notification->isValidSignature()) {
+                    } else {
+                        $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+                        $service = new TransactionService($paymentType->getConnection(), $logger);
+                        $notification = $service->handleNotification(file_get_contents('php://input'));
+                        if (!$notification->isValidSignature()) {
+                            throw new Exception($this->l('The data has been modified by 3rd Party'));
+                        } elseif ($notification instanceof SuccessResponse) {
+                            $responseArray = $notification->getData();
+                            $orderId = $notification->getCustomFields()->get('customOrderNumber');
+                            if ($orderId!=$orderNumber) {
                                 throw new Exception($this->l('The data has been modified by 3rd Party'));
-                            } elseif ($notification instanceof SuccessResponse) {
-                                $responseArray = $notification->getData();
-                                $orderId = $notification->getCustomFields()->get('customOrderNumber');
-                                if ( $orderId!=$orderNumber) {
-                                    throw new Exception($this->l('The data has been modified by 3rd Party'));
-                                } elseif ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
-                                    $order->current_state == _PS_OS_PAYMENT_ ||
-                                    $order->current_state == _PS_OS_CANCELED_) {
-                                    throw new Exception($this->l(sprintf(
-                                        'Order with id %s was already notified',
-                                        $orderId
-                                    )));
-                                } else {
-                                    $this->module->updateOrder($orderId, $this->getStatus($responseArray['transaction-state']));
-                                    $logger->info(sprintf(
-                                        'Order with id %s  was notified',
-                                        $orderId
-                                    ));
-                                }
-                            } elseif ($notification instanceof FailureResponse) {
-                                foreach ($notification->getStatusCollection() as $status) {
-                                    $severity = ucfirst($status->getSeverity());
-                                    $code = $status->getCode();
-                                    $description = $status->getDescription();
-                                    $logger->warning(sprintf(
-                                        '%s with code %s and message "%s" occurred.<br>',
-                                        $severity,
-                                        $code,
-                                        $description
-                                    ));
-                                   // throw new Exception($this->l($description));
-                                }
+                            } elseif ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
+                                $order->current_state == _PS_OS_PAYMENT_ ||
+                                $order->current_state == _PS_OS_CANCELED_) {
+                                throw new Exception($this->l(sprintf(
+                                    'Order with id %s was already notified',
+                                    $orderId
+                                )));
+                            } else {
+                                $this->module->updateOrder(
+                                    $orderId,
+                                    $this->getStatus($responseArray['transaction-state'])
+                                );
+                                $logger->info(sprintf(
+                                    'Order with id %s  was notified',
+                                    $orderId
+                                ));
                             }
+                        } elseif ($notification instanceof FailureResponse) {
+                            foreach ($notification->getStatusCollection() as $status) {
+                                $severity = ucfirst($status->getSeverity());
+                                $code = $status->getCode();
+                                $description = $status->getDescription();
+                                $logger->warning(sprintf(
+                                    '%s with code %s and message "%s" occurred.<br>',
+                                    $severity,
+                                    $code,
+                                    $description
+                                ));
+                            }
+                        }
                     }
                 }
             }
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $message=$e->getMessage();
         }
 
