@@ -40,6 +40,11 @@ class WirecardPaymentGateway extends PaymentModule
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
     private $postErrors;
     const CLASS_NAME="className";
+    const LINK_BUTTON='linkbutton';
+    const INPUT_ON_OFF='onoff';
+    const WIRECARD_SERVER_URL='wirecard_server_url';
+    const HTTP_PASSWORD='http_password';
+    const HTTP_USER='http_user';
 
     public function __construct()
     {
@@ -163,21 +168,22 @@ class WirecardPaymentGateway extends PaymentModule
     protected function paypal()
     {
         $methodName=__FUNCTION__;
+        $MethodName=ucfirst($methodName);
         return array(
-            'tab' => $this->l('PayPal'),
+            'tab' => $this->l($MethodName),
             'fields' => array(
                 array(
                     'name' => 'enable_method',
                     'label' => $this->l('Enable'),
                     'default' => '0',
-                    'type' => 'onoff',
-                    self::CLASS_NAME => 'Paypal',
+                    'type' => self::INPUT_ON_OFF,
+                    self::CLASS_NAME => $MethodName,
                     'logo' => 'paypal.png',
-                    'labelMethod' => $this->l('Paypal'),
+                    'labelMethod' => $this->l($MethodName),
 
                 ),
                 array(
-                    'name' => 'wirecard_server_url',
+                    'name' => self::WIRECARD_SERVER_URL,
                     'label' => $this->l('URL of Wirecard server'),
                     'type' => 'text',
                     'default' => 'https://api-test.wirecard.com',
@@ -201,7 +207,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => 'http_user',
+                    'name' => self::HTTP_USER,
                     'label' => $this->l('HTTP user'),
                     'type' => 'text',
                     'default' => '70000-APITEST-AP',
@@ -209,7 +215,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => 'http_password',
+                    'name' => self::HTTP_PASSWORD,
                     'label' => $this->l('HTTP Password'),
                     'type' => 'text',
                     'default' => 'qD2wzQ_hrc!8',
@@ -228,28 +234,24 @@ class WirecardPaymentGateway extends PaymentModule
                     'name' => 'descriptor',
                     'label' => $this->l('Send descriptor'),
                     'default' => '1',
-                    'type' => 'onoff',
+                    'type' => self::INPUT_ON_OFF,
                     'required' => true
                 ),
                 array(
                     'name' => 'basket_send',
                     'label' => $this->l('Send basket data'),
                     'default' => '0',
-                    'type' => 'onoff',
+                    'type' => self::INPUT_ON_OFF,
                     'required' => true
                 ),
                 array(
-                    'type' => 'linkbutton',
+                    'type' => self::LINK_BUTTON,
                     'required' => false,
                     'buttonText' => $this->l('Test paypal configuration'),
                     'id' => 'paypalConfig',
                     'method' => $methodName,
                     'name' => $methodName,
-                    'send' => array(
-                        $this->buildParamName($methodName, 'wirecard_server_url'),
-                        $this->buildParamName($methodName, 'http_user'),
-                        $this->buildParamName($methodName, 'http_password')
-                    )
+                    'send' => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -258,21 +260,22 @@ class WirecardPaymentGateway extends PaymentModule
     protected function sofort()
     {
         $methodName=__FUNCTION__;
+        $MethodName=ucfirst($methodName);
         return array(
-            'tab' => $this->l('Sofort'),
+            'tab' => $this->l($MethodName),
             'fields' => array(
                 array(
                     'name' => 'enable_method',
                     'label' => $this->l('Enable'),
                     'default' => '0',
-                    'type' => 'onoff',
-                    self::CLASS_NAME => 'Sofort',
+                    'type' => self::INPUT_ON_OFF,
+                    self::CLASS_NAME => $MethodName,
                     'logo' => 'sofortbanking.png',
-                    'labelMethod' => $this->l('Sofort'),
+                    'labelMethod' => $this->l($MethodName),
 
                 ),
                 array(
-                    'name' => 'wirecard_server_url',
+                    'name' => self::WIRECARD_SERVER_URL,
                     'label' => $this->l('URL of Wirecard server'),
                     'type' => 'text',
                     'default' => 'https://api-test.wirecard.com',
@@ -296,7 +299,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => 'http_user',
+                    'name' => self::HTTP_USER,
                     'label' => $this->l('HTTP user'),
                     'type' => 'text',
                     'default' => '70000-APITEST-AP',
@@ -304,7 +307,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => 'http_password',
+                    'name' => self::HTTP_PASSWORD,
                     'label' => $this->l('HTTP Password'),
                     'type' => 'text',
                     'default' => 'qD2wzQ_hrc!8',
@@ -312,19 +315,23 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'type' => 'linkbutton',
+                    'type' => self::LINK_BUTTON,
                     'required' => false,
                     'buttonText' => $this->l('Test sofort configuration'),
                     'id' => 'sofortConfig',
                     'method' => $methodName,
                     'name' => $methodName,
-                    'send' => array(
-                        $this->buildParamName($methodName, 'wirecard_server_url'),
-                        $this->buildParamName($methodName, 'http_user'),
-                        $this->buildParamName($methodName, 'http_password')
-                    )
+                    'send' => $this->getCheckArray($methodName)
                 )
             )
+        );
+    }
+
+    function getCheckArray($methodName){
+        return array(
+            $this->buildParamName($methodName, self::WIRECARD_SERVER_URL),
+            $this->buildParamName($methodName, self::HTTP_USER),
+            $this->buildParamName($methodName, self::HTTP_PASSWORD)
         );
     }
 
@@ -443,13 +450,18 @@ class WirecardPaymentGateway extends PaymentModule
                 }
 
                 switch ($f['type']) {
-                    case 'linkbutton':
+                    case self::LINK_BUTTON:
                         $elem['buttonText'] = $f['buttonText'];
                         $elem['id'] = $f['id'];
                         $elem['method'] = $f['method'];
                         $elem['send'] = $f['send'];
                         break;
-
+                    case self::INPUT_ON_OFF:
+                        $elem['type'] = $radio_type;
+                        $elem['class'] = 't';
+                        $elem['is_bool'] = true;
+                        $elem['values'] = $radio_options;
+                        break;
                     case 'text':
                         if (!isset($elem['class'])) {
                             $elem['class'] = 'fixed-width-xl';
@@ -459,14 +471,6 @@ class WirecardPaymentGateway extends PaymentModule
                             $elem['maxlength'] = $elem['maxchar'] = $f['maxchar'];
                         }
                         break;
-
-                    case 'onoff':
-                        $elem['type'] = $radio_type;
-                        $elem['class'] = 't';
-                        $elem['is_bool'] = true;
-                        $elem['values'] = $radio_options;
-                        break;
-
                     case 'select':
                         if (isset($f['multiple'])) {
                             $elem['multiple'] = $f['multiple'];
