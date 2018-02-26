@@ -31,6 +31,8 @@
 
 require_once __DIR__.'/../../../vendor/autoload.php';
 require_once __DIR__.'/../../../libraries/Logger.php';
+require_once __DIR__.'/../../../libraries/ConfigurationSettings.php';
+
 require_once __DIR__.'/Cart.php';
 
 use Wirecard\PaymentSdk\Config\Config;
@@ -58,7 +60,7 @@ class WirecardPaymentGatewayPayment
 
     public function isAvailable()
     {
-        return (bool)$this->module->getConfigValue($this->paymentMethod, 'enable_method');
+        return (bool)ConfigurationSettings::getConfigValue($this->paymentMethod, 'enable_method');
     }
 
     public function getName()
@@ -86,11 +88,11 @@ class WirecardPaymentGatewayPayment
         $currency = new CurrencyCore($this->module->getContext()->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
 
-        $baseUrl = $this->module->getConfigValue($this->paymentMethod, 'wirecard_server_url');
-        $httpUser = $this->module->getConfigValue($this->paymentMethod, 'http_user');
-        $httpPass = $this->module->getConfigValue($this->paymentMethod, 'http_password');
-        $MAID = $this->module->getConfigValue($this->paymentMethod, 'maid');
-        $key = $this->module->getConfigValue($this->paymentMethod, 'secret') ;
+        $baseUrl = ConfigurationSettings::getConfigValue($this->paymentMethod, 'wirecard_server_url');
+        $httpUser = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_user');
+        $httpPass = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_password');
+        $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, 'maid');
+        $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret') ;
 
         $this->connection = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
 
