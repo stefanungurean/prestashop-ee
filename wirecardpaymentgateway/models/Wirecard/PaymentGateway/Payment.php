@@ -130,7 +130,6 @@ class WirecardPaymentGatewayPayment
         $transaction->setRedirect($CartData->getRedirect($cart, $orderNumber));
         $transaction->setNotificationUrl($CartData->getNotification($cart, $orderNumber));
         $transaction->setAmount($CartData->getTotalAmount($cart));
-        $transaction->setDescriptor($this->getDescriptor($orderNumber));
 
         $transaction->setConsumerId($cart->id_customer);
         $transaction->setIpAddress($CartData->getConsumerIpAddress());
@@ -144,7 +143,6 @@ class WirecardPaymentGatewayPayment
         $response = $transactionService->pay($transaction);
         $this->processResponse($response);
     }
-
 
     public function processResponse($response)
     {
@@ -177,10 +175,6 @@ class WirecardPaymentGatewayPayment
     }
 
     public function getTransactionName()
-    {
-    }
-
-    public function getDescriptor($orderNumber)
     {
     }
 }

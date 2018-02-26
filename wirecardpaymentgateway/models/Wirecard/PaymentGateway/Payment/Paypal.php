@@ -44,6 +44,11 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
         $orderDetail = $this->module->getDisplayName();
         $transaction->setOrderDetail($orderDetail);
         $transaction->setEntryMode('ecommerce');
+        $descriptor = '';
+        if (Configuration::get($this->module->getConfigValue($this->paymentMethod, 'descriptor'))) {
+            $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
+        }
+        $transaction->setDescriptor($descriptor);
         return $transaction;
     }
 

@@ -160,175 +160,180 @@ class WirecardPaymentGateway extends PaymentModule
         return $payment_options;
     }
 
-    /**
-     * returns the config array
-     *
-     * @since 0.0.2
-     *
-     * @return array
-     */
-    protected function config()
+    protected function paypal()
     {
+        $methodName=__FUNCTION__;
         return array(
-            'paypal' => array(
-                'tab' => $this->l('PayPal'),
-                'fields' => array(
-                    array(
-                        'name' => 'enable_method',
-                        'label' => $this->l('Enable'),
-                        'default' => '0',
-                        'type' => 'onoff',
-                        self::CLASS_NAME => 'Paypal',
-                        'logo' => 'paypal.png',
-                        'labelMethod' => $this->l('Paypal'),
+            'tab' => $this->l('PayPal'),
+            'fields' => array(
+                array(
+                    'name' => 'enable_method',
+                    'label' => $this->l('Enable'),
+                    'default' => '0',
+                    'type' => 'onoff',
+                    self::CLASS_NAME => 'Paypal',
+                    'logo' => 'paypal.png',
+                    'labelMethod' => $this->l('Paypal'),
 
-                    ),
-                    array(
-                        'name' => 'wirecard_server_url',
-                        'label' => $this->l('URL of Wirecard server'),
-                        'type' => 'text',
-                        'default' => 'https://api-test.wirecard.com',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'maid',
-                        'label' => $this->l('MAID'),
-                        'type' => 'text',
-                        'default' => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'secret',
-                        'label' => $this->l('Secret'),
-                        'type' => 'text',
-                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_user',
-                        'label' => $this->l('HTTP user'),
-                        'type' => 'text',
-                        'default' => '70000-APITEST-AP',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_password',
-                        'label' => $this->l('HTTP Password'),
-                        'type' => 'text',
-                        'default' => 'qD2wzQ_hrc!8',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'transaction_type',
-                        'label' => $this->l('Transaction type'),
-                        'type' => 'select',
-                        'default' => 'purchase',
-                        'required' => true,
-                        'options' => 'getTransactionTypes'
-                    ),
-                    array(
-                        'name' => 'descriptor',
-                        'label' => $this->l('Send descriptor'),
-                        'default' => '1',
-                        'type' => 'onoff',
-                        'required' => true
-                    ),
-                    array(
-                        'name' => 'basket_send',
-                        'label' => $this->l('Send basket data'),
-                        'default' => '0',
-                        'type' => 'onoff',
-                        'required' => true
-                    ),
-                    array(
-                        'type' => 'linkbutton',
-                        'required' => false,
-                        'buttonText' => $this->l('Test paypal configuration'),
-                        'id' => 'paypalConfig',
-                        'method' => 'paypal',
-                        'name' => 'paypal',
-                        'send' => array(
-                            $this->buildParamName('paypal', 'wirecard_server_url'),
-                            $this->buildParamName('paypal', 'http_user'),
-                            $this->buildParamName('paypal', 'http_password')
-                        )
-                    )
-                )
-            ),
-            'sofort' => array(
-                'tab' => $this->l('Sofort'),
-                'fields' => array(
-                    array(
-                        'name' => 'enable_method',
-                        'label' => $this->l('Enable'),
-                        'default' => '0',
-                        'type' => 'onoff',
-                        self::CLASS_NAME => 'Sofort',
-                        'logo' => 'sofortbanking.png',
-                        'labelMethod' => $this->l('Sofort'),
-
-                    ),
-                    array(
-                        'name' => 'wirecard_server_url',
-                        'label' => $this->l('URL of Wirecard server'),
-                        'type' => 'text',
-                        'default' => 'https://api-test.wirecard.com',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'maid',
-                        'label' => $this->l('MAID'),
-                        'type' => 'text',
-                        'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'secret',
-                        'label' => $this->l('Secret'),
-                        'type' => 'text',
-                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_user',
-                        'label' => $this->l('HTTP user'),
-                        'type' => 'text',
-                        'default' => '70000-APITEST-AP',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'name' => 'http_password',
-                        'label' => $this->l('HTTP Password'),
-                        'type' => 'text',
-                        'default' => 'qD2wzQ_hrc!8',
-                        'required' => true,
-                        'sanitize' => 'trim'
-                    ),
-                    array(
-                        'type' => 'linkbutton',
-                        'required' => false,
-                        'buttonText' => $this->l('Test sofort configuration'),
-                        'id' => 'sofortConfig',
-                        'method' => 'sofort',
-                        'name' => 'sofort',
-                        'send' => array(
-                            $this->buildParamName('sofort', 'wirecard_server_url'),
-                            $this->buildParamName('sofort', 'http_user'),
-                            $this->buildParamName('sofort', 'http_password')
-                        )
+                ),
+                array(
+                    'name' => 'wirecard_server_url',
+                    'label' => $this->l('URL of Wirecard server'),
+                    'type' => 'text',
+                    'default' => 'https://api-test.wirecard.com',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'maid',
+                    'label' => $this->l('MAID'),
+                    'type' => 'text',
+                    'default' => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'secret',
+                    'label' => $this->l('Secret'),
+                    'type' => 'text',
+                    'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'http_user',
+                    'label' => $this->l('HTTP user'),
+                    'type' => 'text',
+                    'default' => '70000-APITEST-AP',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'http_password',
+                    'label' => $this->l('HTTP Password'),
+                    'type' => 'text',
+                    'default' => 'qD2wzQ_hrc!8',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'transaction_type',
+                    'label' => $this->l('Transaction type'),
+                    'type' => 'select',
+                    'default' => 'purchase',
+                    'required' => true,
+                    'options' => 'getTransactionTypes'
+                ),
+                array(
+                    'name' => 'descriptor',
+                    'label' => $this->l('Send descriptor'),
+                    'default' => '1',
+                    'type' => 'onoff',
+                    'required' => true
+                ),
+                array(
+                    'name' => 'basket_send',
+                    'label' => $this->l('Send basket data'),
+                    'default' => '0',
+                    'type' => 'onoff',
+                    'required' => true
+                ),
+                array(
+                    'type' => 'linkbutton',
+                    'required' => false,
+                    'buttonText' => $this->l('Test paypal configuration'),
+                    'id' => 'paypalConfig',
+                    'method' => $methodName,
+                    'name' => $methodName,
+                    'send' => array(
+                        $this->buildParamName($methodName, 'wirecard_server_url'),
+                        $this->buildParamName($methodName, 'http_user'),
+                        $this->buildParamName($methodName, 'http_password')
                     )
                 )
             )
         );
+    }
+
+    protected function sofort()
+    {
+        $methodName=__FUNCTION__;
+        return array(
+            'tab' => $this->l('Sofort'),
+            'fields' => array(
+                array(
+                    'name' => 'enable_method',
+                    'label' => $this->l('Enable'),
+                    'default' => '0',
+                    'type' => 'onoff',
+                    self::CLASS_NAME => 'Sofort',
+                    'logo' => 'sofortbanking.png',
+                    'labelMethod' => $this->l('Sofort'),
+
+                ),
+                array(
+                    'name' => 'wirecard_server_url',
+                    'label' => $this->l('URL of Wirecard server'),
+                    'type' => 'text',
+                    'default' => 'https://api-test.wirecard.com',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'maid',
+                    'label' => $this->l('MAID'),
+                    'type' => 'text',
+                    'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'secret',
+                    'label' => $this->l('Secret'),
+                    'type' => 'text',
+                    'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'http_user',
+                    'label' => $this->l('HTTP user'),
+                    'type' => 'text',
+                    'default' => '70000-APITEST-AP',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'name' => 'http_password',
+                    'label' => $this->l('HTTP Password'),
+                    'type' => 'text',
+                    'default' => 'qD2wzQ_hrc!8',
+                    'required' => true,
+                    'sanitize' => 'trim'
+                ),
+                array(
+                    'type' => 'linkbutton',
+                    'required' => false,
+                    'buttonText' => $this->l('Test sofort configuration'),
+                    'id' => 'sofortConfig',
+                    'method' => $methodName,
+                    'name' => $methodName,
+                    'send' => array(
+                        $this->buildParamName($methodName, 'wirecard_server_url'),
+                        $this->buildParamName($methodName, 'http_user'),
+                        $this->buildParamName($methodName, 'http_password')
+                    )
+                )
+            )
+        );
+    }
+
+    protected function config()
+    {
+        $configurationArray=array();
+        $configurationArray['paypal']=$this->paypal();
+        $configurationArray['sofort']=$this->sofort();
+        return $configurationArray;
     }
 
     /**
