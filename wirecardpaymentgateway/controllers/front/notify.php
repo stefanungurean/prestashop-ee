@@ -46,12 +46,12 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         $message = "";
         try {
             if (!$this->module->active) {
-                throw new Exception($this->l('Module is not activ'));
+                throw new ExceptionEE($this->l('Module is not activ'));
             } else {
                 $orderNumber = $_GET['order'];
                 $order = new Order($orderNumber);
                 if ($orderNumber == null || $order == null) {
-                    throw new Exception($this->l(sprintf(
+                    throw new ExceptionEE($this->l(sprintf(
                         'Order %s do not exist',
                         $orderNumber
                     )));

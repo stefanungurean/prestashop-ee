@@ -87,18 +87,4 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
 
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/cancel.tpl');
     }
-
-    /**
-     * updates order status
-     *
-     * @since 0.0.2
-     *
-     */
-    private function updateStatus($orderNumber, $status)
-    {
-        $history = new OrderHistory();
-        $history->id_order = (int)$orderNumber;
-        $history->changeIdOrderState($status, $history->id_order, true);
-        $history->sendEmail($orderNumber);
-    }
 }
