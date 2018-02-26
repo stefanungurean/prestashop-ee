@@ -131,10 +131,10 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
         $this->module->getContext()->link->getModuleLink($this->module->getName(), 'cancel', $params, true)
         );
         $notificationUrl = $this->module->getContext()->link->getModuleLink(
-        $this->module->getName(),
-        'notify',
-        $params,
-        true
+            $this->module->getName(),
+            'notify',
+            $params,
+            true
         );
 
         $customer = new Customer($cart->id_customer);

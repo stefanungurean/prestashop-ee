@@ -60,6 +60,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                     )));
                 } else {
                     $paymentType = $this->module->getPaymentType($order->payment);
+
                     if ($paymentType === null) {
                         throw new Exception($this->l('This payment method is not available.'));
                     } elseif (!$paymentType->isAvailable()) {
@@ -67,10 +68,9 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                     } elseif (!$paymentType->configuration()) {
                         throw new Exception($this->l('The merchant configuration is incorrect'));
                     } else{
-                        if ($_POST) {
                             $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
                             $service = new TransactionService($paymentType->config, $logger);
-                            $notification = $service->handleResponse($_POST);
+                            $notification = $service->handleNotification(file_get_contents('php://input'));
                             if (!$notification->isValidSignature()) {
                                 throw new Exception($this->l('The data has been modified by 3rd Party'));
                             } elseif ($notification instanceof SuccessResponse) {
@@ -86,7 +86,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                                         $orderId
                                     )));
                                 } else {
-                                    $this->updateStatus($orderId, $this->getStatus($responseArray['transaction-state']));
+                                    $this->module->updateOrder($orderId, $this->getStatus($responseArray['transaction-state']));
                                     $logger->info(sprintf(
                                         'Order with id %s  was notified',
                                         $orderId
@@ -106,9 +106,6 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                                    // throw new Exception($this->l($description));
                                 }
                             }
-                        } else{
-                            throw new Exception($this->l('The order has been cancelled.'));
-                        }
                     }
                 }
             }
@@ -120,20 +117,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         if ($message!="") {
             $logger->error($message);
         }
-    }
-
-    /**
-     * updates order status
-     *
-     * @since 0.0.2
-     *
-     */
-    private function updateStatus($orderNumber, $status)
-    {
-        $history = new OrderHistory();
-        $history->id_order = (int)$orderNumber;
-        $history->changeIdOrderState($status, $history->id_order, true);
-        $history->addWithemail();
+        exit;
     }
 
     /**

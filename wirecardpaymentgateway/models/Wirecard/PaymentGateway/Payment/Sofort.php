@@ -66,8 +66,15 @@ class WirecardPaymentGatewayPaymentSofort extends WirecardPaymentGatewayPayment
             $this->module->getContext()->link->getModuleLink($this->module->getName(), 'cancel', $params, true)
         );
 
+        $notificationUrl = $this->module->getContext()->link->getModuleLink(
+            $this->module->getName(),
+            'notify',
+            $params,
+            true
+        );
         $transaction = new SofortTransaction();
         $transaction->setRedirect($redirectUrls);
+        $transaction->setNotificationUrl($notificationUrl);
         $transaction->setAmount($amount);
         $transaction->setDescriptor('test');
 

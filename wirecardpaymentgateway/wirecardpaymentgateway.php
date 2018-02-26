@@ -888,7 +888,8 @@ class WirecardPaymentGateway extends PaymentModule
         Tools::redirect($this->getContext()->link->getPageLink('order', true, $this->getContext()->cart->id_lang, $params));
     }
 
-    function addOrder($cart, $paymentMethod){
+    function addOrder($cart, $paymentMethod)
+    {
         $this->validateOrder(
             $cart->id,
             Configuration::get(self::WDEE_OS_AWAITING),
@@ -903,7 +904,8 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->currentOrder;
     }
 
-    function updateOrder($orderNumber,$orderStatus){
+    function updateOrder($orderNumber, $orderStatus)
+    {
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;
         $history->changeIdOrderState(($orderStatus), $orderNumber, true);
