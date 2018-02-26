@@ -29,9 +29,6 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 require_once __DIR__.'/libraries/ExceptionEE.php';
-require_once __DIR__.'/libraries/ConfigurationSettings.php';
-require_once __DIR__.'/libraries/OrderMangement.php';
-
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 /**
@@ -39,17 +36,28 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
  */
 class WirecardPaymentGateway extends PaymentModule
 {
+    const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
+    const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
     private $postErrors;
+    const CLASS_NAME="className";
+    const METHOD_NAME="method";
+    const LINK_BUTTON='linkbutton';
+    const INPUT_ON_OFF='onoff';
     const WIRECARD_SERVER_URL='wirecard_server_url';
     const HTTP_PASS='http_password';
     const HTTP_USER='http_user';
-    private $config;
+
     public function __construct()
     {
+        ini_set(
+            'include_path',
+            ini_get('include_path')
+            . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'vendor'
+            . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'models'
+        );
+        require_once 'wirecardee_autoload.php';
 
-
-        $this->config = new ConfigurationSettings($this);
-        ConfigurationSettings::$config= $this->config();
+        $this->config = $this->config();
         $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
         $this->version = '0.0.3';
@@ -67,14 +75,55 @@ class WirecardPaymentGateway extends PaymentModule
 
     public function install()
     {
-        if (!parent::install() || !ConfigurationSettings::setDefaults()
+        if (!parent::install() || !$this->setDefaults()
             || !$this->registerHook('displayPaymentEU')
             || !$this->registerHook('actionFrontControllerSetMedia')
             || !$this->registerHook('displayHeader')) {
             return false;
         }
-        $this->getConfig()->setStatus();
+        if (!Configuration::get(self::WDEE_OS_AWAITING)) {
 
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment awaiting';
+            }
+            $orderState->send_email = false;
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->add();
+            Configuration::updateValue(
+                self::WDEE_OS_AWAITING,
+                (int)($orderState->id)
+            );
+        }
+
+        if (!Configuration::get(self::WDEE_OS_FRAUD)) {
+
+            /** @var OrderStateCore $orderState */
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway fraud detected';
+            }
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->module_name = 'wirecardpaymentgateway';
+            $orderState->add();
+
+            Configuration::updateValue(
+                self::WDEE_OS_FRAUD,
+                (int)($orderState->id)
+            );
+        }
         return true;
     }
 
@@ -98,7 +147,7 @@ class WirecardPaymentGateway extends PaymentModule
         }
         $payment_options=array();
 
-        foreach ($this->getConfig()->getPaymentTypes() as $paymentType) {
+        foreach ($this->getPaymentTypes() as $paymentType) {
             if ($paymentType->isAvailable()) {
                 $payment_options[] = array(
                     'cta_text' => $this->l($paymentType->getLabel()),
@@ -128,8 +177,8 @@ class WirecardPaymentGateway extends PaymentModule
                     'name' => 'enable_method',
                     'label' => $this->l('Enable'),
                     'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
+                    'type' => self::INPUT_ON_OFF,
+                    self::CLASS_NAME => $MethodName,
                     'logo' => 'paypal.png',
                     'labelMethod' => $this->l($MethodName),
 
@@ -186,22 +235,22 @@ class WirecardPaymentGateway extends PaymentModule
                     'name' => 'descriptor',
                     'label' => $this->l('Send descriptor'),
                     'default' => '1',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
+                    'type' => self::INPUT_ON_OFF,
                     'required' => true
                 ),
                 array(
                     'name' => 'basket_send',
                     'label' => $this->l('Send basket data'),
                     'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
+                    'type' => self::INPUT_ON_OFF,
                     'required' => true
                 ),
                 array(
-                    'type' => ConfigurationSettings::LINK_BUTTON,
+                    'type' => self::LINK_BUTTON,
                     'required' => false,
                     'buttonText' => $this->l('Test paypal configuration'),
                     'id' => 'paypalConfig',
-                    ConfigurationSettings::METHOD_NAME  => $methodName,
+                    self::METHOD_NAME  => $methodName,
                     'name' => $methodName,
                     'send' => $this->getCheckArray($methodName)
                 )
@@ -220,8 +269,8 @@ class WirecardPaymentGateway extends PaymentModule
                     'name' => 'enable_method',
                     'label' => $this->l('Enable'),
                     'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
+                    'type' => self::INPUT_ON_OFF,
+                    self::CLASS_NAME => $MethodName,
                     'logo' => 'sofortbanking.png',
                     'labelMethod' => $this->l($MethodName),
 
@@ -267,11 +316,11 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'type' => ConfigurationSettings::LINK_BUTTON,
+                    'type' => self::LINK_BUTTON,
                     'required' => false,
                     'buttonText' => $this->l('Test sofort configuration'),
                     'id' => 'sofortConfig',
-                    ConfigurationSettings::METHOD_NAME => $methodName,
+                    self::METHOD_NAME => $methodName,
                     'name' => $methodName,
                     'send' => $this->getCheckArray($methodName)
                 )
@@ -282,9 +331,9 @@ class WirecardPaymentGateway extends PaymentModule
     public function getCheckArray($methodName)
     {
         return array(
-            ConfigurationSettings::buildParamName($methodName, self::WIRECARD_SERVER_URL),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_USER),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_PASS)
+            $this->buildParamName($methodName, self::WIRECARD_SERVER_URL),
+            $this->buildParamName($methodName, self::HTTP_USER),
+            $this->buildParamName($methodName, self::HTTP_PASS)
         );
     }
 
@@ -306,9 +355,9 @@ class WirecardPaymentGateway extends PaymentModule
         $this->html = '<h2>' . $this->displayName . '</h2>';
 
         if (Tools::isSubmit('btnSubmit')) {
-            $this->getConfig()->postValidation();
+            $this->postValidation();
             if (!count($this->postErrors)) {
-                $this->html.=$this->getConfig()->postProcess();
+                $this->postProcess();
             } else {
                 foreach ($this->postErrors as $err) {
                     $this->html .= $this->displayError(html_entity_decode($err));
@@ -326,9 +375,358 @@ class WirecardPaymentGateway extends PaymentModule
         $this->html .= $this->context->smarty->fetch(
             dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
         );
-        $this->html .= $this->getConfig()->renderForm();
+        $this->html .= $this->renderForm();
 
         return $this->html;
+    }
+
+    /**
+     * render form
+     *
+     * @since 0.0.2
+     *
+     * @return string
+     */
+    private function renderForm()
+    {
+        $radio_type = 'switch';
+
+        $radio_options = array(
+            array(
+                'id' => 'active_on',
+                'value' => 1,
+                'label' => $this->l('Enabled')
+            ),
+            array(
+                'id' => 'active_off',
+                'value' => 0,
+                'label' => $this->l('Disabled')
+            )
+        );
+
+        $input_fields = array();
+        $tabs = array();
+
+        foreach ($this->config as $groupKey => $group) {
+            $tabs[$groupKey] = $this->l($group['tab']);
+            foreach ($group['fields'] as $f) {
+                $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
+                if (isset($f['class'])) {
+                    $configGroup = 'pt';
+                }
+
+                $elem = array(
+                    'name' => $this->buildParamName($configGroup, $f['name']),
+                    'label' => isset($f['label'])?$this->l($f['label']):"",
+                    'tab' => $groupKey,
+                    'type' => $f['type'],
+                    'required' => isset($f['required']) && $f['required']
+                );
+
+                if (isset($f['cssclass'])) {
+                    $elem['class'] = $f['cssclass'];
+                }
+
+                if (isset($f['doc'])) {
+                    if (is_array($f['doc'])) {
+                        $elem['desc'] = '';
+                        foreach ($f['doc'] as $d) {
+                            if (Tools::strlen($elem['desc'])) {
+                                $elem['desc'] .= '<br/>';
+                            }
+
+                            $elem['desc'] .= $this->l($d);
+                        }
+                    } else {
+                        $elem['desc'] = $this->l($f['doc']);
+                    }
+                }
+
+                if (isset($f['docref'])) {
+                    $elem['desc'] = isset($elem['desc']) ? $elem['desc'] . ' ' : '';
+                    $elem['desc'] .= sprintf(
+                        '<a target="_blank" href="%s">%s <i class="icon-external-link"></i></a>',
+                        $f['docref'],
+                        $this->l('More information')
+                    );
+                }
+
+                switch ($f['type']) {
+                    case self::LINK_BUTTON:
+                        $elem['buttonText'] = $f['buttonText'];
+                        $elem['id'] = $f['id'];
+                        $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
+                        $elem['send'] = $f['send'];
+                        break;
+                    case self::INPUT_ON_OFF:
+                        $elem['type'] = $radio_type;
+                        $elem['class'] = 't';
+                        $elem['is_bool'] = true;
+                        $elem['values'] = $radio_options;
+                        break;
+                    case 'text':
+                        if (!isset($elem['class'])) {
+                            $elem['class'] = 'fixed-width-xl';
+                        }
+
+                        if (isset($f['maxchar'])) {
+                            $elem['maxlength'] = $elem['maxchar'] = $f['maxchar'];
+                        }
+                        break;
+                    case 'select':
+                        if (isset($f['multiple'])) {
+                            $elem['multiple'] = $f['multiple'];
+                        }
+
+                        if (isset($f['size'])) {
+                            $elem['size'] = $f['size'];
+                        }
+
+                        if (isset($f['options'])) {
+                            $optfunc = $f['options'];
+                            $options = array();
+                            if (is_array($optfunc)) {
+                                $options = $optfunc;
+                            }
+
+                            if (method_exists($this, $optfunc)) {
+                                $options = $this->$optfunc();
+                            }
+
+                            $elem['options'] = array(
+                                'query' => $options,
+                                'id' => 'key',
+                                'name' => 'value'
+                            );
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+                $input_fields[] = $elem;
+            }
+        }
+
+        $fields_form_settings = array(
+            'form' => array(
+                'tabs' => $tabs,
+                'legend' => array(
+                    'title' => $this->l('Settings'),
+                    'icon' => 'icon-cogs'
+                ),
+                'input' => $input_fields,
+                'submit' => array(
+                    'title' => $this->l('Save')
+                )
+            )
+        );
+
+        /** @var HelperFormCore $helper */
+        $helper = new HelperForm();
+        $helper->show_toolbar = false;
+
+        /** @var LanguageCore $lang */
+        $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
+        $helper->default_form_language = $lang->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get(
+            'PS_BO_ALLOW_EMPLOYEE_FORM_LANG'
+        ) : 0;
+        $helper->id = (int)Tools::getValue('id_carrier');
+        $helper->identifier = $this->identifier;
+        $helper->module = $this;
+        $helper->submit_action = 'btnSubmit';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $helper->tpl_vars = array(
+            'fields_value' => $this->getConfigFieldsValues(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id
+        );
+        return $helper->generateForm(array($fields_form_settings));
+    }
+
+    /**
+     * build prestashop internal parameter name
+     *
+     * @since 0.0.2
+     *
+     * @param $group
+     * @param $name
+     *
+     * @return string
+     */
+    public function buildParamName($group, $name)
+    {
+        return sprintf(
+            'WDEE_%s_%s',
+            Tools::strtoupper($group),
+            Tools::strtoupper($name)
+        );
+    }
+
+    /**
+     * return saved config parameter values
+     *
+     * @since 0.0.2
+     *
+     * @return array
+     */
+    public function getConfigFieldsValues()
+    {
+        $values = array();
+        foreach ($this->getAllConfigurationParameters() as $parameter) {
+            $val = Configuration::get($parameter['param_name']);
+            if (isset($parameter['multiple']) && $parameter['multiple']) {
+                if (!is_array($val)) {
+                    $val = Tools::strlen($val) ? Tools::jsonDecode($val) : array();
+                }
+
+                $x = array();
+                foreach ($val as $v) {
+                    $x[$v] = $v;
+                }
+                $pname = $parameter['param_name'] . '[]';
+                $values[$pname] = $x;
+            } else {
+                $values[$parameter['param_name']] = $val;
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * return alls configuration parameters
+     *
+     * @since 0.0.2
+     *
+     * @return array
+     */
+    public function getAllConfigurationParameters()
+    {
+        $params = array();
+        foreach ($this->config as $groupKey => $group) {
+            foreach ($group['fields'] as $f) {
+                $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
+
+                if (isset($f['class'])) {
+                    $configGroup = 'pt';
+                }
+
+                $f['param_name'] = $this->buildParamName(
+                    $configGroup,
+                    $f['name']
+                );
+                $params[] = $f;
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * validate post parameters
+     *
+     * @since 0.0.2
+     *
+     */
+
+    private function postValidation()
+    {
+        if (Tools::isSubmit('btnSubmit')) {
+            foreach ($this->getAllConfigurationParameters() as $parameter) {
+                $val = Tools::getValue($parameter['param_name']);
+
+                if (isset($parameter['sanitize'])) {
+                    switch ($parameter['sanitize']) {
+                        case 'trim':
+                            $val = trim($val);
+                            break;
+                    }
+                }
+
+                if (isset($parameter['required']) && $parameter['required'] && !Tools::strlen($val)) {
+                    $this->postErrors[] = $parameter['label'] . ' ' . $this->l('is required.');
+                }
+
+                if (!isset($parameter['validator'])) {
+                    continue;
+                }
+
+                switch ($parameter['validator']) {
+                    case 'numeric':
+                        if (Tools::strlen($val) && !is_numeric($val)) {
+                            $this->postErrors[] = $parameter['label'] . ' ' . $this->l(' must be a number.');
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * process form post
+     *
+     * @since 0.0.2
+     *
+     */
+    private function postProcess()
+    {
+        if (Tools::isSubmit('btnSubmit')) {
+            foreach ($this->getAllConfigurationParameters() as $parameter) {
+                $val = Tools::getValue($parameter['param_name']);
+
+                if (isset($parameter['sanitize'])) {
+                    switch ($parameter['sanitize']) {
+                        case 'trim':
+                            $val = trim($val);
+                            break;
+                    }
+                }
+
+                if (is_array($val)) {
+                    $val = Tools::jsonEncode($val);
+                }
+                Configuration::updateValue($parameter['param_name'], $val);
+            }
+        }
+        $this->html .= $this->displayConfirmation($this->l('Settings updated'));
+    }
+
+    /**
+     * set configuration value defaults
+     *
+     * @since 0.0.2
+     *
+     * @return bool
+     */
+    private function setDefaults()
+    {
+        foreach ($this->config as $groupKey => $group) {
+            foreach ($group['fields'] as $f) {
+                if (array_key_exists('default', $f)) {
+                    $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
+
+                    if (isset($f['class'])) {
+                        $configGroup = 'pt';
+                    }
+                    $p = $this->buildParamName($configGroup, $f['name']);
+                    $defVal = $f['default'];
+                    if (is_array($defVal)) {
+                        $defVal = Tools::jsonEncode($defVal);
+                    }
+
+                    if (!Configuration::updateValue($p, $defVal)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -411,6 +809,52 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->name;
     }
 
+    /**
+     * @param $paymentType
+     *
+     * @return WirecardCheckoutSeamlessPayment |null
+     */
+    public function getPaymentType($paymentType)
+    {
+        $found = $this->getPaymentTypes($paymentType);
+        if (count($found) != 1) {
+            return null;
+        }
+
+        return $found[0];
+    }
+
+    /**
+     * return paymenttype objects
+     *
+     * @param null $paymentType
+     *
+     * @return array
+     */
+    public function getPaymentTypes($paymentType = null)
+    {
+        $types = array();
+        foreach ($this->config as $group) {
+            foreach ($group['fields'] as $f) {
+                $classNameIndex=self::CLASS_NAME;
+                if (array_key_exists($classNameIndex, $f)) {
+                    if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
+                        continue;
+                    }
+
+                    $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
+                    $f['group'] = 'pt';
+                    $pt = new $className($this, $f);
+
+                    $types[] = $pt;
+                }
+            }
+        }
+
+
+        return $types;
+    }
+
     public function initiatePayment($paymentTypeName = '')
     {
         try {
@@ -424,7 +868,7 @@ class WirecardPaymentGateway extends PaymentModule
             } elseif (!$this->context->cookie->id_cart) {
                 throw new ExceptionEE($this->l('Unable to load basket.'));
             }
-            $paymentType = $this->getConfig()->getPaymentType($paymentTypeName);
+            $paymentType = $this->getPaymentType($paymentTypeName);
             if ($paymentType === null) {
                 throw new ExceptionEE($this->l('This payment method is not available.'));
             } elseif (!$paymentType->isAvailable()) {
@@ -436,8 +880,8 @@ class WirecardPaymentGateway extends PaymentModule
             if ($validation['status']!==true) {
                 throw new ExceptionEE($this->l($validation['message']));
             }
+            $orderNumber = $this->addOrder($this->getContext()->cart, $paymentType->getMethod());
 
-            $orderNumber = $this->getOrderMangement()->addOrder($this->getContext()->cart, $paymentType->getMethod());
             $paymentType->initiate($this->getContext()->cart, $orderNumber);
         } catch (Exception $e) {
             $message=$e->getMessage();
@@ -446,7 +890,7 @@ class WirecardPaymentGateway extends PaymentModule
         $params=array();
         if ($message!='') {
             if (isset($orderNumber)) {
-                $this->getOrderMangement()->updateOrder($orderNumber, _PS_OS_ERROR_);
+                $this->updateOrder($orderNumber, _PS_OS_ERROR_);
             } else {
                 $orderNumber="";
             }
@@ -465,6 +909,29 @@ class WirecardPaymentGateway extends PaymentModule
         ));
     }
 
+    public function addOrder($cart, $paymentMethod)
+    {
+        $this->validateOrder(
+            $cart->id,
+            Configuration::get(self::WDEE_OS_AWAITING),
+            $cart->getOrderTotal(true),
+            $paymentMethod,
+            null,
+            array(),
+            null,
+            false,
+            $cart->secure_key
+        );
+        return $this->currentOrder;
+    }
+
+    public function updateOrder($orderNumber, $orderStatus)
+    {
+        $history = new OrderHistory();
+        $history->id_order = (int)$orderNumber;
+        $history->changeIdOrderState(($orderStatus), $orderNumber, true);
+    }
+
     /**
      * get context
      *
@@ -475,39 +942,29 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->context;
     }
 
-    public function getOrderMangement()
+    /**
+     * get config value, take presets into account
+     *
+     * @param $group
+     * @param $field
+     *
+     * @return string
+     */
+    public function getConfigValue($group, $field)
     {
-        return new OrderMangement($this);
-    }
-    public function getConfig()
-    {
-        return $this->config;
-    }
-    function HelperRender($fields_form_settings, $fields_value)
-    {
-        /** @var HelperFormCore $helper */
-        $helper = new HelperForm();
-        $helper->show_toolbar = false;
+        if ($group == 'basicdata') {
+            $mode = Configuration::get(
+                $this->buildParamName(
+                    'basicdata',
+                    'configmode'
+                )
+            );
 
-        /** @var LanguageCore $lang */
-        $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
-        $helper->default_form_language = $lang->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get(
-            'PS_BO_ALLOW_EMPLOYEE_FORM_LANG'
-        ) : 0;
-        $helper->id = (int)Tools::getValue('id_carrier');
-        $helper->identifier = $this->identifier;
-        $helper->module = $this;
-        $helper->submit_action = 'btnSubmit';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
+            if (isset($this->presets[$mode]) && isset($this->presets[$mode][$field])) {
+                return $this->presets[$mode][$field];
+            }
+        }
 
-        $helper->tpl_vars = array(
-            'fields_value' => $fields_value,
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id
-        );
-        return $helper->generateForm(array($fields_form_settings));
+        return Configuration::get($this->buildParamName($group, $field));
     }
 }

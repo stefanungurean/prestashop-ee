@@ -53,7 +53,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                     $orderNumber
                 )));
             }
-            $paymentType = $this->module->getConfig()->getPaymentType($order->payment);
+            $paymentType = $this->module->getPaymentType($order->payment);
             if ($paymentType === null) {
                 throw new ExceptionEE($this->l('This payment method is not available.'));
             }
@@ -72,7 +72,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             }
 
             $logger->log(1, $this->l(sprintf('Cancelled order %s', $orderNumber)));
-            $this->module->getOrderMangement()->updateOrder($order->id, _PS_OS_CANCELED_);
+            $this->module->updateOrder($order->id, _PS_OS_CANCELED_);
         } catch (Exception $e) {
             $message=$e->getMessage();
         }

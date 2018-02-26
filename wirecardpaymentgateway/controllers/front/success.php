@@ -58,7 +58,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                     $orderNumber
                 )));
             }
-            $paymentType = $this->module->getConfig()->getPaymentType($order->payment);
+            $paymentType = $this->module->getPaymentType($order->payment);
             if ($paymentType === null) {
                 throw new ExceptionEE($this->l('This payment method is not available.'));
             }

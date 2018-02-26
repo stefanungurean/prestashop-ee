@@ -31,7 +31,6 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../libraries/Logger.php';
-require_once __DIR__ . '/../../libraries/ConfigurationSettings.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
@@ -51,9 +50,9 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
                 $status = 'ok';
                 $message = $this->l('The merchant configuration was successfuly tested.');
 
-                $baseUrl = Tools::getValue(ConfigurationSettings::buildParamName($method, 'wirecard_server_url'));
-                $httpUser = Tools::getValue(ConfigurationSettings::buildParamName($method, 'http_user'));
-                $httpPass = Tools::getValue(ConfigurationSettings::buildParamName($method, 'http_password'));
+                $baseUrl = Tools::getValue($this->module->buildParamName($method, 'wirecard_server_url'));
+                $httpUser = Tools::getValue($this->module->buildParamName($method, 'http_user'));
+                $httpPass = Tools::getValue($this->module->buildParamName($method, 'http_password'));
 
                 $config = new Config($baseUrl, $httpUser, $httpPass, "EUR");
                 $transactionService = new TransactionService($config, $logger);
