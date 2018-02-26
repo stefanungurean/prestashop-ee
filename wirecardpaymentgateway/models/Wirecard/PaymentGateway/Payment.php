@@ -176,7 +176,7 @@ class WirecardPaymentGatewayPayment
             }
         }
     }
-    
+
     public function getUrlParameters($cart, $orderNumber)
     {
         return array(

@@ -44,36 +44,35 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
         try {
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
-            } else {
-                $orderNumber = $_GET['order'];
-                $order = new Order($orderNumber);
-                if ($orderNumber == null || $order == null) {
-                    throw new ExceptionEE($this->l(sprintf(
-                        'Order %s do not exist',
-                        $orderNumber
-                    )));
-                } else {
-                    $paymentType = $this->module->getPaymentType($order->payment);
-                    if ($paymentType === null) {
-                        throw new ExceptionEE($this->l('This payment method is not available.'));
-                    } elseif (!$paymentType->isAvailable()) {
-                        throw new ExceptionEE($this->l('Payment method not enabled.'));
-                    } elseif (!$paymentType->configuration()) {
-                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
-                    } else {
-                        $this->context->smarty->assign(array(
-                            'reference' => $order->reference,
-                            'payment' => $order->payment
-                        ));
-                        if ($order->current_state == _PS_OS_CANCELED_) {
-                            throw new ExceptionEE($this->l('Order is already cancelled'));
-                        } else {
-                            $logger->log(1, $this->l(sprintf('Cancelled order %s', $orderNumber)));
-                            $this->module->updateOrder($order->id, _PS_OS_CANCELED_);
-                        }
-                    }
-                }
             }
+            $orderNumber = $_GET['order'];
+            $order = new Order($orderNumber);
+            if ($orderNumber == null || $order == null) {
+                throw new ExceptionEE($this->l(sprintf(
+                    'Order %s do not exist',
+                    $orderNumber
+                )));
+            }
+            $paymentType = $this->module->getPaymentType($order->payment);
+            if ($paymentType === null) {
+                throw new ExceptionEE($this->l('This payment method is not available.'));
+            }
+            if (!$paymentType->isAvailable()) {
+                throw new ExceptionEE($this->l('Payment method not enabled.'));
+            }
+            if (!$paymentType->configuration()) {
+                throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
+            }
+            $this->context->smarty->assign(array(
+                'reference' => $order->reference,
+                'payment' => $order->payment
+            ));
+            if ($order->current_state == _PS_OS_CANCELED_) {
+                throw new ExceptionEE($this->l('Order is already cancelled'));
+            }
+
+            $logger->log(1, $this->l(sprintf('Cancelled order %s', $orderNumber)));
+            $this->module->updateOrder($order->id, _PS_OS_CANCELED_);
         } catch (Exception $e) {
             $message=$e->getMessage();
         }
