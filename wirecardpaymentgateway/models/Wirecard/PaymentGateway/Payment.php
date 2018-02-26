@@ -179,23 +179,21 @@ class WirecardPaymentGatewayPayment
     
     public function getUrlParameters($cart, $orderNumber)
     {
-        $params = array(
+        return array(
             'id_cart' => (int)$cart->id,
             'id_module' => (int)$this->module->id,
             'key' => $cart->secure_key,
             'order' => $orderNumber
         );
-        return $params;
     }
 
     public function getRedirect($cart, $orderNumber)
     {
         $params=$this->getUrlParameters($cart, $orderNumber);
-        $redirectUrls = new Redirect(
+        return new Redirect(
             $this->module->getContext()->link->getModuleLink($this->module->getName(), 'success', $params, true),
             $this->module->getContext()->link->getModuleLink($this->module->getName(), 'cancel', $params, true)
         );
-        return $redirectUrls;
     }
 
     public function getNotification($cart, $orderNumber)
@@ -320,29 +318,14 @@ class WirecardPaymentGatewayPayment
 
     protected function getConsumerIpAddress()
     {
-        if (!method_exists('Tools', 'getRemoteAddr')) {
-            if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) and $_SERVER['HTTP_X_FORWARDED_FOR']) {
-                if (strpos($_SERVER['HTTP_X_FORWARDED_FOR'], ',')) {
-                    $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-
-                    return $ips[0];
-                } else {
-                    return $_SERVER['HTTP_X_FORWARDED_FOR'];
-                }
-            }
-
-            return $_SERVER['REMOTE_ADDR'];
-        } else {
-            return Tools::getRemoteAddr();
-        }
+        return Tools::getRemoteAddr();
     }
 
     public function getTotalAmount($cart)
     {
         $currency = new CurrencyCore($cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
-        return $amount;
+        return new Amount($cart->getOrderTotal(true), $currencyIsoCode);
     }
 
     public function setCustomField($CustomFieldArray)

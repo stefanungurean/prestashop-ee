@@ -30,6 +30,7 @@
  */
 require __DIR__.'/../../vendor/autoload.php';
 require __DIR__.'/../../libraries/Logger.php';
+require __DIR__.'/../../libraries/ExceptionEE.php';
 
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {
@@ -42,30 +43,30 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
         $message = "";
         try {
             if (!$this->module->active) {
-                throw new Exception($this->l('Module is not activ'));
+                throw new ExceptionEE($this->l('Module is not activ'));
             } else {
                 $orderNumber = $_GET['order'];
                 $order = new Order($orderNumber);
                 if ($orderNumber == null || $order == null) {
-                    throw new Exception($this->l(sprintf(
+                    throw new ExceptionEE($this->l(sprintf(
                         'Order %s do not exist',
                         $orderNumber
                     )));
                 } else {
                     $paymentType = $this->module->getPaymentType($order->payment);
                     if ($paymentType === null) {
-                        throw new Exception($this->l('This payment method is not available.'));
+                        throw new ExceptionEE($this->l('This payment method is not available.'));
                     } elseif (!$paymentType->isAvailable()) {
-                        throw new Exception($this->l('Payment method not enabled.'));
+                        throw new ExceptionEE($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
-                        throw new Exception($this->l('The merchant configuration is incorrect'));
+                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
                     } else {
                         $this->context->smarty->assign(array(
                             'reference' => $order->reference,
                             'payment' => $order->payment
                         ));
                         if ($order->current_state == _PS_OS_CANCELED_) {
-                            throw new Exception($this->l('Order is already cancelled'));
+                            throw new ExceptionEE($this->l('Order is already cancelled'));
                         } else {
                             $logger->log(1, $this->l(sprintf('Cancelled order %s', $orderNumber)));
                             $this->module->updateOrder($order->id, _PS_OS_CANCELED_);

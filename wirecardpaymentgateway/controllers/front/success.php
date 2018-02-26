@@ -30,6 +30,7 @@
  */
 require __DIR__.'/../../vendor/autoload.php';
 require __DIR__.'/../../libraries/Logger.php';
+require __DIR__.'/../../libraries/ExceptionEE.php';
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -47,34 +48,34 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         $message = "";
         try {
             if (!$this->module->active) {
-                throw new Exception($this->l('Module is not activ'));
+                throw new ExceptionEE($this->l('Module is not activ'));
             } else {
                 $orderNumber = $_GET['order'];
                 $order = new Order($orderNumber);
                 if ($orderNumber == null || $order == null) {
-                    throw new Exception($this->l(sprintf(
+                    throw new ExceptionEE($this->l(sprintf(
                         'Order %s do not exist',
                         $orderNumber
                     )));
                 } else {
                     $paymentType = $this->module->getPaymentType($order->payment);
                     if ($paymentType === null) {
-                        throw new Exception($this->l('This payment method is not available.'));
+                        throw new ExceptionEE($this->l('This payment method is not available.'));
                     } elseif (!$paymentType->isAvailable()) {
-                        throw new Exception($this->l('Payment method not enabled.'));
+                        throw new ExceptionEE($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
-                        throw new Exception($this->l('The merchant configuration is incorrect'));
+                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
                     } else {
                         if ($_POST) {
                             $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
                             $service = new TransactionService($paymentType->getConnection(), $logger);
                             $response = $service->handleResponse($_POST);
                             if (!$response->isValidSignature()) {
-                                throw new Exception($this->l('The data has been modified by 3rd Party'));
+                                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
                             } elseif ($response instanceof SuccessResponse) {
                                 $orderId = $response->getCustomFields()->get('customOrderNumber');
                                 if ($orderId!=$_GET['order']) {
-                                    throw new Exception($this->l('The data has been modified by 3rd Party'));
+                                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
                                 } else {
                                     $logger->log(1, sprintf(
                                         'Order %s confirm successfully ',
@@ -102,11 +103,11 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                                         $code,
                                         $description
                                     ));
-                                    throw new Exception($this->l($description));
+                                    throw new ExceptionEE($this->l($description));
                                 }
                             }
                         } else {
-                            throw new Exception($this->l('The order has been cancelled.'));
+                            throw new ExceptionEE($this->l('The order has been cancelled.'));
                         }
                     }
                 }

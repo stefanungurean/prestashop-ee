@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Shop System Plugins - Terms of Use
  *
@@ -29,24 +30,9 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use \Wirecard\PaymentSdk\Transaction\SofortTransaction;
+use Prophecy\Exception;
 
-class WirecardPaymentGatewayPaymentSofort extends WirecardPaymentGatewayPayment
+class ExceptionEE extends RuntimeException
 {
-    protected $paymentMethod = 'Sofort';
 
-    public function getTransaction($cart, $orderNumber)
-    {
-        return new SofortTransaction();
-    }
-
-    public function getTransactionName()
-    {
-        return SofortTransaction::NAME;
-    }
-
-    public function getDescriptor($orderNumber)
-    {
-        return 'test';
-    }
 }

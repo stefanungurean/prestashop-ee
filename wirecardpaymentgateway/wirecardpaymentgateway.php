@@ -28,7 +28,7 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-
+require_once __DIR__.'/libraries/ExceptionEE.php';
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 /**
@@ -846,26 +846,26 @@ class WirecardPaymentGateway extends PaymentModule
     {
         try {
             if (!$this->active) {
-                throw new Exception($this->l('Module is not active'));
+                throw new ExceptionEE($this->l('Module is not active'));
             } elseif (!(Validate::isLoadedObject($this->getContext()->cart) &&
                 !$this->getContext()->cart->OrderExists())) {
-                throw new Exception($this->l(
+                throw new ExceptionEE($this->l(
                     'Cart cannot be loaded or an order has already been placed using this cart'
                 ));
             } elseif (!$this->context->cookie->id_cart) {
-                throw new Exception($this->l('Unable to load basket.'));
+                throw new ExceptionEE($this->l('Unable to load basket.'));
             }
             $paymentType = $this->getPaymentType($paymentTypeName);
             if ($paymentType === null) {
-                throw new Exception($this->l('This payment method is not available.'));
+                throw new ExceptionEE($this->l('This payment method is not available.'));
             } elseif (!$paymentType->isAvailable()) {
-                throw new Exception($this->l('Payment method not enabled.'));
+                throw new ExceptionEE($this->l('Payment method not enabled.'));
             } elseif (!$paymentType->configuration()) {
-                throw new Exception($this->l('The merchant configuration is incorrect'));
+                throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
             $validation = $paymentType->validations();
             if ($validation['status']!==true) {
-                throw new Exception($this->l($validation['message']));
+                throw new ExceptionEE($this->l($validation['message']));
             }
             $orderNumber = $this->addOrder($this->getContext()->cart, $paymentType->getMethod());
 
@@ -882,7 +882,7 @@ class WirecardPaymentGateway extends PaymentModule
                 $orderNumber="";
             }
 
-            $this->module->getContext()->cookie->eeMessage = $message;
+            $this->getContext()->cookie->eeMessage = $message;
             $params = array(
                 'submitReorder' => true,
                 'id_order' => (int)$orderNumber

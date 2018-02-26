@@ -30,11 +30,11 @@
  */
 require __DIR__.'/../../vendor/autoload.php';
 require __DIR__.'/../../libraries/Logger.php';
+require __DIR__.'/../../libraries/ExceptionEE.php';
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
 {
     /**
@@ -59,26 +59,26 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                     $paymentType = $this->module->getPaymentType($order->payment);
 
                     if ($paymentType === null) {
-                        throw new Exception($this->l('This payment method is not available.'));
+                        throw new ExceptionEE($this->l('This payment method is not available.'));
                     } elseif (!$paymentType->isAvailable()) {
-                        throw new Exception($this->l('Payment method not enabled.'));
+                        throw new ExceptionEE($this->l('Payment method not enabled.'));
                     } elseif (!$paymentType->configuration()) {
-                        throw new Exception($this->l('The merchant configuration is incorrect'));
+                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
                     } else {
                         $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
                         $service = new TransactionService($paymentType->getConnection(), $logger);
                         $notification = $service->handleNotification(file_get_contents('php://input'));
                         if (!$notification->isValidSignature()) {
-                            throw new Exception($this->l('The data has been modified by 3rd Party'));
+                            throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
                         } elseif ($notification instanceof SuccessResponse) {
                             $responseArray = $notification->getData();
                             $orderId = $notification->getCustomFields()->get('customOrderNumber');
                             if ($orderId!=$orderNumber) {
-                                throw new Exception($this->l('The data has been modified by 3rd Party'));
+                                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
                             } elseif ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
                                 $order->current_state == _PS_OS_PAYMENT_ ||
                                 $order->current_state == _PS_OS_CANCELED_) {
-                                throw new Exception($this->l(sprintf(
+                                throw new ExceptionEE($this->l(sprintf(
                                     'Order with id %s was already notified',
                                     $orderId
                                 )));
