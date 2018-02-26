@@ -35,18 +35,19 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
 {
     protected $paymentMethod = 'Paypal';
 
-    public function getTransaction($cart, $orderNumber)
+    public function getTransaction()
     {
+
         $transaction = new PayPalTransaction();
         if (Configuration::get($this->module->getConfigValue($this->paymentMethod, 'basket_send'))) {
-             $transaction->setBasket($this->getBasket($cart));
+             $transaction->setBasket($this->getBasket($this->cart));
         }
         $orderDetail = $this->module->getDisplayName();
         $transaction->setOrderDetail($orderDetail);
         $transaction->setEntryMode('ecommerce');
         $descriptor = '';
         if (Configuration::get($this->module->getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
+            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
         }
         $transaction->setDescriptor($descriptor);
         return $transaction;
@@ -57,11 +58,11 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
         return PayPalTransaction::NAME;
     }
 
-    public function getDescriptor($orderNumber)
+    public function getDescriptor()
     {
         $descriptor = '';
         if (Configuration::get($this->module->getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
+            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
         }
         return $descriptor;
     }

@@ -328,7 +328,8 @@ class WirecardPaymentGateway extends PaymentModule
         );
     }
 
-    function getCheckArray($methodName){
+    public function getCheckArray($methodName)
+    {
         return array(
             $this->buildParamName($methodName, self::WIRECARD_SERVER_URL),
             $this->buildParamName($methodName, self::HTTP_USER),

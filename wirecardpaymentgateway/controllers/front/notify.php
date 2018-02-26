@@ -35,6 +35,7 @@ require_once __DIR__.'/../../libraries/ExceptionEE.php';
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
+
 class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontController
 {
     /**
@@ -83,7 +84,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
     }
 
 
-    function processResponse($notification)
+    public function processResponse($notification)
     {
         $logger = new Logger();
         if (!$notification->isValidSignature()) {
@@ -112,7 +113,6 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                 'Order with id %s was notified',
                 $orderId
             ));
-
         }
         if ($notification instanceof FailureResponse) {
             foreach ($notification->getStatusCollection() as $status) {

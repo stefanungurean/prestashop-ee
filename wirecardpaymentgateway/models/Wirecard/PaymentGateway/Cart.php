@@ -227,5 +227,4 @@ class WirecardPaymentGatewayCart
 
         return $address;
     }
-
 }

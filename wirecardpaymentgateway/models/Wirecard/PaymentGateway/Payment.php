@@ -47,6 +47,8 @@ class WirecardPaymentGatewayPayment
     public $module;
     public $connection;
     protected $paymentMethod = null;
+    public $cart;
+    public $orderNumber;
 
     public function __construct($module, $config)
     {
@@ -125,8 +127,11 @@ class WirecardPaymentGatewayPayment
 
     public function initiate($cart, $orderNumber)
     {
+        $this->cart = $cart;
+        $this->orderNumber = $orderNumber;
         $CartData=new WirecardPaymentGatewayCart($this->module);
-        $transaction =$this->getTransaction($cart, $orderNumber);
+
+        $transaction =$this->getTransaction();
         $transaction->setRedirect($CartData->getRedirect($cart, $orderNumber));
         $transaction->setNotificationUrl($CartData->getNotification($cart, $orderNumber));
         $transaction->setAmount($CartData->getTotalAmount($cart));
@@ -170,11 +175,11 @@ class WirecardPaymentGatewayPayment
         }
     }
 
-    public function getTransaction($cart, $orderNumber)
+    public function getTransactionName()
     {
     }
 
-    public function getTransactionName()
+    public function getTransaction()
     {
     }
 }

@@ -75,7 +75,6 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             $service = new TransactionService($paymentType->getConnection(), $logger);
             $response = $service->handleResponse($_POST);
             $this->processResponse($response);
-
         } catch (Exception $e) {
             $message=$e->getMessage();
         }
@@ -89,7 +88,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation.tpl');
     }
 
-    function processResponse($response)
+    public function processResponse($response)
     {
         $logger = new Logger();
         if (!$response->isValidSignature()) {
@@ -116,7 +115,6 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                 'carrier' => $carrier->name,
                 'delay' => $carrier->delay
             ));
-
         }
         if ($response instanceof FailureResponse) {
             foreach ($response->getStatusCollection() as $status) {

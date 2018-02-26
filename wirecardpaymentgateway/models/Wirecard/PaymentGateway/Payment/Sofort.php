@@ -35,12 +35,11 @@ class WirecardPaymentGatewayPaymentSofort extends WirecardPaymentGatewayPayment
 {
     protected $paymentMethod = 'Sofort';
 
-    public function getTransaction($cart, $orderNumber)
+    public function getTransaction()
     {
         $transaction= new SofortTransaction();
         $transaction->setDescriptor('test');
         return $transaction;
-
     }
 
     public function getTransactionName()
