@@ -39,6 +39,7 @@ class WirecardPaymentGateway extends PaymentModule
     const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
     private $postErrors;
+    const CLASS_NAME="className";
 
     public function __construct()
     {
@@ -177,7 +178,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'label' => $this->l('Enable'),
                         'default' => '0',
                         'type' => 'onoff',
-                        'className' => 'Paypal',
+                        self::CLASS_NAME => 'Paypal',
                         'logo' => 'paypal.png',
                         'labelMethod' => $this->l('Paypal'),
 
@@ -267,7 +268,7 @@ class WirecardPaymentGateway extends PaymentModule
                         'label' => $this->l('Enable'),
                         'default' => '0',
                         'type' => 'onoff',
-                        'className' => 'Sofort',
+                        self::CLASS_NAME => 'Sofort',
                         'logo' => 'sofortbanking.png',
                         'labelMethod' => $this->l('Sofort'),
 
@@ -824,7 +825,7 @@ class WirecardPaymentGateway extends PaymentModule
         $types = array();
         foreach ($this->config as $group) {
             foreach ($group['fields'] as $f) {
-                $classNameIndex='className';
+                $classNameIndex=self::CLASS_NAME;
                 if (array_key_exists($classNameIndex, $f)) {
                     if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
                         continue;
