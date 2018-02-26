@@ -118,8 +118,8 @@ class WirecardPaymentGatewayPayment
 
     public function validations()
     {
-        $cart = $this->module->getContext()->cart;
-        if (!$cart->checkQuantities()) {
+        $cartData = $this->module->getContext()->cart;
+        if (!$cartData->checkQuantities()) {
             return array('status'=> false,'message'=>$this->module->l('Products out of stock'));
         }
         return array('status'=> true,'message'=>'');
