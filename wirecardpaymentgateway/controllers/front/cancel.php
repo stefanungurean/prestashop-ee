@@ -28,9 +28,9 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require __DIR__.'/../../vendor/autoload.php';
-require __DIR__.'/../../libraries/Logger.php';
-require __DIR__.'/../../libraries/ExceptionEE.php';
+require_once __DIR__.'/../../vendor/autoload.php';
+require_once __DIR__.'/../../libraries/Logger.php';
+require_once __DIR__.'/../../libraries/ExceptionEE.php';
 
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {

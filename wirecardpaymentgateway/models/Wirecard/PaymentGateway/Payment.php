@@ -172,7 +172,7 @@ class WirecardPaymentGatewayPayment
             }
             $message = implode(',', $errors);
             if (Tools::strlen($message)) {
-                throw new Exception($message);
+                throw new ExceptionEE($message);
             }
         }
     }
