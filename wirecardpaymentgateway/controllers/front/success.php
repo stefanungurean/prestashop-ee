@@ -71,48 +71,11 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             if (!isset($_POST)) {
                 throw new ExceptionEE($this->l('The order has been cancelled.'));
             }
-
             $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
             $service = new TransactionService($paymentType->getConnection(), $logger);
             $response = $service->handleResponse($_POST);
-            if (!$response->isValidSignature()) {
-                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-            }
-            if ($response instanceof SuccessResponse) {
-                $orderId = $response->getCustomFields()->get('customOrderNumber');
-                if ($orderId!=$_GET['order']) {
-                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                }
-                $logger->log(1, sprintf(
-                    'Order %s confirm successfully ',
-                    $orderId
-                ));
-                $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
-                $customer = new Customer($order->id_customer);
+            $this->processResponse($response);
 
-                $this->context->smarty->assign(array(
-                    'email' => $customer->email,
-                    'reference' => $order->reference,
-                    'payment' => $order->payment,
-                    'carrier' => $carrier->name,
-                    'delay' => $carrier->delay
-                ));
-
-            }
-            if ($response instanceof FailureResponse) {
-                foreach ($response->getStatusCollection() as $status) {
-                    $severity = ucfirst($status->getSeverity());
-                    $code = $status->getCode();
-                    $description = $status->getDescription();
-                    $logger->warning(sprintf(
-                        '%s with code %s and message "%s" occurred.<br>',
-                        $severity,
-                        $code,
-                        $description
-                    ));
-                    throw new ExceptionEE($this->l($description));
-                }
-            }
         } catch (Exception $e) {
             $message=$e->getMessage();
         }
@@ -124,5 +87,50 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             'message' => $message
         ));
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation.tpl');
+    }
+
+    function processResponse($response)
+    {
+        $logger = new Logger();
+        if (!$response->isValidSignature()) {
+            throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+        }
+
+        if ($response instanceof SuccessResponse) {
+            $orderId = $response->getCustomFields()->get('customOrderNumber');
+            if ($orderId!=$_GET['order']) {
+                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+            }
+            $order = new Order($orderId);
+            $logger->log(1, sprintf(
+                'Order %s confirm successfully ',
+                $orderId
+            ));
+            $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
+            $customer = new Customer($order->id_customer);
+
+            $this->context->smarty->assign(array(
+                'email' => $customer->email,
+                'reference' => $order->reference,
+                'payment' => $order->payment,
+                'carrier' => $carrier->name,
+                'delay' => $carrier->delay
+            ));
+
+        }
+        if ($response instanceof FailureResponse) {
+            foreach ($response->getStatusCollection() as $status) {
+                $severity = ucfirst($status->getSeverity());
+                $code = $status->getCode();
+                $description = $status->getDescription();
+                $logger->warning(sprintf(
+                    '%s with code %s and message "%s" occurred.<br>',
+                    $severity,
+                    $code,
+                    $description
+                ));
+                throw new ExceptionEE($this->l($description));
+            }
+        }
     }
 }

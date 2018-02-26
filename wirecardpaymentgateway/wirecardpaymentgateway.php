@@ -824,12 +824,13 @@ class WirecardPaymentGateway extends PaymentModule
         $types = array();
         foreach ($this->config as $group) {
             foreach ($group['fields'] as $f) {
-                if (array_key_exists('className', $f)) {
-                    if ($paymentType !== null && (!isset($f['className'])||$f['className'] != $paymentType)) {
+                $classNameIndex='className';
+                if (array_key_exists($classNameIndex, $f)) {
+                    if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
                         continue;
                     }
 
-                    $className = 'WirecardPaymentGatewayPayment' . $f['className'];
+                    $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
                     $f['group'] = 'pt';
                     $pt = new $className($this, $f);
 

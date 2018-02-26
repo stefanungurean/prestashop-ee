@@ -71,46 +71,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
             $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
             $service = new TransactionService($paymentType->getConnection(), $logger);
             $notification = $service->handleNotification(file_get_contents('php://input'));
-            if (!$notification->isValidSignature()) {
-                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-            }
-            if ($notification instanceof SuccessResponse) {
-                $responseArray = $notification->getData();
-                $orderId = $notification->getCustomFields()->get('customOrderNumber');
-                if ($orderId!=$orderNumber) {
-                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                }
-                if ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
-                    $order->current_state == _PS_OS_PAYMENT_ ||
-                    $order->current_state == _PS_OS_CANCELED_) {
-                    throw new ExceptionEE($this->l(sprintf(
-                        'Order with id %s was already notified',
-                        $orderId
-                    )));
-                }
-                $this->module->updateOrder(
-                    $orderId,
-                    $this->getStatus($responseArray['transaction-state'])
-                );
-                $logger->info(sprintf(
-                    'Order with id %s  was notified',
-                    $orderId
-                ));
-
-            }
-            if ($notification instanceof FailureResponse) {
-                foreach ($notification->getStatusCollection() as $status) {
-                    $severity = ucfirst($status->getSeverity());
-                    $code = $status->getCode();
-                    $description = $status->getDescription();
-                    $logger->warning(sprintf(
-                        '%s with code %s and message "%s" occurred.<br>',
-                        $severity,
-                        $code,
-                        $description
-                    ));
-                }
-            }
+            $this->processResponse($notification);
         } catch (Exception $e) {
             $message=$e->getMessage();
         }
@@ -121,12 +82,53 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         exit;
     }
 
-    /**
-     * geupdates order status
-     *
-     * @since 0.0.2
-     *
-     */
+
+    function processResponse($notification)
+    {
+        $logger = new Logger();
+        if (!$notification->isValidSignature()) {
+            throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+        }
+        if ($notification instanceof SuccessResponse) {
+            $responseArray = $notification->getData();
+            $orderId = $notification->getCustomFields()->get('customOrderNumber');
+            if ($orderId!=$_GET['order']) {
+                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+            }
+            $order = new Order($orderId);
+            if ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
+                $order->current_state == _PS_OS_PAYMENT_ ||
+                $order->current_state == _PS_OS_CANCELED_) {
+                throw new ExceptionEE($this->l(sprintf(
+                    'Order with id %s was already notified',
+                    $orderId
+                )));
+            }
+            $this->module->updateOrder(
+                $orderId,
+                $this->getStatus($responseArray['transaction-state'])
+            );
+            $logger->info(sprintf(
+                'Order with id %s was notified',
+                $orderId
+            ));
+
+        }
+        if ($notification instanceof FailureResponse) {
+            foreach ($notification->getStatusCollection() as $status) {
+                $severity = ucfirst($status->getSeverity());
+                $code = $status->getCode();
+                $description = $status->getDescription();
+                $logger->warning(sprintf(
+                    '%s with code %s and message "%s" occurred.<br>',
+                    $severity,
+                    $code,
+                    $description
+                ));
+            }
+        }
+    }
+
     private function getStatus($status)
     {
         switch ($status) {
