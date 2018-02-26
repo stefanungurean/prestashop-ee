@@ -40,10 +40,11 @@ class WirecardPaymentGateway extends PaymentModule
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
     private $postErrors;
     const CLASS_NAME="className";
+    const METHOD_NAME="method";
     const LINK_BUTTON='linkbutton';
     const INPUT_ON_OFF='onoff';
     const WIRECARD_SERVER_URL='wirecard_server_url';
-    const HTTP_PASSWORD='http_password';
+    const HTTP_PASS='http_password';
     const HTTP_USER='http_user';
 
     public function __construct()
@@ -215,7 +216,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => self::HTTP_PASSWORD,
+                    'name' => self::HTTP_PASS,
                     'label' => $this->l('HTTP Password'),
                     'type' => 'text',
                     'default' => 'qD2wzQ_hrc!8',
@@ -249,7 +250,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'required' => false,
                     'buttonText' => $this->l('Test paypal configuration'),
                     'id' => 'paypalConfig',
-                    'method' => $methodName,
+                    self::METHOD_NAME  => $methodName,
                     'name' => $methodName,
                     'send' => $this->getCheckArray($methodName)
                 )
@@ -307,7 +308,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'sanitize' => 'trim'
                 ),
                 array(
-                    'name' => self::HTTP_PASSWORD,
+                    'name' => self::HTTP_PASS,
                     'label' => $this->l('HTTP Password'),
                     'type' => 'text',
                     'default' => 'qD2wzQ_hrc!8',
@@ -319,7 +320,7 @@ class WirecardPaymentGateway extends PaymentModule
                     'required' => false,
                     'buttonText' => $this->l('Test sofort configuration'),
                     'id' => 'sofortConfig',
-                    'method' => $methodName,
+                    self::METHOD_NAME => $methodName,
                     'name' => $methodName,
                     'send' => $this->getCheckArray($methodName)
                 )
@@ -331,7 +332,7 @@ class WirecardPaymentGateway extends PaymentModule
         return array(
             $this->buildParamName($methodName, self::WIRECARD_SERVER_URL),
             $this->buildParamName($methodName, self::HTTP_USER),
-            $this->buildParamName($methodName, self::HTTP_PASSWORD)
+            $this->buildParamName($methodName, self::HTTP_PASS)
         );
     }
 
@@ -453,7 +454,7 @@ class WirecardPaymentGateway extends PaymentModule
                     case self::LINK_BUTTON:
                         $elem['buttonText'] = $f['buttonText'];
                         $elem['id'] = $f['id'];
-                        $elem['method'] = $f['method'];
+                        $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
                         $elem['send'] = $f['send'];
                         break;
                     case self::INPUT_ON_OFF:
