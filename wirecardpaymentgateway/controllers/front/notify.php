@@ -47,65 +47,68 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         try {
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
-            } else {
-                $orderNumber = $_GET['order'];
-                $order = new Order($orderNumber);
-                if ($orderNumber == null || $order == null) {
-                    throw new ExceptionEE($this->l(sprintf(
-                        'Order %s do not exist',
-                        $orderNumber
-                    )));
-                } else {
-                    $paymentType = $this->module->getPaymentType($order->payment);
+            }
+            $orderNumber = $_GET['order'];
+            $order = new Order($orderNumber);
+            if ($orderNumber == null || $order == null) {
+                throw new ExceptionEE($this->l(sprintf(
+                    'Order %s do not exist',
+                    $orderNumber
+                )));
+            }
 
-                    if ($paymentType === null) {
-                        throw new ExceptionEE($this->l('This payment method is not available.'));
-                    } elseif (!$paymentType->isAvailable()) {
-                        throw new ExceptionEE($this->l('Payment method not enabled.'));
-                    } elseif (!$paymentType->configuration()) {
-                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
-                    } else {
-                        $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
-                        $service = new TransactionService($paymentType->getConnection(), $logger);
-                        $notification = $service->handleNotification(file_get_contents('php://input'));
-                        if (!$notification->isValidSignature()) {
-                            throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                        } elseif ($notification instanceof SuccessResponse) {
-                            $responseArray = $notification->getData();
-                            $orderId = $notification->getCustomFields()->get('customOrderNumber');
-                            if ($orderId!=$orderNumber) {
-                                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                            } elseif ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
-                                $order->current_state == _PS_OS_PAYMENT_ ||
-                                $order->current_state == _PS_OS_CANCELED_) {
-                                throw new ExceptionEE($this->l(sprintf(
-                                    'Order with id %s was already notified',
-                                    $orderId
-                                )));
-                            } else {
-                                $this->module->updateOrder(
-                                    $orderId,
-                                    $this->getStatus($responseArray['transaction-state'])
-                                );
-                                $logger->info(sprintf(
-                                    'Order with id %s  was notified',
-                                    $orderId
-                                ));
-                            }
-                        } elseif ($notification instanceof FailureResponse) {
-                            foreach ($notification->getStatusCollection() as $status) {
-                                $severity = ucfirst($status->getSeverity());
-                                $code = $status->getCode();
-                                $description = $status->getDescription();
-                                $logger->warning(sprintf(
-                                    '%s with code %s and message "%s" occurred.<br>',
-                                    $severity,
-                                    $code,
-                                    $description
-                                ));
-                            }
-                        }
-                    }
+            $paymentType = $this->module->getPaymentType($order->payment);
+            if ($paymentType === null) {
+                throw new ExceptionEE($this->l('This payment method is not available.'));
+            }
+            if (!$paymentType->isAvailable()) {
+                throw new ExceptionEE($this->l('Payment method not enabled.'));
+            }
+            if (!$paymentType->configuration()) {
+                throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
+            }
+
+            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+            $service = new TransactionService($paymentType->getConnection(), $logger);
+            $notification = $service->handleNotification(file_get_contents('php://input'));
+            if (!$notification->isValidSignature()) {
+                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+            }
+            if ($notification instanceof SuccessResponse) {
+                $responseArray = $notification->getData();
+                $orderId = $notification->getCustomFields()->get('customOrderNumber');
+                if ($orderId!=$orderNumber) {
+                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+                }
+                if ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
+                    $order->current_state == _PS_OS_PAYMENT_ ||
+                    $order->current_state == _PS_OS_CANCELED_) {
+                    throw new ExceptionEE($this->l(sprintf(
+                        'Order with id %s was already notified',
+                        $orderId
+                    )));
+                }
+                $this->module->updateOrder(
+                    $orderId,
+                    $this->getStatus($responseArray['transaction-state'])
+                );
+                $logger->info(sprintf(
+                    'Order with id %s  was notified',
+                    $orderId
+                ));
+
+            }
+            if ($notification instanceof FailureResponse) {
+                foreach ($notification->getStatusCollection() as $status) {
+                    $severity = ucfirst($status->getSeverity());
+                    $code = $status->getCode();
+                    $description = $status->getDescription();
+                    $logger->warning(sprintf(
+                        '%s with code %s and message "%s" occurred.<br>',
+                        $severity,
+                        $code,
+                        $description
+                    ));
                 }
             }
         } catch (Exception $e) {

@@ -49,67 +49,68 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         try {
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
-            } else {
-                $orderNumber = $_GET['order'];
-                $order = new Order($orderNumber);
-                if ($orderNumber == null || $order == null) {
-                    throw new ExceptionEE($this->l(sprintf(
-                        'Order %s do not exist',
-                        $orderNumber
-                    )));
-                } else {
-                    $paymentType = $this->module->getPaymentType($order->payment);
-                    if ($paymentType === null) {
-                        throw new ExceptionEE($this->l('This payment method is not available.'));
-                    } elseif (!$paymentType->isAvailable()) {
-                        throw new ExceptionEE($this->l('Payment method not enabled.'));
-                    } elseif (!$paymentType->configuration()) {
-                        throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
-                    } else {
-                        if ($_POST) {
-                            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
-                            $service = new TransactionService($paymentType->getConnection(), $logger);
-                            $response = $service->handleResponse($_POST);
-                            if (!$response->isValidSignature()) {
-                                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                            } elseif ($response instanceof SuccessResponse) {
-                                $orderId = $response->getCustomFields()->get('customOrderNumber');
-                                if ($orderId!=$_GET['order']) {
-                                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-                                } else {
-                                    $logger->log(1, sprintf(
-                                        'Order %s confirm successfully ',
-                                        $orderId
-                                    ));
-                                    $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
-                                    $customer = new Customer($order->id_customer);
+            }
+            $orderNumber = $_GET['order'];
+            $order = new Order($orderNumber);
+            if ($orderNumber == null || $order == null) {
+                throw new ExceptionEE($this->l(sprintf(
+                    'Order %s do not exist',
+                    $orderNumber
+                )));
+            }
+            $paymentType = $this->module->getPaymentType($order->payment);
+            if ($paymentType === null) {
+                throw new ExceptionEE($this->l('This payment method is not available.'));
+            }
+            if (!$paymentType->isAvailable()) {
+                throw new ExceptionEE($this->l('Payment method not enabled.'));
+            }
+            if (!$paymentType->configuration()) {
+                throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
+            }
+            if (!isset($_POST)) {
+                throw new ExceptionEE($this->l('The order has been cancelled.'));
+            }
 
-                                    $this->context->smarty->assign(array(
-                                        'email' => $customer->email,
-                                        'reference' => $order->reference,
-                                        'payment' => $order->payment,
-                                        'carrier' => $carrier->name,
-                                        'delay' => $carrier->delay
-                                    ));
-                                }
-                            } elseif ($response instanceof FailureResponse) {
-                                foreach ($response->getStatusCollection() as $status) {
-                                    $severity = ucfirst($status->getSeverity());
-                                    $code = $status->getCode();
-                                    $description = $status->getDescription();
-                                    $logger->warning(sprintf(
-                                        '%s with code %s and message "%s" occurred.<br>',
-                                        $severity,
-                                        $code,
-                                        $description
-                                    ));
-                                    throw new ExceptionEE($this->l($description));
-                                }
-                            }
-                        } else {
-                            throw new ExceptionEE($this->l('The order has been cancelled.'));
-                        }
-                    }
+            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+            $service = new TransactionService($paymentType->getConnection(), $logger);
+            $response = $service->handleResponse($_POST);
+            if (!$response->isValidSignature()) {
+                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+            }
+            if ($response instanceof SuccessResponse) {
+                $orderId = $response->getCustomFields()->get('customOrderNumber');
+                if ($orderId!=$_GET['order']) {
+                    throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+                }
+                $logger->log(1, sprintf(
+                    'Order %s confirm successfully ',
+                    $orderId
+                ));
+                $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
+                $customer = new Customer($order->id_customer);
+
+                $this->context->smarty->assign(array(
+                    'email' => $customer->email,
+                    'reference' => $order->reference,
+                    'payment' => $order->payment,
+                    'carrier' => $carrier->name,
+                    'delay' => $carrier->delay
+                ));
+
+            }
+            if ($response instanceof FailureResponse) {
+                foreach ($response->getStatusCollection() as $status) {
+                    $severity = ucfirst($status->getSeverity());
+                    $code = $status->getCode();
+                    $description = $status->getDescription();
+                    $logger->warning(sprintf(
+                        '%s with code %s and message "%s" occurred.<br>',
+                        $severity,
+                        $code,
+                        $description
+                    ));
+                    throw new ExceptionEE($this->l($description));
                 }
             }
         } catch (Exception $e) {
