@@ -31,6 +31,7 @@
 require_once __DIR__.'/libraries/ExceptionEE.php';
 require_once __DIR__.'/libraries/ConfigurationSettings.php';
 require_once __DIR__.'/libraries/OrderMangement.php';
+require_once __DIR__.'/libraries/StoreData.php';
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
@@ -40,14 +41,13 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 class WirecardPaymentGateway extends PaymentModule
 {
     private $postErrors;
-    const WIRECARD_SERVER_URL='wirecard_server_url';
-    const HTTP_PASS='http_password';
-    const HTTP_USER='http_user';
+
     private $config;
+
     public function __construct()
     {
-        $this->config = new ConfigurationSettings($this);
-        ConfigurationSettings::$config= $this->config();
+        $storeData= new StoreData($this);
+        $this->config = new ConfigurationSettings($this, $storeData->config());
         $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
         $this->version = '0.0.3';
@@ -71,7 +71,7 @@ class WirecardPaymentGateway extends PaymentModule
             || !$this->registerHook('displayHeader')) {
             return false;
         }
-        $this->getConfig()->setStatus();
+        $this->getOrderMangement()->setStatus();
 
         return true;
     }
@@ -83,11 +83,6 @@ class WirecardPaymentGateway extends PaymentModule
         }
         return true;
     }
-
-    /**
-     * @since 0.0.2
-     *
-     */
 
     public function hookDisplayPaymentEU($params)
     {
@@ -115,190 +110,6 @@ class WirecardPaymentGateway extends PaymentModule
         return $payment_options;
     }
 
-    protected function paypal()
-    {
-        $methodName=__FUNCTION__;
-        $MethodName=ucfirst($methodName);
-        return array(
-            'tab' => $this->l($MethodName),
-            'fields' => array(
-                array(
-                    'name' => 'enable_method',
-                    'label' => $this->l('Enable'),
-                    'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
-                    'logo' => 'paypal.png',
-                    'labelMethod' => $this->l($MethodName),
-
-                ),
-                array(
-                    'name' => self::WIRECARD_SERVER_URL,
-                    'label' => $this->l('URL of Wirecard server'),
-                    'type' => 'text',
-                    'default' => 'https://api-test.wirecard.com',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => 'maid',
-                    'label' => $this->l('MAID'),
-                    'type' => 'text',
-                    'default' => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => 'secret',
-                    'label' => $this->l('Secret'),
-                    'type' => 'text',
-                    'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => self::HTTP_USER,
-                    'label' => $this->l('HTTP user'),
-                    'type' => 'text',
-                    'default' => '70000-APITEST-AP',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => self::HTTP_PASS,
-                    'label' => $this->l('HTTP Password'),
-                    'type' => 'text',
-                    'default' => 'qD2wzQ_hrc!8',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => 'transaction_type',
-                    'label' => $this->l('Transaction type'),
-                    'type' => 'select',
-                    'default' => 'purchase',
-                    'required' => true,
-                    'options' => 'getTransactionTypes'
-                ),
-                array(
-                    'name' => 'descriptor',
-                    'label' => $this->l('Send descriptor'),
-                    'default' => '1',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    'required' => true
-                ),
-                array(
-                    'name' => 'basket_send',
-                    'label' => $this->l('Send basket data'),
-                    'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    'required' => true
-                ),
-                array(
-                    'type' => ConfigurationSettings::LINK_BUTTON,
-                    'required' => false,
-                    'buttonText' => $this->l('Test paypal configuration'),
-                    'id' => 'paypalConfig',
-                    ConfigurationSettings::METHOD_NAME  => $methodName,
-                    'name' => $methodName,
-                    'send' => $this->getCheckArray($methodName)
-                )
-            )
-        );
-    }
-
-    protected function sofort()
-    {
-        $methodName=__FUNCTION__;
-        $MethodName=ucfirst($methodName);
-        return array(
-            'tab' => $this->l($MethodName),
-            'fields' => array(
-                array(
-                    'name' => 'enable_method',
-                    'label' => $this->l('Enable'),
-                    'default' => '0',
-                    'type' => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
-                    'logo' => 'sofortbanking.png',
-                    'labelMethod' => $this->l($MethodName),
-
-                ),
-                array(
-                    'name' => self::WIRECARD_SERVER_URL,
-                    'label' => $this->l('URL of Wirecard server'),
-                    'type' => 'text',
-                    'default' => 'https://api-test.wirecard.com',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => 'maid',
-                    'label' => $this->l('MAID'),
-                    'type' => 'text',
-                    'default' => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => 'secret',
-                    'label' => $this->l('Secret'),
-                    'type' => 'text',
-                    'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => self::HTTP_USER,
-                    'label' => $this->l('HTTP user'),
-                    'type' => 'text',
-                    'default' => '70000-APITEST-AP',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'name' => self::HTTP_PASS,
-                    'label' => $this->l('HTTP Password'),
-                    'type' => 'text',
-                    'default' => 'qD2wzQ_hrc!8',
-                    'required' => true,
-                    'sanitize' => 'trim'
-                ),
-                array(
-                    'type' => ConfigurationSettings::LINK_BUTTON,
-                    'required' => false,
-                    'buttonText' => $this->l('Test sofort configuration'),
-                    'id' => 'sofortConfig',
-                    ConfigurationSettings::METHOD_NAME => $methodName,
-                    'name' => $methodName,
-                    'send' => $this->getCheckArray($methodName)
-                )
-            )
-        );
-    }
-
-    public function getCheckArray($methodName)
-    {
-        return array(
-            ConfigurationSettings::buildParamName($methodName, self::WIRECARD_SERVER_URL),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_USER),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_PASS)
-        );
-    }
-
-    protected function config()
-    {
-        $configurationArray=array();
-        $configurationArray['paypal']=$this->paypal();
-        $configurationArray['sofort']=$this->sofort();
-        return $configurationArray;
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     * @throws SmartyException
-     */
     public function getContent()
     {
         $this->html = '<h2>' . $this->displayName . '</h2>';
@@ -329,13 +140,6 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->html;
     }
 
-    /**
-     * return options for transaction types select
-     *
-     * @since 0.0.2
-     *
-     * @return array
-     */
     public function getTransactionTypes()
     {
         return array(
@@ -359,9 +163,6 @@ class WirecardPaymentGateway extends PaymentModule
         }
     }
 
-    /**
-     * display error message after checkout failure
-     */
     public function hookDisplayHeader()
     {
         $context = Context::getContext();
@@ -385,25 +186,11 @@ class WirecardPaymentGateway extends PaymentModule
         }
     }
 
-    /**
-     * return module display name
-     *
-     * @since 0.0.2
-     *
-     * @return string
-     */
     public function getDisplayName()
     {
         return $this->displayName;
     }
 
-    /**
-     * return module name
-     *
-     * @since 0.0.2
-     *
-     * @return string
-     */
     public function getName()
     {
         return $this->name;
@@ -463,11 +250,6 @@ class WirecardPaymentGateway extends PaymentModule
         ));
     }
 
-    /**
-     * get context
-     *
-     * @return Context
-     */
     public function getContext()
     {
         return $this->context;
@@ -477,6 +259,7 @@ class WirecardPaymentGateway extends PaymentModule
     {
         return new OrderMangement($this);
     }
+
     public function getConfig()
     {
         return $this->config;
@@ -484,11 +267,9 @@ class WirecardPaymentGateway extends PaymentModule
     
     public function helperRender($fields_form_settings, $fields_value)
     {
-        /** @var HelperFormCore $helper */
         $helper = new HelperForm();
         $helper->show_toolbar = false;
 
-        /** @var LanguageCore $lang */
         $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
         $helper->default_form_language = $lang->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get(

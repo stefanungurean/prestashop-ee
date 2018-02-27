@@ -38,4 +38,47 @@ class OrderMangement
         $history->id_order = (int)$orderNumber;
         $history->changeIdOrderState(($orderStatus), $orderNumber, true);
     }
+
+    public function setStatus()
+    {
+        if (!Configuration::get(OrderMangement::WDEE_OS_AWAITING)) {
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment awaiting';
+            }
+            $orderState->send_email = false;
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->add();
+            Configuration::updateValue(
+                OrderMangement::WDEE_OS_AWAITING,
+                (int)($orderState->id)
+            );
+        }
+
+        if (!Configuration::get(OrderMangement::WDEE_OS_FRAUD)) {
+            $orderState = new OrderState();
+            $orderState->name = array();
+            foreach (Language::getLanguages() as $language) {
+                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway fraud detected';
+            }
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->hidden = false;
+            $orderState->delivery = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->module_name =$this->module->name;
+            $orderState->add();
+
+            Configuration::updateValue(
+                OrderMangement::WDEE_OS_FRAUD,
+                (int)($orderState->id)
+            );
+        }
+    }
 }

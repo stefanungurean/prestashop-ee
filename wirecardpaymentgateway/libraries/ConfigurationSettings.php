@@ -14,26 +14,30 @@ class ConfigurationSettings
     static public $config;
     const CLASS_NAME="className";
     const METHOD_NAME="method";
+
+    //inputs names
     const LINK_BUTTON='linkbutton';
     const INPUT_ON_OFF='onoff';
+    const SUBMIT_BUTTON='btnSubmit';
+
+    //validation names
     const REQUIRED='required';
     const SANITIZE='sanitize';
-    const SUBMIT_BUTTON='btnSubmit';
-    const VALUE_TEXT='value';
-    const LABEL_TEXT='label';
-    const PARAM_LABEL='param_name';
-    const FIELDS_LABEL='fields';
-    const MULTIPLE_LABEL='multiple';
-    const CLASS_LABEL='class';
-    const OPTION_LABEL='options';
-    const GROUP_LABEL='group';
-
     const VALIDATE_MAX_CHAR = 'maxchar';
 
+    //labels names
+    const VALUE_TEXT='value';
+    const LABEL_TEXT='label';
+    const PARAM_TEXT='param_name';
+    const FIELDS_TEXT='fields';
+    const MULTIPLE_TEXT='multiple';
+    const CLASS_TEXT='class';
+    const OPTION_TEXT='options';
+    const GROUP_TEXT='group';
 
-
-    public function __construct($module)
+    public function __construct($module, $config)
     {
+        self::$config=$config;
         $this->module=$module;
         ini_set(
             'include_path',
@@ -49,14 +53,14 @@ class ConfigurationSettings
         $configGroup = $groupKey;
         $label = "";
 
-        if (isset($f[self::GROUP_LABEL])) {
-            $configGroup=$f[self::GROUP_LABEL];
+        if (isset($f[self::GROUP_TEXT])) {
+            $configGroup=$f[self::GROUP_TEXT];
         }
         if (isset($f[self::LABEL_TEXT])) {
             $label= $this->module->l($f[self::LABEL_TEXT]);
         }
 
-        if (isset($f[self::CLASS_LABEL])) {
+        if (isset($f[self::CLASS_TEXT])) {
             $configGroup = 'pt';
         }
 
@@ -69,7 +73,7 @@ class ConfigurationSettings
         );
 
         if (isset($f['cssclass'])) {
-            $elem[self::CLASS_LABEL] = $f['cssclass'];
+            $elem[self::CLASS_TEXT] = $f['cssclass'];
         }
 
         $elem = $this->processInputDoc($f, $elem);
@@ -134,13 +138,13 @@ class ConfigurationSettings
                 break;
             case self::INPUT_ON_OFF:
                 $elem['type'] = $radio_type;
-                $elem[self::CLASS_LABEL] = 't';
+                $elem[self::CLASS_TEXT] = 't';
                 $elem['is_bool'] = true;
                 $elem['values'] = $radio_options;
                 break;
             case 'text':
-                if (!isset($elem[self::CLASS_LABEL])) {
-                    $elem[self::CLASS_LABEL] = 'fixed-width-xl';
+                if (!isset($elem[self::CLASS_TEXT])) {
+                    $elem[self::CLASS_TEXT] = 'fixed-width-xl';
                 }
                 if (isset($f[self::VALIDATE_MAX_CHAR])) {
                     $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
@@ -157,16 +161,16 @@ class ConfigurationSettings
 
     public function processInputTypeSelect($f, $elem)
     {
-        if (isset($f[self::MULTIPLE_LABEL])) {
-            $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
+        if (isset($f[self::MULTIPLE_TEXT])) {
+            $elem[self::MULTIPLE_TEXT] = $f[self::MULTIPLE_TEXT];
         }
 
         if (isset($f['size'])) {
             $elem['size'] = $f['size'];
         }
 
-        if (isset($f[self::OPTION_LABEL])) {
-            $optfunc = $f[self::OPTION_LABEL];
+        if (isset($f[self::OPTION_TEXT])) {
+            $optfunc = $f[self::OPTION_TEXT];
             $options = array();
             if (is_array($optfunc)) {
                 $options = $optfunc;
@@ -176,7 +180,7 @@ class ConfigurationSettings
                 $options = $this->module->$optfunc();
             }
 
-            $elem[self::OPTION_LABEL] = array(
+            $elem[self::OPTION_TEXT] = array(
                 'query' => $options,
                 'id' => 'key',
                 'name' => self::VALUE_TEXT
@@ -192,7 +196,7 @@ class ConfigurationSettings
 
         foreach (self::$config as $groupKey => $group) {
             $tabs[$groupKey] = $this->module->l($group['tab']);
-            foreach ($group[self::FIELDS_LABEL] as $f) {
+            foreach ($group[self::FIELDS_TEXT] as $f) {
                 $elem=$this->processInput($f, $groupKey);
                 $input_fields[] = $elem;
             }
@@ -244,8 +248,8 @@ class ConfigurationSettings
     {
         $values = array();
         foreach ($this->getAllConfigurationParameters() as $parameter) {
-            $val = Configuration::get($parameter[self::PARAM_LABEL]);
-            if (isset($parameter[self::MULTIPLE_LABEL]) && $parameter[self::MULTIPLE_LABEL]) {
+            $val = Configuration::get($parameter[self::PARAM_TEXT]);
+            if (isset($parameter[self::MULTIPLE_TEXT]) && $parameter[self::MULTIPLE_TEXT]) {
                 if (!is_array($val)) {
                     $val = Tools::strlen($val) ? Tools::jsonDecode($val) : array();
                 }
@@ -254,10 +258,10 @@ class ConfigurationSettings
                 foreach ($val as $v) {
                     $x[$v] = $v;
                 }
-                $pname = $parameter[self::PARAM_LABEL] . '[]';
+                $pname = $parameter[self::PARAM_TEXT] . '[]';
                 $values[$pname] = $x;
             } else {
-                $values[$parameter[self::PARAM_LABEL]] = $val;
+                $values[$parameter[self::PARAM_TEXT]] = $val;
             }
         }
 
@@ -275,14 +279,14 @@ class ConfigurationSettings
     {
         $params = array();
         foreach (self::$config as $groupKey => $group) {
-            foreach ($group[self::FIELDS_LABEL] as $f) {
-                $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+            foreach ($group[self::FIELDS_TEXT] as $f) {
+                $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
 
-                if (isset($f[self::CLASS_LABEL])) {
+                if (isset($f[self::CLASS_TEXT])) {
                     $configGroup = 'pt';
                 }
 
-                $f[self::PARAM_LABEL] = $this->buildParamName(
+                $f[self::PARAM_TEXT] = $this->buildParamName(
                     $configGroup,
                     $f['name']
                 );
@@ -312,7 +316,7 @@ class ConfigurationSettings
     }
     public function validateValue($parameter)
     {
-        $val = Tools::getValue($parameter[self::PARAM_LABEL]);
+        $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
         if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
                 $val = trim($val);
@@ -341,7 +345,7 @@ class ConfigurationSettings
     {
         if (Tools::isSubmit(self::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter[self::PARAM_LABEL]);
+                $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
                 if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
                     $val = trim($val);
@@ -350,23 +354,16 @@ class ConfigurationSettings
                 if (is_array($val)) {
                     $val = Tools::jsonEncode($val);
                 }
-                Configuration::updateValue($parameter[self::PARAM_LABEL], $val);
+                Configuration::updateValue($parameter[self::PARAM_TEXT], $val);
             }
         }
         return $this->module->displayConfirmation($this->module->l('Settings updated'));
     }
 
-    /**
-     * set configuration value defaults
-     *
-     * @since 0.0.2
-     *
-     * @return bool
-     */
     public static function setDefaults()
     {
         foreach (self::$config as $groupKey => $group) {
-            foreach ($group[self::FIELDS_LABEL] as $f) {
+            foreach ($group[self::FIELDS_TEXT] as $f) {
                 if (array_key_exists('default', $f) && !self::setDefaultValue($f, $groupKey)) {
                     return false;
                 }
@@ -377,9 +374,9 @@ class ConfigurationSettings
 
     public static function setDefaultValue($f, $groupKey)
     {
-        $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+        $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
 
-        if (isset($f[self::CLASS_LABEL])) {
+        if (isset($f[self::CLASS_TEXT])) {
             $configGroup = 'pt';
         }
         $p = self::buildParamName($configGroup, $f['name']);
@@ -391,6 +388,7 @@ class ConfigurationSettings
         if (!Configuration::updateValue($p, $defVal)) {
             return false;
         }
+        return true;
     }
 
     /**
@@ -404,14 +402,14 @@ class ConfigurationSettings
     {
         $types = array();
         foreach (self::$config as $group) {
-            foreach ($group[self::FIELDS_LABEL] as $f) {
+            foreach ($group[self::FIELDS_TEXT] as $f) {
                 $classNameIndex=self::CLASS_NAME;
                 if (array_key_exists($classNameIndex, $f)) {
                     if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
                         continue;
                     }
                     $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
-                    $f[self::GROUP_LABEL] = 'pt';
+                    $f[self::GROUP_TEXT] = 'pt';
                     $pt = new $className($this->module, $f);
 
                     $types[] = $pt;
@@ -484,52 +482,5 @@ class ConfigurationSettings
         $this->html .= $this->renderForm();
 
         return $this->html;
-    }
-
-    public function setStatus()
-    {
-        if (!Configuration::get(OrderMangement::WDEE_OS_AWAITING)) {
-
-            /** @var OrderStateCore $orderState */
-            $orderState = new OrderState();
-            $orderState->name = array();
-            foreach (Language::getLanguages() as $language) {
-                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway payment awaiting';
-            }
-            $orderState->send_email = false;
-            $orderState->color = 'lightblue';
-            $orderState->hidden = false;
-            $orderState->delivery = false;
-            $orderState->logable = false;
-            $orderState->invoice = false;
-            $orderState->add();
-            Configuration::updateValue(
-                OrderMangement::WDEE_OS_AWAITING,
-                (int)($orderState->id)
-            );
-        }
-
-        if (!Configuration::get(OrderMangement::WDEE_OS_FRAUD)) {
-
-            /** @var OrderStateCore $orderState */
-            $orderState = new OrderState();
-            $orderState->name = array();
-            foreach (Language::getLanguages() as $language) {
-                $orderState->name[$language['id_lang']] = 'Checkout Wirecard Gateway fraud detected';
-            }
-            $orderState->send_email = false;
-            $orderState->color = '#8f0621';
-            $orderState->hidden = false;
-            $orderState->delivery = false;
-            $orderState->logable = false;
-            $orderState->invoice = false;
-            $orderState->module_name =$this->module->name;
-            $orderState->add();
-
-            Configuration::updateValue(
-                OrderMangement::WDEE_OS_FRAUD,
-                (int)($orderState->id)
-            );
-        }
     }
 }
