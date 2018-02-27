@@ -49,10 +49,10 @@ class ConfigurationSettings
         $configGroup = $groupKey;
         $label = "";
 
-        if(isset($f[self::GROUP_LABEL])){
+        if (isset($f[self::GROUP_LABEL])) {
             $configGroup=$f[self::GROUP_LABEL];
         }
-        if(isset($f[self::LABEL_TEXT])){
+        if (isset($f[self::LABEL_TEXT])) {
             $label= $this->module->l($f[self::LABEL_TEXT]);
         }
 
@@ -76,7 +76,7 @@ class ConfigurationSettings
 
         if (isset($f['docref'])) {
             $desc='';
-            if(isset($elem['desc'])){
+            if (isset($elem['desc'])) {
                 $desc= $elem['desc']. ' ';
             }
             $elem['desc'] = $desc;
@@ -87,9 +87,9 @@ class ConfigurationSettings
             );
         }
 
-        return $this->processInputType($f, $elem);;
+        return $this->processInputType($f, $elem);
     }
-    
+
     public function processInputDoc($f, $elem)
     {
         if (isset($f['doc'])) {
