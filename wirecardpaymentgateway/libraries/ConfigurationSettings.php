@@ -46,14 +46,23 @@ class ConfigurationSettings
 
     public function processInput($f, $groupKey)
     {
-        $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+        $configGroup = $groupKey;
+        $label = "";
+
+        if(isset($f[self::GROUP_LABEL])){
+            $configGroup=$f[self::GROUP_LABEL];
+        }
+        if(isset($f[self::LABEL_TEXT])){
+            $label= $this->module->l($f[self::LABEL_TEXT]);
+        }
+
         if (isset($f[self::CLASS_LABEL])) {
             $configGroup = 'pt';
         }
 
         $elem = array(
             'name' => self::buildParamName($configGroup, $f['name']),
-            self::LABEL_TEXT => isset($f[self::LABEL_TEXT])?$this->module->l($f[self::LABEL_TEXT]):"",
+            self::LABEL_TEXT => $label,
             'tab' => $groupKey,
             'type' => $f['type'],
             self::REQUIRED => isset($f[self::REQUIRED ]) && $f[self::REQUIRED ]
@@ -63,6 +72,26 @@ class ConfigurationSettings
             $elem[self::CLASS_LABEL] = $f['cssclass'];
         }
 
+        $elem = $this->processInputDoc($f, $elem);
+
+        if (isset($f['docref'])) {
+            $desc='';
+            if(isset($elem['desc'])){
+                $desc= $elem['desc']. ' ';
+            }
+            $elem['desc'] = $desc;
+            $elem['desc'] .= sprintf(
+                '<a target="_blank" href="%s">%s <i class="icon-external-link"></i></a>',
+                $f['docref'],
+                $this->module->l('More information')
+            );
+        }
+
+        return $this->processInputType($f, $elem);;
+    }
+    
+    public function processInputDoc($f, $elem)
+    {
         if (isset($f['doc'])) {
             if (is_array($f['doc'])) {
                 $elem['desc'] = '';
@@ -77,17 +106,6 @@ class ConfigurationSettings
                 $elem['desc'] = $this->module->l($f['doc']);
             }
         }
-
-        if (isset($f['docref'])) {
-            $elem['desc'] = isset($elem['desc']) ? $elem['desc'] . ' ' : '';
-            $elem['desc'] .= sprintf(
-                '<a target="_blank" href="%s">%s <i class="icon-external-link"></i></a>',
-                $f['docref'],
-                $this->module->l('More information')
-            );
-        }
-        $elem= $this->processInputType($f, $elem);
-
         return $elem;
     }
 
@@ -124,40 +142,45 @@ class ConfigurationSettings
                 if (!isset($elem[self::CLASS_LABEL])) {
                     $elem[self::CLASS_LABEL] = 'fixed-width-xl';
                 }
-
                 if (isset($f[self::VALIDATE_MAX_CHAR])) {
                     $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
                 }
                 break;
             case 'select':
-                if (isset($f[self::MULTIPLE_LABEL])) {
-                    $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
-                }
-
-                if (isset($f['size'])) {
-                    $elem['size'] = $f['size'];
-                }
-
-                if (isset($f[self::OPTION_LABEL])) {
-                    $optfunc = $f[self::OPTION_LABEL];
-                    $options = array();
-                    if (is_array($optfunc)) {
-                        $options = $optfunc;
-                    }
-
-                    if (method_exists($this->module, $optfunc)) {
-                        $options = $this->module->$optfunc();
-                    }
-
-                    $elem[self::OPTION_LABEL] = array(
-                        'query' => $options,
-                        'id' => 'key',
-                        'name' => self::VALUE_TEXT
-                    );
-                }
+                $elem=$this->processInputTypeSelect($f, $elem);
                 break;
             default:
                 break;
+        }
+        return $elem;
+    }
+
+    public function processInputTypeSelect($f, $elem)
+    {
+        if (isset($f[self::MULTIPLE_LABEL])) {
+            $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
+        }
+
+        if (isset($f['size'])) {
+            $elem['size'] = $f['size'];
+        }
+
+        if (isset($f[self::OPTION_LABEL])) {
+            $optfunc = $f[self::OPTION_LABEL];
+            $options = array();
+            if (is_array($optfunc)) {
+                $options = $optfunc;
+            }
+
+            if (method_exists($this->module, $optfunc)) {
+                $options = $this->module->$optfunc();
+            }
+
+            $elem[self::OPTION_LABEL] = array(
+                'query' => $options,
+                'id' => 'key',
+                'name' => self::VALUE_TEXT
+            );
         }
         return $elem;
     }
