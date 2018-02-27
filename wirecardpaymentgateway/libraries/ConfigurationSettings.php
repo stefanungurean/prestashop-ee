@@ -324,7 +324,9 @@ class ConfigurationSettings
                 $val = trim($val);
         }
 
-        if (isset($parameter[self::VALIDATE_REQUIRED ]) && $parameter[self::VALIDATE_REQUIRED ] && !Tools::strlen($val)) {
+        if (isset($parameter[self::VALIDATE_REQUIRED ]) &&
+            $parameter[self::VALIDATE_REQUIRED ] &&
+            !Tools::strlen($val)) {
             $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
         }
 
@@ -366,7 +368,7 @@ class ConfigurationSettings
     {
         foreach (self::$config as $groupKey => $group) {
             foreach ($group[self::FIELDS_TEXT] as $f) {
-                if (array_key_exists('default', $f) && !self::setDefaultValue($f, $groupKey)) {
+                if (array_key_exists(self::VALIDATE_DEFAULT, $f) && !self::setDefaultValue($f, $groupKey)) {
                     return false;
                 }
             }
@@ -382,7 +384,7 @@ class ConfigurationSettings
             $configGroup = 'pt';
         }
         $p = self::buildParamName($configGroup, $f['name']);
-        $defVal = $f['default'];
+        $defVal = $f[self::VALIDATE_DEFAULT];
         if (is_array($defVal)) {
             $defVal = Tools::jsonEncode($defVal);
         }
