@@ -20,7 +20,7 @@ class ConfigurationSettings
     const LINK_BUTTON='linkbutton';
     const INPUT_ON_OFF='onoff';
     const SUBMIT_BUTTON='btnSubmit';
-
+ 
     //validation names
     const VALIDATE_REQUIRED='required';
     const VALIDATE_SANITIZE='sanitize';
