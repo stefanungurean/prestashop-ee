@@ -13,6 +13,7 @@ class ConfigurationSettings
     private $module;
     static public $config;
     const CLASS_NAME="className";
+
     const METHOD_NAME="method";
 
     //inputs names
@@ -36,6 +37,8 @@ class ConfigurationSettings
     const CLASS_TEXT='class';
     const OPTION_TEXT='options';
     const GROUP_TEXT='group';
+    const NAME_TEXT='name';
+    const TYPE_TEXT='type';
 
     public function __construct($module, $config)
     {
@@ -67,10 +70,10 @@ class ConfigurationSettings
         }
 
         $elem = array(
-            'name' => self::buildParamName($configGroup, $f['name']),
+            self::NAME_TEXT => self::buildParamName($configGroup, $f[self::NAME_TEXT]),
             self::LABEL_TEXT => $label,
             'tab' => $groupKey,
-            'type' => $f['type'],
+            self::TYPE_TEXT => $f[self::TYPE_TEXT],
             self::VALIDATE_REQUIRED => isset($f[self::VALIDATE_REQUIRED ]) && $f[self::VALIDATE_REQUIRED ]
         );
 
@@ -131,7 +134,7 @@ class ConfigurationSettings
                 self::LABEL_TEXT => $this->module->l('Disabled')
             )
         );
-        switch ($f['type']) {
+        switch ($f[self::TYPE_TEXT]) {
             case self::LINK_BUTTON:
                 $elem['buttonText'] = $f['buttonText'];
                 $elem['id'] = $f['id'];
@@ -139,7 +142,7 @@ class ConfigurationSettings
                 $elem['send'] = $f['send'];
                 break;
             case self::INPUT_ON_OFF:
-                $elem['type'] = $radio_type;
+                $elem[self::TYPE_TEXT] = $radio_type;
                 $elem[self::CLASS_TEXT] = 't';
                 $elem['is_bool'] = true;
                 $elem['values'] = $radio_options;
@@ -185,7 +188,7 @@ class ConfigurationSettings
             $elem[self::OPTION_TEXT] = array(
                 'query' => $options,
                 'id' => 'key',
-                'name' => self::VALUE_TEXT
+                self::NAME_TEXT => self::VALUE_TEXT
             );
         }
         return $elem;
@@ -290,7 +293,7 @@ class ConfigurationSettings
 
                 $f[self::PARAM_TEXT] = $this->buildParamName(
                     $configGroup,
-                    $f['name']
+                    $f[self::NAME_TEXT]
                 );
                 $params[] = $f;
             }
@@ -383,7 +386,7 @@ class ConfigurationSettings
         if (isset($f[self::CLASS_TEXT])) {
             $configGroup = 'pt';
         }
-        $p = self::buildParamName($configGroup, $f['name']);
+        $p = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
         $defVal = $f[self::VALIDATE_DEFAULT];
         if (is_array($defVal)) {
             $defVal = Tools::jsonEncode($defVal);
