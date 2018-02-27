@@ -21,9 +21,11 @@ class ConfigurationSettings
     const SUBMIT_BUTTON='btnSubmit';
 
     //validation names
-    const REQUIRED='required';
-    const SANITIZE='sanitize';
+    const VALIDATE_REQUIRED='required';
+    const VALIDATE_SANITIZE='sanitize';
     const VALIDATE_MAX_CHAR = 'maxchar';
+    const VALIDATE_DEFAULT = 'default';
+
 
     //labels names
     const VALUE_TEXT='value';
@@ -69,7 +71,7 @@ class ConfigurationSettings
             self::LABEL_TEXT => $label,
             'tab' => $groupKey,
             'type' => $f['type'],
-            self::REQUIRED => isset($f[self::REQUIRED ]) && $f[self::REQUIRED ]
+            self::VALIDATE_REQUIRED => isset($f[self::VALIDATE_REQUIRED ]) && $f[self::VALIDATE_REQUIRED ]
         );
 
         if (isset($f['cssclass'])) {
@@ -318,11 +320,11 @@ class ConfigurationSettings
     {
         $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-        if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
+        if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == "trim") {
                 $val = trim($val);
         }
 
-        if (isset($parameter[self::REQUIRED ]) && $parameter[self::REQUIRED ] && !Tools::strlen($val)) {
+        if (isset($parameter[self::VALIDATE_REQUIRED ]) && $parameter[self::VALIDATE_REQUIRED ] && !Tools::strlen($val)) {
             $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
         }
 
@@ -347,7 +349,7 @@ class ConfigurationSettings
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-                if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
+                if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == "trim") {
                     $val = trim($val);
                 }
 
