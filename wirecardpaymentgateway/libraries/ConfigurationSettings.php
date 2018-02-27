@@ -147,8 +147,8 @@ class ConfigurationSettings
                                 $options = $optfunc;
                             }
 
-                            if (method_exists($this, $optfunc)) {
-                                $options = $this->$optfunc();
+                            if (method_exists($this->module, $optfunc)) {
+                                $options = $this->module->$optfunc();
                             }
 
                             $elem[self::OPTION_LABEL] = array(
@@ -272,31 +272,33 @@ class ConfigurationSettings
     {
         if (Tools::isSubmit(SELF::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter[self::PARAM_LABEL]);
-
-                if (isset($parameter[self::SANITIZE])) {
-                    switch ($parameter[self::SANITIZE]) {
-                        case 'trim':
-                            $val = trim($val);
-                            break;
-                    }
-                }
-
-                if (isset($parameter[self::REQUIRED ]) && $parameter[self::REQUIRED ] && !Tools::strlen($val)) {
-                    $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
-                }
-
-                if (!isset($parameter['validator'])) {
+                if(!$this->validateValue($parameter)){
                     continue;
                 }
+            }
+        }
+    }
+    function validateValue($parameter)
+    {
+        $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
-                switch ($parameter['validator']) {
-                    case 'numeric':
-                        if (Tools::strlen($val) && !is_numeric($val)) {
-                            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
-                        }
-                        break;
-                }
+        if (isset($parameter[self::SANITIZE])) {
+            if ($parameter[self::SANITIZE] == "trim") {
+                $val = trim($val);
+            }
+        }
+
+        if (isset($parameter[self::REQUIRED ]) && $parameter[self::REQUIRED ] && !Tools::strlen($val)) {
+            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
+        }
+
+        if (!isset($parameter['validator'])) {
+            return false;
+        }
+
+        if($parameter['validator']=='numeric'){
+            if (Tools::strlen($val) && !is_numeric($val)) {
+                $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
             }
         }
     }
@@ -314,10 +316,8 @@ class ConfigurationSettings
                 $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
                 if (isset($parameter[self::SANITIZE])) {
-                    switch ($parameter[self::SANITIZE]) {
-                        case 'trim':
-                            $val = trim($val);
-                            break;
+                    if ($parameter[self::SANITIZE] == "trim") {
+                        $val = trim($val);
                     }
                 }
 
@@ -342,24 +342,30 @@ class ConfigurationSettings
         foreach (self::$config as $groupKey => $group) {
             foreach ($group[self::FIELDS_LABEL] as $f) {
                 if (array_key_exists('default', $f)) {
-                    $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
-
-                    if (isset($f[self::CLASS_LABEL])) {
-                        $configGroup = 'pt';
-                    }
-                    $p = self::buildParamName($configGroup, $f['name']);
-                    $defVal = $f['default'];
-                    if (is_array($defVal)) {
-                        $defVal = Tools::jsonEncode($defVal);
-                    }
-
-                    if (!Configuration::updateValue($p, $defVal)) {
+                    if(!self::setDefaultValue($f, $groupKey))
                         return false;
-                    }
                 }
             }
         }
         return true;
+    }
+
+    static function setDefaultValue($f, $groupKey)
+    {
+        $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+
+        if (isset($f[self::CLASS_LABEL])) {
+            $configGroup = 'pt';
+        }
+        $p = self::buildParamName($configGroup, $f['name']);
+        $defVal = $f['default'];
+        if (is_array($defVal)) {
+            $defVal = Tools::jsonEncode($defVal);
+        }
+
+        if (!Configuration::updateValue($p, $defVal)) {
+            return false;
+        }
     }
 
     /**

@@ -336,7 +336,7 @@ class WirecardPaymentGateway extends PaymentModule
      *
      * @return array
      */
-    private function getTransactionTypes()
+    public function getTransactionTypes()
     {
         return array(
             array('key' => 'authorization', 'value' => $this->l('Authorization')),
