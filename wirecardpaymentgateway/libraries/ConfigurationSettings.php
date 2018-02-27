@@ -45,7 +45,7 @@ class ConfigurationSettings
         require_once 'wirecardee_autoload.php';
     }
 
-    public function renderForm()
+    public function processInput($f, $groupKey)
     {
         $radio_type = 'switch';
 
@@ -62,106 +62,111 @@ class ConfigurationSettings
             )
         );
 
+        $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+        if (isset($f[self::CLASS_LABEL])) {
+            $configGroup = 'pt';
+        }
+
+        $elem = array(
+            'name' => self::buildParamName($configGroup, $f['name']),
+            self::LABEL_TEXT => isset($f[self::LABEL_TEXT])?$this->module->l($f[self::LABEL_TEXT]):"",
+            'tab' => $groupKey,
+            'type' => $f['type'],
+            self::REQUIRED => isset($f[self::REQUIRED ]) && $f[self::REQUIRED ]
+        );
+
+        if (isset($f['cssclass'])) {
+            $elem[self::CLASS_LABEL] = $f['cssclass'];
+        }
+
+        if (isset($f['doc'])) {
+            if (is_array($f['doc'])) {
+                $elem['desc'] = '';
+                foreach ($f['doc'] as $d) {
+                    if (Tools::strlen($elem['desc'])) {
+                        $elem['desc'] .= '<br/>';
+                    }
+
+                    $elem['desc'] .= $this->module->l($d);
+                }
+            } else {
+                $elem['desc'] = $this->module->l($f['doc']);
+            }
+        }
+
+        if (isset($f['docref'])) {
+            $elem['desc'] = isset($elem['desc']) ? $elem['desc'] . ' ' : '';
+            $elem['desc'] .= sprintf(
+                '<a target="_blank" href="%s">%s <i class="icon-external-link"></i></a>',
+                $f['docref'],
+                $this->module->l('More information')
+            );
+        }
+
+        switch ($f['type']) {
+            case self::LINK_BUTTON:
+                $elem['buttonText'] = $f['buttonText'];
+                $elem['id'] = $f['id'];
+                $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
+                $elem['send'] = $f['send'];
+                break;
+            case self::INPUT_ON_OFF:
+                $elem['type'] = $radio_type;
+                $elem[self::CLASS_LABEL] = 't';
+                $elem['is_bool'] = true;
+                $elem['values'] = $radio_options;
+                break;
+            case 'text':
+                if (!isset($elem[self::CLASS_LABEL])) {
+                    $elem[self::CLASS_LABEL] = 'fixed-width-xl';
+                }
+
+                if (isset($f[self::VALIDATE_MAX_CHAR])) {
+                    $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
+                }
+                break;
+            case 'select':
+                if (isset($f[self::MULTIPLE_LABEL])) {
+                    $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
+                }
+
+                if (isset($f['size'])) {
+                    $elem['size'] = $f['size'];
+                }
+
+                if (isset($f[self::OPTION_LABEL])) {
+                    $optfunc = $f[self::OPTION_LABEL];
+                    $options = array();
+                    if (is_array($optfunc)) {
+                        $options = $optfunc;
+                    }
+
+                    if (method_exists($this->module, $optfunc)) {
+                        $options = $this->module->$optfunc();
+                    }
+
+                    $elem[self::OPTION_LABEL] = array(
+                        'query' => $options,
+                        'id' => 'key',
+                        'name' => self::VALUE_TEXT
+                    );
+                }
+                break;
+            default:
+                break;
+        }
+        return $elem;
+    }
+
+    public function renderForm()
+    {
         $input_fields = array();
         $tabs = array();
 
         foreach (self::$config as $groupKey => $group) {
             $tabs[$groupKey] = $this->module->l($group['tab']);
             foreach ($group[self::FIELDS_LABEL] as $f) {
-                $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
-                if (isset($f[self::CLASS_LABEL])) {
-                    $configGroup = 'pt';
-                }
-
-                $elem = array(
-                    'name' => self::buildParamName($configGroup, $f['name']),
-                    self::LABEL_TEXT => isset($f[self::LABEL_TEXT])?$this->module->l($f[self::LABEL_TEXT]):"",
-                    'tab' => $groupKey,
-                    'type' => $f['type'],
-                    self::REQUIRED => isset($f[self::REQUIRED ]) && $f[self::REQUIRED ]
-                );
-
-                if (isset($f['cssclass'])) {
-                    $elem[self::CLASS_LABEL] = $f['cssclass'];
-                }
-
-                if (isset($f['doc'])) {
-                    if (is_array($f['doc'])) {
-                        $elem['desc'] = '';
-                        foreach ($f['doc'] as $d) {
-                            if (Tools::strlen($elem['desc'])) {
-                                $elem['desc'] .= '<br/>';
-                            }
-
-                            $elem['desc'] .= $this->module->l($d);
-                        }
-                    } else {
-                        $elem['desc'] = $this->module->l($f['doc']);
-                    }
-                }
-
-                if (isset($f['docref'])) {
-                    $elem['desc'] = isset($elem['desc']) ? $elem['desc'] . ' ' : '';
-                    $elem['desc'] .= sprintf(
-                        '<a target="_blank" href="%s">%s <i class="icon-external-link"></i></a>',
-                        $f['docref'],
-                        $this->module->l('More information')
-                    );
-                }
-
-                switch ($f['type']) {
-                    case self::LINK_BUTTON:
-                        $elem['buttonText'] = $f['buttonText'];
-                        $elem['id'] = $f['id'];
-                        $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
-                        $elem['send'] = $f['send'];
-                        break;
-                    case self::INPUT_ON_OFF:
-                        $elem['type'] = $radio_type;
-                        $elem[self::CLASS_LABEL] = 't';
-                        $elem['is_bool'] = true;
-                        $elem['values'] = $radio_options;
-                        break;
-                    case 'text':
-                        if (!isset($elem[self::CLASS_LABEL])) {
-                            $elem[self::CLASS_LABEL] = 'fixed-width-xl';
-                        }
-
-                        if (isset($f[self::VALIDATE_MAX_CHAR])) {
-                            $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
-                        }
-                        break;
-                    case 'select':
-                        if (isset($f[self::MULTIPLE_LABEL])) {
-                            $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
-                        }
-
-                        if (isset($f['size'])) {
-                            $elem['size'] = $f['size'];
-                        }
-
-                        if (isset($f[self::OPTION_LABEL])) {
-                            $optfunc = $f[self::OPTION_LABEL];
-                            $options = array();
-                            if (is_array($optfunc)) {
-                                $options = $optfunc;
-                            }
-
-                            if (method_exists($this->module, $optfunc)) {
-                                $options = $this->module->$optfunc();
-                            }
-
-                            $elem[self::OPTION_LABEL] = array(
-                                'query' => $options,
-                                'id' => 'key',
-                                'name' => self::VALUE_TEXT
-                            );
-                        }
-                        break;
-                    default:
-                        break;
-                }
-
+                $elem=$this->processInput($f,$groupKey);
                 $input_fields[] = $elem;
             }
         }
@@ -179,7 +184,7 @@ class ConfigurationSettings
                 )
             )
         );
-        return $this->module->HelperRender($fields_form_settings, $this->getConfigFieldsValues());
+        return $this->module->helperRender($fields_form_settings, $this->getConfigFieldsValues());
     }
 
     /**
@@ -192,7 +197,7 @@ class ConfigurationSettings
      *
      * @return string
      */
-    static function buildParamName($group, $name)
+    public static function buildParamName($group, $name)
     {
         return sprintf(
             'WDEE_%s_%s',
@@ -272,13 +277,13 @@ class ConfigurationSettings
     {
         if (Tools::isSubmit(SELF::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                if(!$this->validateValue($parameter)){
+                if (!$this->validateValue($parameter)) {
                     continue;
                 }
             }
         }
     }
-    function validateValue($parameter)
+    public function validateValue($parameter)
     {
         $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
@@ -294,7 +299,7 @@ class ConfigurationSettings
             return false;
         }
 
-        if($parameter['validator']=='numeric' && Tools::strlen($val) && !is_numeric($val)) {
+        if ($parameter['validator']=='numeric' && Tools::strlen($val) && !is_numeric($val)) {
                 $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
         }
     }
@@ -331,19 +336,19 @@ class ConfigurationSettings
      *
      * @return bool
      */
-    static function setDefaults()
+    public static function setDefaults()
     {
         foreach (self::$config as $groupKey => $group) {
             foreach ($group[self::FIELDS_LABEL] as $f) {
                 if (array_key_exists('default', $f) && !self::setDefaultValue($f, $groupKey)) {
                     return false;
-               }
+                }
             }
         }
         return true;
     }
 
-    static function setDefaultValue($f, $groupKey)
+    public static function setDefaultValue($f, $groupKey)
     {
         $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
 
@@ -414,7 +419,7 @@ class ConfigurationSettings
      *
      * @return string
      */
-    static function getConfigValue($group, $field)
+    public static function getConfigValue($group, $field)
     {
         return Configuration::get(self::buildParamName($group, $field));
     }

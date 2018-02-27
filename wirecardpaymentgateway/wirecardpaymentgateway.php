@@ -482,7 +482,7 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->config;
     }
     
-    function HelperRender($fields_form_settings, $fields_value)
+    public function helperRender($fields_form_settings, $fields_value)
     {
         /** @var HelperFormCore $helper */
         $helper = new HelperForm();

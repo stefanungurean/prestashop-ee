@@ -1,5 +1,4 @@
-<?php
-/**
+{*
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -27,34 +26,19 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
- */
+ *}
 
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-
-class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
-{
-    protected $paymentMethod = 'Paypal';
-
-    public function getTransaction()
-    {
-
-        $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
-             $transaction->setBasket($this->getBasket($this->cart));
-        }
-        $orderDetail = $this->module->getDisplayName();
-        $transaction->setOrderDetail($orderDetail);
-        $transaction->setEntryMode('ecommerce');
-        $descriptor = '';
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
-        }
-        $transaction->setDescriptor($descriptor);
-        return $transaction;
-    }
-
-    public function getTransactionName()
-    {
-        return PayPalTransaction::NAME;
-    }
-}
+{if $message == 'ok'}
+    <p>{l s='Thank you for your order.' mod='wirecardceecheckoutseamless'}
+        <br/><br/>
+        <strong>{l s='Your order will soon be shipped.' mod='wirecardceecheckoutseamless'}</strong>
+        <br/><br/>
+        {l s='For any questions or further information contact our' mod='wirecardceecheckoutseamless'} <a
+                href="{$link->getPageLink('contact', true)|escape:'htmlall':'UTF-8'}">{l s='customer support' mod='wirecardceecheckoutseamless'}</a>.
+    </p>
+{else}
+    <p class="warning">
+        {l s='We have noticed that there is a problem with your order. If you think this is an error, you can contact our'  mod='wirecardceecheckoutseamless'}
+        <a href="{$link->getPageLink('contact', true)|escape:'htmlall':'UTF-8'}">{l s='customer support' mod='wirecardceecheckoutseamless'}</a>.
+    </p>
+{/if}

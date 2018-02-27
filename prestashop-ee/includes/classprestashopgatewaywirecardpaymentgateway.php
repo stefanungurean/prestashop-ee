@@ -29,32 +29,23 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-
-class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
+/**
+ * Class Prestashop_Gateway_Wirecard_Payment_Gateway
+ */
+class PrestashopGatewayWirecardPaymentGateway extends PrestashopPaymentGateway
 {
-    protected $paymentMethod = 'Paypal';
 
-    public function getTransaction()
+    public function __construct()
     {
+        $this->id                 = 'prestashop_wirecard_payment_gateway';
+        $this->method_title       = 'Wirecard Payment Gateway';
+        $this->method_description = 'Payment Gateway';
+        $this->has_fields         = true;
+        $this->init_form_fields();
+        $this->init_settings();
 
-        $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
-             $transaction->setBasket($this->getBasket($this->cart));
-        }
-        $orderDetail = $this->module->getDisplayName();
-        $transaction->setOrderDetail($orderDetail);
-        $transaction->setEntryMode('ecommerce');
-        $descriptor = '';
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
-        }
-        $transaction->setDescriptor($descriptor);
-        return $transaction;
-    }
-
-    public function getTransactionName()
-    {
-        return PayPalTransaction::NAME;
+        // if any of the payment types are enabled, set this to "yes", otherwise "no"
+        $this->enabled = 'yes';
+        $this->title   = 'Wirecard Payment Gateway';
     }
 }

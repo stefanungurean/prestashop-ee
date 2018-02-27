@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>wirecardpaymentgateway</name>
+    <displayName><![CDATA[Wirecard payment proccesing gateway]]></displayName>
+    <version><![CDATA[0.0.3]]></version>
+    <description><![CDATA[Wirecard payment methods.]]></description>
+    <author><![CDATA[Wirecard]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>

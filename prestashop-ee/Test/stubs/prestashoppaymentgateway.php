@@ -7,7 +7,7 @@
  *
  * They have been tested and approved for full functionality in the standard configuration
  * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
+ * License Version 3 (GPLv3) and can be used, developed and passed on to third parties under
  * the same terms.
  *
  * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
@@ -29,32 +29,8 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+namespace Vendor\Model;
 
-class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
+class PrestashopPaymentGateway
 {
-    protected $paymentMethod = 'Paypal';
-
-    public function getTransaction()
-    {
-
-        $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
-             $transaction->setBasket($this->getBasket($this->cart));
-        }
-        $orderDetail = $this->module->getDisplayName();
-        $transaction->setOrderDetail($orderDetail);
-        $transaction->setEntryMode('ecommerce');
-        $descriptor = '';
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
-        }
-        $transaction->setDescriptor($descriptor);
-        return $transaction;
-    }
-
-    public function getTransactionName()
-    {
-        return PayPalTransaction::NAME;
-    }
 }
