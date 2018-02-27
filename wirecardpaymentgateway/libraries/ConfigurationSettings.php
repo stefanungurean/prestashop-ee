@@ -282,10 +282,8 @@ class ConfigurationSettings
     {
         $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
-        if (isset($parameter[self::SANITIZE])) {
-            if ($parameter[self::SANITIZE] == "trim") {
+        if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
                 $val = trim($val);
-            }
         }
 
         if (isset($parameter[self::REQUIRED ]) && $parameter[self::REQUIRED ] && !Tools::strlen($val)) {
@@ -296,10 +294,8 @@ class ConfigurationSettings
             return false;
         }
 
-        if($parameter['validator']=='numeric'){
-            if (Tools::strlen($val) && !is_numeric($val)) {
+        if($parameter['validator']=='numeric' && Tools::strlen($val) && !is_numeric($val)) {
                 $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
-            }
         }
     }
 
@@ -315,10 +311,8 @@ class ConfigurationSettings
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
-                if (isset($parameter[self::SANITIZE])) {
-                    if ($parameter[self::SANITIZE] == "trim") {
-                        $val = trim($val);
-                    }
+                if (isset($parameter[self::SANITIZE])&& $parameter[self::SANITIZE] == "trim") {
+                    $val = trim($val);
                 }
 
                 if (is_array($val)) {
@@ -341,10 +335,9 @@ class ConfigurationSettings
     {
         foreach (self::$config as $groupKey => $group) {
             foreach ($group[self::FIELDS_LABEL] as $f) {
-                if (array_key_exists('default', $f)) {
-                    if(!self::setDefaultValue($f, $groupKey))
-                        return false;
-                }
+                if (array_key_exists('default', $f) && !self::setDefaultValue($f, $groupKey)) {
+                    return false;
+               }
             }
         }
         return true;
