@@ -20,7 +20,7 @@ class ConfigurationSettings
     const LINK_BUTTON='linkbutton';
     const INPUT_ON_OFF='onoff';
     const SUBMIT_BUTTON='btnSubmit';
- 
+
     //validation names
     const VALIDATE_REQUIRED='required';
     const VALIDATE_SANITIZE='sanitize';
@@ -69,8 +69,13 @@ class ConfigurationSettings
             $configGroup = 'pt';
         }
 
+        $name="";
+        if (isset($f[self::NAME_TEXT])) {
+            $name = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
+        }
+
         $elem = array(
-            self::NAME_TEXT => self::buildParamName($configGroup, $f[self::NAME_TEXT]),
+            self::NAME_TEXT => $name,
             self::LABEL_TEXT => $label,
             'tab' => $groupKey,
             self::TYPE_TEXT => $f[self::TYPE_TEXT],
@@ -291,11 +296,13 @@ class ConfigurationSettings
                     $configGroup = 'pt';
                 }
 
-                $f[self::PARAM_TEXT] = $this->buildParamName(
-                    $configGroup,
-                    $f[self::NAME_TEXT]
-                );
-                $params[] = $f;
+                if (isset($f[self::NAME_TEXT])) {
+                    $f[self::PARAM_TEXT] = $this->buildParamName(
+                        $configGroup,
+                        $f[self::NAME_TEXT]
+                    );
+                    $params[] = $f;
+                }
             }
         }
 
