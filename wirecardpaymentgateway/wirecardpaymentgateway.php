@@ -46,8 +46,6 @@ class WirecardPaymentGateway extends PaymentModule
     private $config;
     public function __construct()
     {
-
-
         $this->config = new ConfigurationSettings($this);
         ConfigurationSettings::$config= $this->config();
         $this->name = 'wirecardpaymentgateway';

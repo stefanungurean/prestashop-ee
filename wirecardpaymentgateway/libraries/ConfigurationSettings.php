@@ -16,6 +16,23 @@ class ConfigurationSettings
     const METHOD_NAME="method";
     const LINK_BUTTON='linkbutton';
     const INPUT_ON_OFF='onoff';
+    const REQUIRED='required';
+    const SANITIZE='sanitize';
+    const SUBMIT_BUTTON='btnSubmit';
+    const VALUE_TEXT='value';
+    const LABEL_TEXT='label';
+    const PARAM_LABEL='param_name';
+    const FIELDS_LABEL='fields';
+    const MULTIPLE_LABEL='multiple';
+    const CLASS_LABEL='class';
+    const OPTION_LABEL='options';
+
+    const GROUP_LABEL='group';
+
+    const VALIDATE_MAX_CHAR = 'maxchar';
+
+
+
     public function __construct($module)
     {
         $this->module=$module;
@@ -35,13 +52,13 @@ class ConfigurationSettings
         $radio_options = array(
             array(
                 'id' => 'active_on',
-                'value' => 1,
-                'label' => $this->module->l('Enabled')
+                self::VALUE_TEXT => 1,
+                self::LABEL_TEXT => $this->module->l('Enabled')
             ),
             array(
                 'id' => 'active_off',
-                'value' => 0,
-                'label' => $this->module->l('Disabled')
+                self::VALUE_TEXT => 0,
+                self::LABEL_TEXT => $this->module->l('Disabled')
             )
         );
 
@@ -50,22 +67,22 @@ class ConfigurationSettings
 
         foreach (self::$config as $groupKey => $group) {
             $tabs[$groupKey] = $this->module->l($group['tab']);
-            foreach ($group['fields'] as $f) {
-                $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
-                if (isset($f['class'])) {
+            foreach ($group[self::FIELDS_LABEL] as $f) {
+                $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
+                if (isset($f[self::CLASS_LABEL])) {
                     $configGroup = 'pt';
                 }
 
                 $elem = array(
                     'name' => self::buildParamName($configGroup, $f['name']),
-                    'label' => isset($f['label'])?$this->module->l($f['label']):"",
+                    self::LABEL_TEXT => isset($f[self::LABEL_TEXT])?$this->module->l($f[self::LABEL_TEXT]):"",
                     'tab' => $groupKey,
                     'type' => $f['type'],
-                    'required' => isset($f['required']) && $f['required']
+                    self::REQUIRED => isset($f[self::REQUIRED ]) && $f[self::REQUIRED ]
                 );
 
                 if (isset($f['cssclass'])) {
-                    $elem['class'] = $f['cssclass'];
+                    $elem[self::CLASS_LABEL] = $f['cssclass'];
                 }
 
                 if (isset($f['doc'])) {
@@ -101,30 +118,30 @@ class ConfigurationSettings
                         break;
                     case self::INPUT_ON_OFF:
                         $elem['type'] = $radio_type;
-                        $elem['class'] = 't';
+                        $elem[self::CLASS_LABEL] = 't';
                         $elem['is_bool'] = true;
                         $elem['values'] = $radio_options;
                         break;
                     case 'text':
-                        if (!isset($elem['class'])) {
-                            $elem['class'] = 'fixed-width-xl';
+                        if (!isset($elem[self::CLASS_LABEL])) {
+                            $elem[self::CLASS_LABEL] = 'fixed-width-xl';
                         }
 
-                        if (isset($f['maxchar'])) {
-                            $elem['maxlength'] = $elem['maxchar'] = $f['maxchar'];
+                        if (isset($f[self::VALIDATE_MAX_CHAR])) {
+                            $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
                         }
                         break;
                     case 'select':
-                        if (isset($f['multiple'])) {
-                            $elem['multiple'] = $f['multiple'];
+                        if (isset($f[self::MULTIPLE_LABEL])) {
+                            $elem[self::MULTIPLE_LABEL] = $f[self::MULTIPLE_LABEL];
                         }
 
                         if (isset($f['size'])) {
                             $elem['size'] = $f['size'];
                         }
 
-                        if (isset($f['options'])) {
-                            $optfunc = $f['options'];
+                        if (isset($f[self::OPTION_LABEL])) {
+                            $optfunc = $f[self::OPTION_LABEL];
                             $options = array();
                             if (is_array($optfunc)) {
                                 $options = $optfunc;
@@ -134,10 +151,10 @@ class ConfigurationSettings
                                 $options = $this->$optfunc();
                             }
 
-                            $elem['options'] = array(
+                            $elem[self::OPTION_LABEL] = array(
                                 'query' => $options,
                                 'id' => 'key',
-                                'name' => 'value'
+                                'name' => self::VALUE_TEXT
                             );
                         }
                         break;
@@ -195,8 +212,8 @@ class ConfigurationSettings
     {
         $values = array();
         foreach ($this->getAllConfigurationParameters() as $parameter) {
-            $val = Configuration::get($parameter['param_name']);
-            if (isset($parameter['multiple']) && $parameter['multiple']) {
+            $val = Configuration::get($parameter[self::PARAM_LABEL]);
+            if (isset($parameter[self::MULTIPLE_LABEL]) && $parameter[self::MULTIPLE_LABEL]) {
                 if (!is_array($val)) {
                     $val = Tools::strlen($val) ? Tools::jsonDecode($val) : array();
                 }
@@ -205,10 +222,10 @@ class ConfigurationSettings
                 foreach ($val as $v) {
                     $x[$v] = $v;
                 }
-                $pname = $parameter['param_name'] . '[]';
+                $pname = $parameter[self::PARAM_LABEL] . '[]';
                 $values[$pname] = $x;
             } else {
-                $values[$parameter['param_name']] = $val;
+                $values[$parameter[self::PARAM_LABEL]] = $val;
             }
         }
 
@@ -226,14 +243,14 @@ class ConfigurationSettings
     {
         $params = array();
         foreach (self::$config as $groupKey => $group) {
-            foreach ($group['fields'] as $f) {
-                $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
+            foreach ($group[self::FIELDS_LABEL] as $f) {
+                $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
 
-                if (isset($f['class'])) {
+                if (isset($f[self::CLASS_LABEL])) {
                     $configGroup = 'pt';
                 }
 
-                $f['param_name'] = $this->buildParamName(
+                $f[self::PARAM_LABEL] = $this->buildParamName(
                     $configGroup,
                     $f['name']
                 );
@@ -253,20 +270,20 @@ class ConfigurationSettings
 
     public function postValidation()
     {
-        if (Tools::isSubmit('btnSubmit')) {
+        if (Tools::isSubmit(SELF::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter['param_name']);
+                $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
-                if (isset($parameter['sanitize'])) {
-                    switch ($parameter['sanitize']) {
+                if (isset($parameter[self::SANITIZE])) {
+                    switch ($parameter[self::SANITIZE]) {
                         case 'trim':
                             $val = trim($val);
                             break;
                     }
                 }
 
-                if (isset($parameter['required']) && $parameter['required'] && !Tools::strlen($val)) {
-                    $this->postErrors[] = $parameter['label'] . ' ' . $this->module->l('is required.');
+                if (isset($parameter[self::REQUIRED ]) && $parameter[self::REQUIRED ] && !Tools::strlen($val)) {
+                    $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
                 }
 
                 if (!isset($parameter['validator'])) {
@@ -276,7 +293,7 @@ class ConfigurationSettings
                 switch ($parameter['validator']) {
                     case 'numeric':
                         if (Tools::strlen($val) && !is_numeric($val)) {
-                            $this->postErrors[] = $parameter['label'] . ' ' . $this->module->l(' must be a number.');
+                            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
                         }
                         break;
                 }
@@ -292,12 +309,12 @@ class ConfigurationSettings
      */
     public function postProcess()
     {
-        if (Tools::isSubmit('btnSubmit')) {
+        if (Tools::isSubmit(self::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter['param_name']);
+                $val = Tools::getValue($parameter[self::PARAM_LABEL]);
 
-                if (isset($parameter['sanitize'])) {
-                    switch ($parameter['sanitize']) {
+                if (isset($parameter[self::SANITIZE])) {
+                    switch ($parameter[self::SANITIZE]) {
                         case 'trim':
                             $val = trim($val);
                             break;
@@ -307,7 +324,7 @@ class ConfigurationSettings
                 if (is_array($val)) {
                     $val = Tools::jsonEncode($val);
                 }
-                Configuration::updateValue($parameter['param_name'], $val);
+                Configuration::updateValue($parameter[self::PARAM_LABEL], $val);
             }
         }
         return $this->module->displayConfirmation($this->module->l('Settings updated'));
@@ -323,11 +340,11 @@ class ConfigurationSettings
     static function setDefaults()
     {
         foreach (self::$config as $groupKey => $group) {
-            foreach ($group['fields'] as $f) {
+            foreach ($group[self::FIELDS_LABEL] as $f) {
                 if (array_key_exists('default', $f)) {
-                    $configGroup = isset($f['group']) ? $f['group'] : $groupKey;
+                    $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
 
-                    if (isset($f['class'])) {
+                    if (isset($f[self::CLASS_LABEL])) {
                         $configGroup = 'pt';
                     }
                     $p = self::buildParamName($configGroup, $f['name']);
@@ -356,14 +373,14 @@ class ConfigurationSettings
     {
         $types = array();
         foreach (self::$config as $group) {
-            foreach ($group['fields'] as $f) {
+            foreach ($group[self::FIELDS_LABEL] as $f) {
                 $classNameIndex=self::CLASS_NAME;
                 if (array_key_exists($classNameIndex, $f)) {
                     if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
                         continue;
                     }
                     $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
-                    $f['group'] = 'pt';
+                    $f[self::GROUP_LABEL] = 'pt';
                     $pt = new $className($this->module, $f);
 
                     $types[] = $pt;
@@ -400,15 +417,6 @@ class ConfigurationSettings
      */
     static function getConfigValue($group, $field)
     {
-        if ($group == 'basicdata') {
-            $mode = Configuration::get(
-                self::buildParamName(
-                    'basicdata',
-                    'configmode'
-                )
-            );
-        }
-
         return Configuration::get(self::buildParamName($group, $field));
     }
 
@@ -421,7 +429,7 @@ class ConfigurationSettings
     {
         $this->html = '<h2>' . $this->displayName . '</h2>';
 
-        if (Tools::isSubmit('btnSubmit')) {
+        if (Tools::isSubmit(self::SUBMIT_BUTTON)) {
             $this->postValidation();
             if (!count($this->postErrors)) {
                 $this->postProcess();
