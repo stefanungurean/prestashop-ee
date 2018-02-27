@@ -26,7 +26,6 @@ class ConfigurationSettings
     const MULTIPLE_LABEL='multiple';
     const CLASS_LABEL='class';
     const OPTION_LABEL='options';
-
     const GROUP_LABEL='group';
 
     const VALIDATE_MAX_CHAR = 'maxchar';
@@ -47,21 +46,6 @@ class ConfigurationSettings
 
     public function processInput($f, $groupKey)
     {
-        $radio_type = 'switch';
-
-        $radio_options = array(
-            array(
-                'id' => 'active_on',
-                self::VALUE_TEXT => 1,
-                self::LABEL_TEXT => $this->module->l('Enabled')
-            ),
-            array(
-                'id' => 'active_off',
-                self::VALUE_TEXT => 0,
-                self::LABEL_TEXT => $this->module->l('Disabled')
-            )
-        );
-
         $configGroup = isset($f[self::GROUP_LABEL]) ? $f[self::GROUP_LABEL] : $groupKey;
         if (isset($f[self::CLASS_LABEL])) {
             $configGroup = 'pt';
@@ -102,7 +86,27 @@ class ConfigurationSettings
                 $this->module->l('More information')
             );
         }
+        $elem= $this->processInputType($f, $elem);
 
+        return $elem;
+    }
+
+    public function processInputType($f, $elem)
+    {
+        $radio_type = 'switch';
+
+        $radio_options = array(
+            array(
+                'id' => 'active_on',
+                self::VALUE_TEXT => 1,
+                self::LABEL_TEXT => $this->module->l('Enabled')
+            ),
+            array(
+                'id' => 'active_off',
+                self::VALUE_TEXT => 0,
+                self::LABEL_TEXT => $this->module->l('Disabled')
+            )
+        );
         switch ($f['type']) {
             case self::LINK_BUTTON:
                 $elem['buttonText'] = $f['buttonText'];
@@ -166,7 +170,7 @@ class ConfigurationSettings
         foreach (self::$config as $groupKey => $group) {
             $tabs[$groupKey] = $this->module->l($group['tab']);
             foreach ($group[self::FIELDS_LABEL] as $f) {
-                $elem=$this->processInput($f,$groupKey);
+                $elem=$this->processInput($f, $groupKey);
                 $input_fields[] = $elem;
             }
         }
