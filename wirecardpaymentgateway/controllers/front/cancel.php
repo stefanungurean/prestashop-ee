@@ -45,7 +45,7 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
             }
-            $orderNumber = $_GET['order'];
+            $orderNumber = Tools::getValue('order');
             $order = new Order($orderNumber);
             if ($orderNumber == null || $order == null) {
                 throw new ExceptionEE($this->l(sprintf(

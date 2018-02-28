@@ -49,7 +49,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
             }
-            $orderNumber = $_GET['order'];
+            $orderNumber = Tools::getValue('order');
             $order = new Order($orderNumber);
             if ($orderNumber == null || $order == null) {
                 throw new ExceptionEE($this->l(sprintf(
@@ -93,7 +93,7 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         if ($notification instanceof SuccessResponse) {
             $responseArray = $notification->getData();
             $orderId = $notification->getCustomFields()->get('customOrderNumber');
-            if ($orderId!=$_GET['order']) {
+            if ($orderId!=Tools::getValue('order')) {
                 throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
             }
             $order = new Order($orderId);
