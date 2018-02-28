@@ -27,10 +27,14 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../../libraries/Logger.php';
-require_once __DIR__.'/../../libraries/ExceptionEE.php';
+
+require_once dirname(__FILE__) . '/../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../libraries/Logger.php';
+require_once dirname(__FILE__) . '/../../libraries/ExceptionEE.php';
 
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {
@@ -47,22 +51,23 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             }
             $orderNumber = Tools::getValue('order');
             $order = new Order($orderNumber);
-            if ($orderNumber == null || $order == null) {
-                throw new ExceptionEE($this->l(sprintf(
-                    'Order %s do not exist',
+            if ($orderNumber == null || empty($order)) {
+                throw new ExceptionEE(sprintf(
+                    $this->l('Order %s do not exist'),
                     $orderNumber
-                )));
+                ));
             }
             $paymentType = $this->module->getConfig()->getPaymentType($order->payment);
             if ($paymentType === null) {
-                throw new ExceptionEE($this->l('This payment method is not available.'));
+                throw new ExceptionEE($this->l('This payment method is not available'));
             }
             if (!$paymentType->isAvailable()) {
-                throw new ExceptionEE($this->l('Payment method not enabled.'));
+                throw new ExceptionEE($this->l('Payment method not enabled'));
             }
             if (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
+
             $this->context->smarty->assign(array(
                 'reference' => $order->reference,
                 'payment' => $order->payment
@@ -71,13 +76,16 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
                 throw new ExceptionEE($this->l('Order is already cancelled'));
             }
 
-            $logger->log(1, $this->l(sprintf('Cancelled order %s', $orderNumber)));
             $this->module->getOrderMangement()->updateOrder($order->id, _PS_OS_CANCELED_);
+            $logger->info(sprintf(
+                $this->l('Cancelled order %s'),
+                $orderNumber
+            ));
         } catch (Exception $e) {
-            $message=$e->getMessage();
+            $message = $e->getMessage();
         }
 
-        if ($message!="") {
+        if ($message != "") {
             $logger->error($message);
         }
         $this->context->smarty->assign(array(

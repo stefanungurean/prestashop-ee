@@ -27,6 +27,9 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
@@ -35,25 +38,40 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
 {
     protected $paymentMethod = 'Paypal';
 
-    public function getTransaction()
+    /**
+     * get default paypal transaction data
+     *
+     * @since 0.0.3
+     *
+     * @return PayPalTransaction
+     */
+    protected function getTransaction()
     {
-
-        $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
-             $transaction->setBasket($this->getBasket($this->cart));
-        }
         $orderDetail = $this->module->getDisplayName();
-        $transaction->setOrderDetail($orderDetail);
-        $transaction->setEntryMode('ecommerce');
         $descriptor = '';
         if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
             $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
         }
+
+        $transaction = new PayPalTransaction();
+        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
+            $transaction->setBasket($this->getBasket($this->cart));
+        }
+        $transaction->setOrderDetail($orderDetail);
+        $transaction->setEntryMode('ecommerce');
         $transaction->setDescriptor($descriptor);
+
         return $transaction;
     }
 
-    public function getTransactionName()
+    /**
+     * get default paypal transaction name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
+    protected function getTransactionName()
     {
         return PayPalTransaction::NAME;
     }

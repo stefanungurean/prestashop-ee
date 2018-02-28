@@ -7,7 +7,7 @@
  *
  * They have been tested and approved for full functionality in the standard configuration
  * (status on delivery) of the corresponding shop system. They are under General Public
- * License Version 3 (GPLv3) and can be used, developed and passed on to third parties under
+ * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
  * the same terms.
  *
  * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
@@ -27,10 +27,54 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
-namespace Vendor\Model;
+spl_autoload_register('wirecardEEAutoload');
 
-class PrestashopPaymentGateway
+/**
+ * include class page
+ *
+ * @since 0.0.3
+ *
+ * @param $class
+ *
+ */
+function wirecardEEAutoload($class)
 {
+    $namespaces = array( 'Wirecard');
+    $namespace = null;
+    $modelNamespace = 'WirecardPaymentGateway';
+    $paymentNamespace = 'WirecardPaymentGatewayPayment';
+
+    foreach ($namespaces as $ns) {
+        if (strncmp($ns, $class, Tools::strlen($ns)) !== 0) {
+            continue;
+        } else {
+            $namespace = $ns;
+            break;
+        }
+    }
+
+    if ($namespace === null) {
+        return;
+    }
+
+    if (strcmp($class, $modelNamespace) > 0) {
+        $classWithUnderscore = 'Wirecard_PaymentGateway_';
+        if ((strcmp($paymentNamespace, Tools::substr($class, Tools::strlen($paymentNamespace))) >= 0)
+            && ((Tools::substr($class, Tools::strlen($paymentNamespace))) != '')
+        ) {
+            $classWithUnderscore .= 'Payment_' . Tools::substr($class, Tools::strlen($paymentNamespace));
+        } else {
+            $classWithUnderscore .= Tools::substr($class, Tools::strlen($modelNamespace));
+        }
+        $class = $classWithUnderscore;
+    }
+
+    $file = str_replace(array('\\', '_'), '/', $class) . '.php';
+
+    require_once $file;
 }

@@ -27,13 +27,15 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
-require_once __DIR__.'/../../../vendor/autoload.php';
-require_once __DIR__.'/../../../libraries/Logger.php';
-require_once __DIR__.'/../../../libraries/ConfigurationSettings.php';
-
-require_once __DIR__.'/Cart.php';
+require_once dirname(__FILE__) . '/../../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../../libraries/Logger.php';
+require_once dirname(__FILE__) . '/../../../libraries/ConfigurationSettings.php';
+require_once dirname(__FILE__) . '/Cart.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -44,45 +46,96 @@ use Wirecard\PaymentSdk\TransactionService;
 class WirecardPaymentGatewayPayment
 {
     /** @var  array */
-    private $config;
+    protected $config;
     /** @var  WirecardPaymentGateway */
-    public $module;
-    public $connection;
+    protected $module;
+    protected $connection;
     protected $paymentMethod = null;
-    public $cart;
-    public $orderNumber;
+    protected $cart;
+    protected $orderNumber;
 
+    /**
+     * initiate payment
+     *
+     * @since 0.0.3
+     *
+     * @param $module
+     * @param $config
+     *
+     */
     public function __construct($module, $config)
     {
         $this->module = $module;
         $this->config = $config;
     }
 
+    /**
+     * check if payment is available
+     *
+     * @since 0.0.3
+     *
+     * @return boolean
+     */
     public function isAvailable()
     {
         return (bool)ConfigurationSettings::getConfigValue($this->paymentMethod, 'enable_method');
     }
 
+    /**
+     * get payment name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getName()
     {
         return $this->config['name'];
     }
 
+    /**
+     * get payment label
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getLabel()
     {
         return $this->config['labelMethod'];
     }
 
+    /**
+     * get payment logo
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getLogo()
     {
         return $this->config['logo'];
     }
 
+    /**
+     * get payment method name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getMethod()
     {
         return $this->paymentMethod;
     }
 
+    /**
+     * check/set payment connection
+     *
+     * @since 0.0.3
+     *
+     * @return boolean
+     */
     public function configuration()
     {
         $currency = new CurrencyCore($this->module->getContext()->cart->id_currency);
@@ -95,49 +148,76 @@ class WirecardPaymentGatewayPayment
         $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret') ;
 
         $this->connection = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
-
         $logger = new Logger();
         $transactionService = new TransactionService($this->connection, $logger);
-
         if (!$transactionService->checkCredentials()) {
             return false;
         }
-
         $Config = new PaymentMethodConfig($this->getTransactionName(), $MAID, $key);
         $this->connection->add($Config);
+
         return true;
     }
 
+    /**
+     * get payment connection
+     *
+     * @since 0.0.3
+     *
+     * @return boolean
+     */
     public function getConnection()
     {
         return $this->connection;
     }
 
-    public function setCertificate($certifcate)
+    /**
+     * set payment connection certificate
+     *
+     * @since 0.0.3
+     *
+     */
+    public function setCertificate($certificate)
     {
-        $this->connection->setPublicKey(file_get_contents($certifcate));
+        $this->connection->setPublicKey(Tools::file_get_contents($certificate));
     }
 
+    /**
+     * check payment preconditions
+     *
+     * @since 0.0.3
+     *
+     * @return array
+     */
     public function validations()
     {
         $cartData = $this->module->getContext()->cart;
         if (!$cartData->checkQuantities()) {
             return array('status'=> false,'message'=>$this->module->l('Products out of stock'));
         }
+
         return array('status'=> true,'message'=>'');
     }
 
+    /**
+     * initiate payment
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     * @param $orderNumber
+     *
+     */
     public function initiate($cart, $orderNumber)
     {
         $this->cart = $cart;
         $this->orderNumber = $orderNumber;
-        $CartData=new WirecardPaymentGatewayCart($this->module);
+        $CartData = new WirecardPaymentGatewayCart($this->module);
 
         $transaction =$this->getTransaction();
         $transaction->setRedirect($CartData->getRedirect($cart, $orderNumber));
         $transaction->setNotificationUrl($CartData->getNotification($cart, $orderNumber));
         $transaction->setAmount($CartData->getTotalAmount($cart));
-
         $transaction->setConsumerId($cart->id_customer);
         $transaction->setIpAddress($CartData->getConsumerIpAddress());
         $transaction->setAccountHolder($CartData->getConsumerData($cart));
@@ -151,20 +231,30 @@ class WirecardPaymentGatewayPayment
         $this->processResponse($response);
     }
 
-    public function processResponse($response)
+    /**
+     * process payment response
+     *
+     * @since 0.0.3
+     *
+     * @param $response
+     * @param $orderNumber
+     *
+     * @throw ExceptionEE
+     */
+    protected function processResponse($response)
     {
         if ($response instanceof InteractionResponse) {
             die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
         } elseif ($response instanceof FailureResponse) {
             $errors = array();
             foreach ($response->getStatusCollection() as $status) {
-                $severity = ucfirst($status->getSeverity());
+                $severity = Tools::ucfirst($status->getSeverity());
                 $code = $status->getCode();
                 $description = $status->getDescription();
                 $errors[] = $description;
                 $logger = new Logger();
                 $logger->warning(sprintf(
-                    '%s with code %s and message "%s" occurred.<br>',
+                    $this->module->l('%s with code %s and message "%s" occurred'),
                     $severity,
                     $code,
                     $description
@@ -177,11 +267,25 @@ class WirecardPaymentGatewayPayment
         }
     }
 
-    public function getTransactionName()
+    /**
+     * get default paypal transaction name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
+    protected function getTransactionName()
     {
     }
 
-    public function getTransaction()
+    /**
+     * get default paypal transaction data
+     *
+     * @since 0.0.3
+     *
+     * @return PayPalTransaction
+     */
+    protected function getTransaction()
     {
     }
 }

@@ -27,11 +27,14 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
-require_once __DIR__.'/libraries/ExceptionEE.php';
-require_once __DIR__.'/libraries/ConfigurationSettings.php';
-require_once __DIR__.'/libraries/OrderMangement.php';
-require_once __DIR__.'/libraries/StoreData.php';
+
+require_once dirname(__FILE__) . '/libraries/ExceptionEE.php';
+require_once dirname(__FILE__) . '/libraries/ConfigurationSettings.php';
+require_once dirname(__FILE__) . '/libraries/OrderMangement.php';
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
@@ -41,13 +44,17 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 class WirecardPaymentGateway extends PaymentModule
 {
     private $postErrors;
-
     private $config;
 
+    /**
+     * initiate module
+     *
+     * @since 0.0.3
+     *
+     */
     public function __construct()
     {
-        $storeData= new StoreData($this);
-        $this->config = new ConfigurationSettings($this, $storeData->config());
+        $this->config = new ConfigurationSettings($this);
         $this->name = 'wirecardpaymentgateway';
         $this->tab = 'payments_gateways';
         $this->version = '0.0.3';
@@ -63,10 +70,17 @@ class WirecardPaymentGateway extends PaymentModule
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
 
+    /**
+     * install module
+     *
+     * @since 0.0.3
+     *
+     * @return boolean
+     */
     public function install()
     {
         if (!parent::install() || !ConfigurationSettings::setDefaults()
-            || !$this->registerHook('displayPaymentEU')
+            || !$this->registerHook('paymentOptions')
             || !$this->registerHook('actionFrontControllerSetMedia')
             || !$this->registerHook('displayHeader')) {
             return false;
@@ -76,40 +90,65 @@ class WirecardPaymentGateway extends PaymentModule
         return true;
     }
 
+    /**
+     * uninstall module
+     *
+     * @since 0.0.3
+     *
+     * @return boolean
+     */
     public function uninstall()
     {
         if (!parent::uninstall()) {
             return false;
         }
+
         return true;
     }
 
-    public function hookDisplayPaymentEU($params)
+    /**
+     * display module payment methods
+     *
+     * @since 0.0.3
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function hookPaymentOptions($params)
     {
+        $payment_options = array();
         if (!$this->active) {
-            return;
+            return $payment_options;
         }
-        $payment_options=array();
 
         foreach ($this->getConfig()->getPaymentTypes() as $paymentType) {
             if ($paymentType->isAvailable()) {
-                $payment_options[] = array(
-                    'cta_text' => $this->l($paymentType->getLabel()),
-                    'logo' => Media::getMediaPath(
-                        _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/'. $paymentType->getLogo()
-                    ),
-                    'action' => $this->context->link->getModuleLink(
-                        $this->name,
-                        'payment?paymentType='.$paymentType->getMethod(),
-                        array(),
-                        true
-                    )
-                );
+                $payment = new PaymentOption();
+                $payment->setLogo(Media::getMediaPath(
+                    _PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/'. $paymentType->getLogo()
+                ))->setCallToActionText($paymentType->getLabel())
+                ->setAction($this->context->link->getModuleLink(
+                    $this->name,
+                    'payment?paymentType='.$paymentType->getMethod(),
+                    array(),
+                    true
+                ));
+                $payment_options[] = $payment;
             }
         }
+
         return $payment_options;
     }
 
+    /**
+     * show module content
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     * @throws Exception
+     */
     public function getContent()
     {
         $this->html = '<h2>' . $this->displayName . '</h2>';
@@ -117,7 +156,7 @@ class WirecardPaymentGateway extends PaymentModule
         if (Tools::isSubmit('btnSubmit')) {
             $this->getConfig()->postValidation();
             if (!count($this->postErrors)) {
-                $this->html.=$this->getConfig()->postProcess();
+                $this->html .= $this->getConfig()->postProcess();
             } else {
                 foreach ($this->postErrors as $err) {
                     $this->html .= $this->displayError(html_entity_decode($err));
@@ -131,7 +170,6 @@ class WirecardPaymentGateway extends PaymentModule
                 'ajax_configtest_url' => $this->context->link->getModuleLink('wirecardpaymentgateway', 'ajax')
             )
         );
-
         $this->html .= $this->context->smarty->fetch(
             dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
         );
@@ -140,15 +178,13 @@ class WirecardPaymentGateway extends PaymentModule
         return $this->html;
     }
 
-    public function getTransactionTypes()
-    {
-        return array(
-            array('key' => 'authorization', 'value' => $this->l('Authorization')),
-            array('key' => 'purchase', 'value' => $this->l('Purchase'))
-        );
-    }
-
-    public function hookActionFrontControllerSetMedia($params)
+    /**
+     * set frontend media
+     *
+     * @since 0.0.3
+     *
+     */
+    public function hookActionFrontControllerSetMedia()
     {
         $controllerArray = array('order');
         if (in_array($this->context->controller->php_self, $controllerArray)) {
@@ -163,6 +199,12 @@ class WirecardPaymentGateway extends PaymentModule
         }
     }
 
+    /**
+     * set frontend order header
+     *
+     * @since 0.0.3
+     *
+     */
     public function hookDisplayHeader()
     {
         $context = Context::getContext();
@@ -186,16 +228,38 @@ class WirecardPaymentGateway extends PaymentModule
         }
     }
 
+    /**
+     * get module display name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getDisplayName()
     {
         return $this->displayName;
     }
 
+    /**
+     * get module name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * initiate module payment
+     *
+     * @since 0.0.3
+     *
+     * @param $paymentTypeName
+     *
+     */
     public function initiatePayment($paymentTypeName = '')
     {
         try {
@@ -207,35 +271,35 @@ class WirecardPaymentGateway extends PaymentModule
                     'Cart cannot be loaded or an order has already been placed using this cart'
                 ));
             } elseif (!$this->context->cookie->id_cart) {
-                throw new ExceptionEE($this->l('Unable to load basket.'));
+                throw new ExceptionEE($this->l('Unable to load basket'));
             }
+
             $paymentType = $this->getConfig()->getPaymentType($paymentTypeName);
             if ($paymentType === null) {
-                throw new ExceptionEE($this->l('This payment method is not available.'));
+                throw new ExceptionEE($this->l('This payment method is not available'));
             } elseif (!$paymentType->isAvailable()) {
-                throw new ExceptionEE($this->l('Payment method not enabled.'));
+                throw new ExceptionEE($this->l('Payment method not enabled'));
             } elseif (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
             $validation = $paymentType->validations();
-            if ($validation['status']!==true) {
-                throw new ExceptionEE($this->l($validation['message']));
+            if ($validation['status'] !== true) {
+                throw new ExceptionEE($validation['message']);
             }
 
             $orderNumber = $this->getOrderMangement()->addOrder($this->getContext()->cart, $paymentType->getMethod());
             $paymentType->initiate($this->getContext()->cart, $orderNumber);
         } catch (Exception $e) {
-            $message=$e->getMessage();
+            $message = $e->getMessage();
         }
 
-        $params=array();
-        if ($message!='') {
+        $params = array();
+        if ($message != '') {
             if (isset($orderNumber)) {
                 $this->getOrderMangement()->updateOrder($orderNumber, _PS_OS_ERROR_);
             } else {
-                $orderNumber="";
+                $orderNumber = "";
             }
-
             $this->getContext()->cookie->eeMessage = $message;
             $params = array(
                 'submitReorder' => true,
@@ -250,27 +314,57 @@ class WirecardPaymentGateway extends PaymentModule
         ));
     }
 
+    /**
+     * get module context
+     *
+     * @since 0.0.3
+     *
+     * @return Context
+     */
     public function getContext()
     {
         return $this->context;
     }
 
+    /**
+     * get module order management
+     *
+     * @since 0.0.3
+     *
+     * @return OrderMangement
+     */
     public function getOrderMangement()
     {
         return new OrderMangement($this);
     }
 
+    /**
+     * get module configuration settings
+     *
+     * @since 0.0.3
+     *
+     * @return ConfigurationSettings
+     */
     public function getConfig()
     {
         return $this->config;
     }
-    
+
+    /**
+     * render module form
+     *
+     * @since 0.0.3
+     * @param $fields_form_settings
+     * @param $fields_value
+     *
+     * @return string
+     */
     public function helperRender($fields_form_settings, $fields_value)
     {
+        $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
+
         $helper = new HelperForm();
         $helper->show_toolbar = false;
-
-        $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
         $helper->default_form_language = $lang->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get(
             'PS_BO_ALLOW_EMPLOYEE_FORM_LANG'
@@ -282,12 +376,12 @@ class WirecardPaymentGateway extends PaymentModule
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
             . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-
         $helper->tpl_vars = array(
             'fields_value' => $fields_value,
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id
         );
+
         return $helper->generateForm(array($fields_form_settings));
     }
 }

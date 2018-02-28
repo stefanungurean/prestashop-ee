@@ -1,4 +1,4 @@
-{*
+{**
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -26,6 +26,9 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  *}
 {extends file='page.tpl'}
 
@@ -36,14 +39,14 @@
                 <div class="col-md-12">
                     {block name='order_confirmation_header'}
                         <h3 class="h1 card-title">
-                            <i class="material-icons done">&#xE876;</i>{l s='Your order is confirmed' d='Shop.Theme.Checkout' }
+                            <i class="material-icons done">&#xE876;</i>{l s='Your order is confirmed' d='Shop.Theme.Checkout' mod='wirecardpaymentgateway'}
                         </h3>
                     {/block}
                     <p>
                         {if $message==""}
-                        {l s='An email has been sent to your mail address %email%.' d='Shop.Theme.Checkout' sprintf=['%email%' =>$email]}
+                        {l s='An email has been sent to your mail address %email%.' d='Shop.Theme.Checkout' sprintf=['%email%' =>$email] mod='wirecardpaymentgateway'}
                         {else}
-                            {l s='%message%' d='Shop.Theme.Checkout' sprintf=['%message%' => $message]}
+                            {l s='%message%' d='Shop.Theme.Checkout' sprintf=['%message%' => $message] mod='wirecardpaymentgateway'}
                         {/if}
                     </p>
                 </div>
@@ -51,21 +54,20 @@
         </div>
     </section>
 {/block}
-
-{block name='page_content_container'}
-    {if $message==""}
+{if $message == ""}
+    {block name='page_content_container'}
         <section id="content" class="page-content page-order-confirmation card">
             <div class="card-block">
                 <div class="row">
                     {block name='order_details'}
                         <div id="order-details" class="col-md-12">
-                            <h3 class="h3 card-title">{l s='Order details' d='Shop.Theme.Checkout'}:{$reference}</h3>
+                            <h3 class="h3 card-title">{l s='Order details: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference] mod='wirecardpaymentgateway'}</h3>
                             <ul>
-                                <li>{l s='Order reference: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference]}</li>
-                                <li>{l s='Payment method: %method%' d='Shop.Theme.Checkout' sprintf=['%method%' => $payment]}</li>
+                                <li>{l s='Order reference: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference] mod='wirecardpaymentgateway'}</li>
+                                <li>{l s='Payment method: %payment%' d='Shop.Theme.Checkout' sprintf=['%payment%' => $payment] mod='wirecardpaymentgateway'}</li>
                                 <li>
-                                    {l s='Shipping method: %method%' d='Shop.Theme.Checkout' sprintf=['%method%' => $carrier]}<br>
-                                    <em>{$delay}</em>
+                                    {l s='Shipping method: %carrier%' d='Shop.Theme.Checkout' sprintf=['%carrier%' => $carrier] mod='wirecardpaymentgateway'}<br>
+                                    <em>{$delay|escape:'htmlall':'UTF-8'}</em>
                                 </li>
                             </ul>
                         </div>
@@ -73,5 +75,5 @@
                 </div>
             </div>
         </section>
-    {/if}
-{/block}
+    {/block}
+{/if}

@@ -1,75 +1,124 @@
 <?php
 /**
- * Created by IntelliJ IDEA.
- * User: eduard.stroia
- * Date: 26.02.2018
- * Time: 19:02
+ * Shop System Plugins - Terms of Use
+ *
+ * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
+ * of the Wirecard AG range of products and services.
+ *
+ * They have been tested and approved for full functionality in the standard configuration
+ * (status on delivery) of the corresponding shop system. They are under General Public
+ * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
+ * the same terms.
+ *
+ * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
+ * occurring when used in an enhanced, customized shop system configuration.
+ *
+ * Operation in an enhanced, customized configuration is at your own risk and requires a
+ * comprehensive test phase by the user of the plugin.
+ *
+ * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
+ * functionality neither does Wirecard AG assume liability for any disadvantages related to
+ * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
+ * for customized shop systems or installed plugins of other vendors of plugins within the same
+ * shop system.
+ *
+ * Customers are responsible for testing the plugin's functionality before starting productive
+ * operation.
+ *
+ * By installing the plugin into the shop system the customer agrees to these terms of use.
+ * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
-require_once __DIR__.'/OrderMangement.php';
+require_once dirname(__FILE__) .'/OrderMangement.php';
+require_once dirname(__FILE__) .'/TabData.php';
 
 class ConfigurationSettings
 {
     private $module;
-    static public $config;
-    const CLASS_NAME="className";
+    private static $config;
+    private static $tabData;
 
-    const METHOD_NAME="method";
+    const CLASS_NAME = "className";
+    const METHOD_NAME = "method";
 
     //inputs names
-    const LINK_BUTTON='linkbutton';
-    const INPUT_ON_OFF='onoff';
-    const SUBMIT_BUTTON='btnSubmit';
+    const LINK_BUTTON = 'linkbutton';
+    const INPUT_ON_OFF = 'onoff';
+    const SUBMIT_BUTTON = 'btnSubmit';
 
     //validation names
-    const VALIDATE_REQUIRED='required';
-    const VALIDATE_SANITIZE='sanitize';
+    const VALIDATE_REQUIRED = 'required';
+    const VALIDATE_SANITIZE = 'sanitize';
     const VALIDATE_MAX_CHAR = 'maxchar';
     const VALIDATE_DEFAULT = 'default';
 
 
     //labels names
-    const VALUE_TEXT='value';
-    const LABEL_TEXT='label';
-    const PARAM_TEXT='param_name';
-    const FIELDS_TEXT='fields';
-    const MULTIPLE_TEXT='multiple';
-    const CLASS_TEXT='class';
-    const OPTION_TEXT='options';
-    const GROUP_TEXT='group';
-    const NAME_TEXT='name';
-    const TYPE_TEXT='type';
+    const VALUE_TEXT = 'value';
+    const LABEL_TEXT = 'label';
+    const PARAM_TEXT = 'param_name';
+    const FIELDS_TEXT = 'fields';
+    const MULTIPLE_TEXT = 'multiple';
+    const CLASS_TEXT = 'class';
+    const OPTION_TEXT = 'options';
+    const GROUP_TEXT = 'group';
+    const NAME_TEXT = 'name';
+    const TYPE_TEXT = 'type';
 
-    public function __construct($module, $config)
+    /**
+     * initiate the configuration settings
+     *
+     * @since 0.0.3
+     *
+     * @param $module
+     *
+     */
+    public function __construct($module)
     {
-        self::$config=$config;
-        $this->module=$module;
+        self::$tabData = new TabData($module);
+        self::$config =  self::$tabData->getConfig();
+        $this->module = $module;
+
         ini_set(
             'include_path',
             ini_get('include_path')
             . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR.'..' .DIRECTORY_SEPARATOR. 'vendor'
             . PATH_SEPARATOR . realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR.'..' .DIRECTORY_SEPARATOR. 'models'
         );
-        require_once 'wirecardee_autoload.php';
+        require_once realpath(dirname(__FILE__)).
+            DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'wirecardee_autoload.php';
     }
 
-    public function processInput($f, $groupKey)
+    /**
+     * process form element
+     *
+     * @since 0.0.3
+     *
+     * @param $f
+     * @param $groupKey
+     *
+     * @return array
+     */
+    private function processInput($f, $groupKey)
     {
         $configGroup = $groupKey;
         $label = "";
 
         if (isset($f[self::GROUP_TEXT])) {
-            $configGroup=$f[self::GROUP_TEXT];
+            $configGroup = $f[self::GROUP_TEXT];
         }
-        if (isset($f[self::LABEL_TEXT])) {
-            $label= $this->module->l($f[self::LABEL_TEXT]);
-        }
-
         if (isset($f[self::CLASS_TEXT])) {
             $configGroup = 'pt';
         }
 
-        $name="";
+        if (isset($f[self::LABEL_TEXT])) {
+            $label = $f[self::LABEL_TEXT];
+        }
+
+        $name = "";
         if (isset($f[self::NAME_TEXT])) {
             $name = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
         }
@@ -89,9 +138,9 @@ class ConfigurationSettings
         $elem = $this->processInputDoc($f, $elem);
 
         if (isset($f['docref'])) {
-            $desc='';
+            $desc = '';
             if (isset($elem['desc'])) {
-                $desc= $elem['desc']. ' ';
+                $desc = $elem['desc']. ' ';
             }
             $elem['desc'] = $desc;
             $elem['desc'] .= sprintf(
@@ -104,7 +153,17 @@ class ConfigurationSettings
         return $this->processInputType($f, $elem);
     }
 
-    public function processInputDoc($f, $elem)
+    /**
+     * process  element doc attribute
+     *
+     * @since 0.0.3
+     *
+     * @param $f
+     * @param $elem
+     *
+     * @return array
+     */
+    private function processInputDoc($f, $elem)
     {
         if (isset($f['doc'])) {
             if (is_array($f['doc'])) {
@@ -113,20 +172,29 @@ class ConfigurationSettings
                     if (Tools::strlen($elem['desc'])) {
                         $elem['desc'] .= '<br/>';
                     }
-
-                    $elem['desc'] .= $this->module->l($d);
+                    $elem['desc'] .= $d;
                 }
             } else {
-                $elem['desc'] = $this->module->l($f['doc']);
+                $elem['desc'] = $f['doc'];
             }
         }
+
         return $elem;
     }
 
-    public function processInputType($f, $elem)
+    /**
+     * process element by type
+     *
+     * @since 0.0.3
+     *
+     * @param $f
+     * @param $elem
+     *
+     * @return array
+     */
+    private function processInputType($f, $elem)
     {
         $radio_type = 'switch';
-
         $radio_options = array(
             array(
                 'id' => 'active_on',
@@ -139,6 +207,7 @@ class ConfigurationSettings
                 self::LABEL_TEXT => $this->module->l('Disabled')
             )
         );
+
         switch ($f[self::TYPE_TEXT]) {
             case self::LINK_BUTTON:
                 $elem['buttonText'] = $f['buttonText'];
@@ -161,33 +230,41 @@ class ConfigurationSettings
                 }
                 break;
             case 'select':
-                $elem=$this->processInputTypeSelect($f, $elem);
+                $elem = $this->processInputTypeSelect($f, $elem);
                 break;
             default:
                 break;
         }
+
         return $elem;
     }
 
-    public function processInputTypeSelect($f, $elem)
+    /**
+     * process drop down element
+     *
+     * @since 0.0.3
+     *
+     * @param $f
+     * @param $elem
+     *
+     * @return array
+     */
+    private function processInputTypeSelect($f, $elem)
     {
         if (isset($f[self::MULTIPLE_TEXT])) {
             $elem[self::MULTIPLE_TEXT] = $f[self::MULTIPLE_TEXT];
         }
-
         if (isset($f['size'])) {
             $elem['size'] = $f['size'];
         }
-
         if (isset($f[self::OPTION_TEXT])) {
             $optfunc = $f[self::OPTION_TEXT];
             $options = array();
             if (is_array($optfunc)) {
                 $options = $optfunc;
             }
-
-            if (method_exists($this->module, $optfunc)) {
-                $options = $this->module->$optfunc();
+            if (method_exists(self::$tabData, $optfunc)) {
+                $options = self::$tabData->$optfunc();
             }
 
             $elem[self::OPTION_TEXT] = array(
@@ -196,18 +273,26 @@ class ConfigurationSettings
                 self::NAME_TEXT => self::VALUE_TEXT
             );
         }
+
         return $elem;
     }
 
+    /**
+     * return rendered form
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function renderForm()
     {
         $input_fields = array();
         $tabs = array();
 
-        foreach (self::$config as $groupKey => $group) {
-            $tabs[$groupKey] = $this->module->l($group['tab']);
+        foreach (self::getConfig() as $groupKey => $group) {
+            $tabs[$groupKey] = $group['tab'];
             foreach ($group[self::FIELDS_TEXT] as $f) {
-                $elem=$this->processInput($f, $groupKey);
+                $elem = $this->processInput($f, $groupKey);
                 $input_fields[] = $elem;
             }
         }
@@ -225,6 +310,7 @@ class ConfigurationSettings
                 )
             )
         );
+
         return $this->module->helperRender($fields_form_settings, $this->getConfigFieldsValues());
     }
 
@@ -250,11 +336,11 @@ class ConfigurationSettings
     /**
      * return saved config parameter values
      *
-     * @since 0.0.2
+     * @since 0.0.3
      *
      * @return array
      */
-    public function getConfigFieldsValues()
+    private function getConfigFieldsValues()
     {
         $values = array();
         foreach ($this->getAllConfigurationParameters() as $parameter) {
@@ -279,16 +365,16 @@ class ConfigurationSettings
     }
 
     /**
-     * return alls configuration parameters
+     * return all configuration parameters
      *
-     * @since 0.0.2
+     * @since 0.0.3
      *
      * @return array
      */
-    public function getAllConfigurationParameters()
+    private function getAllConfigurationParameters()
     {
         $params = array();
-        foreach (self::$config as $groupKey => $group) {
+        foreach (self::getConfig() as $groupKey => $group) {
             foreach ($group[self::FIELDS_TEXT] as $f) {
                 $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
 
@@ -312,10 +398,11 @@ class ConfigurationSettings
     /**
      * validate post parameters
      *
-     * @since 0.0.2
+     * @since 0.0.3
+     *
+     * @param $parameter
      *
      */
-
     public function postValidation()
     {
         if (Tools::isSubmit(SELF::SUBMIT_BUTTON)) {
@@ -326,33 +413,45 @@ class ConfigurationSettings
             }
         }
     }
-    public function validateValue($parameter)
+
+    /**
+     * validate item value
+     *
+     * @since 0.0.3
+     *
+     * @param $parameter
+     *
+     * @return boolean
+     */
+    private function validateValue($parameter)
     {
         $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
         if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == "trim") {
-                $val = trim($val);
+            $val = trim($val);
         }
 
         if (isset($parameter[self::VALIDATE_REQUIRED ]) &&
             $parameter[self::VALIDATE_REQUIRED ] &&
             !Tools::strlen($val)) {
-            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required.');
+            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required');
         }
 
         if (!isset($parameter['validator'])) {
             return false;
         }
 
-        if ($parameter['validator']=='numeric' && Tools::strlen($val) && !is_numeric($val)) {
-                $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number.');
+        if ($parameter['validator'] == 'numeric' && Tools::strlen($val) && !is_numeric($val)) {
+            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number');
         }
+
+        return true;
     }
 
     /**
      * process form post
      *
-     * @since 0.0.2
+     * @since 0.0.3
      *
      */
     public function postProcess()
@@ -361,7 +460,7 @@ class ConfigurationSettings
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-                if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == "trim") {
+                if (isset($parameter[self::VALIDATE_SANITIZE]) && $parameter[self::VALIDATE_SANITIZE] == "trim") {
                     $val = trim($val);
                 }
 
@@ -371,28 +470,47 @@ class ConfigurationSettings
                 Configuration::updateValue($parameter[self::PARAM_TEXT], $val);
             }
         }
+
         return $this->module->displayConfirmation($this->module->l('Settings updated'));
     }
 
+    /**
+     * set item default values
+     *
+     * @since 0.0.3
+     *     *
+     * @return boolean
+     */
     public static function setDefaults()
     {
-        foreach (self::$config as $groupKey => $group) {
+        foreach (self::getConfig() as $groupKey => $group) {
             foreach ($group[self::FIELDS_TEXT] as $f) {
                 if (array_key_exists(self::VALIDATE_DEFAULT, $f) && !self::setDefaultValue($f, $groupKey)) {
                     return false;
                 }
             }
         }
+
         return true;
     }
 
-    public static function setDefaultValue($f, $groupKey)
+    /**
+     * set item default value
+     *
+     * @since 0.0.3
+     *
+     * @param $f
+     * @param $groupKey
+     *
+     * @return boolean
+     */
+    private static function setDefaultValue($f, $groupKey)
     {
         $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
-
         if (isset($f[self::CLASS_TEXT])) {
             $configGroup = 'pt';
         }
+
         $p = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
         $defVal = $f[self::VALIDATE_DEFAULT];
         if (is_array($defVal)) {
@@ -402,43 +520,49 @@ class ConfigurationSettings
         if (!Configuration::updateValue($p, $defVal)) {
             return false;
         }
+
         return true;
     }
 
     /**
-     * return paymenttype objects
+     * return payment instances
+     *
+     * @since 0.0.3
      *
      * @param null $paymentType
      *
-     * @return array
+     * @return array WirecardPaymentGatewayPayment
      */
     public function getPaymentTypes($paymentType = null)
     {
         $types = array();
-        foreach (self::$config as $group) {
+        foreach (self::getConfig() as $group) {
             foreach ($group[self::FIELDS_TEXT] as $f) {
-                $classNameIndex=self::CLASS_NAME;
+                $classNameIndex = self::CLASS_NAME;
                 if (array_key_exists($classNameIndex, $f)) {
-                    if ($paymentType !== null && (!isset($f[$classNameIndex])||$f[$classNameIndex] != $paymentType)) {
+                    if ($paymentType !== null &&
+                        (!isset($f[$classNameIndex]) || $f[$classNameIndex] != $paymentType)) {
                         continue;
                     }
                     $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
                     $f[self::GROUP_TEXT] = 'pt';
                     $pt = new $className($this->module, $f);
-
                     $types[] = $pt;
                 }
             }
         }
 
-
         return $types;
     }
 
     /**
+     * get payment instance
+     *
+     * @since 0.0.3
+     *
      * @param $paymentType
      *
-     * @return WirecardCheckoutSeamlessPayment |null
+     * @return WirecardPaymentGatewayPayment |null
      */
     public function getPaymentType($paymentType)
     {
@@ -451,7 +575,9 @@ class ConfigurationSettings
     }
 
     /**
-     * get config value, take presets into account
+     * get config value
+     *
+     * @since 0.0.3
      *
      * @param $group
      * @param $field
@@ -464,37 +590,14 @@ class ConfigurationSettings
     }
 
     /**
+     * get current configuration
+     *
+     * @since 0.0.3
+     *
      * @return string
-     * @throws Exception
-     * @throws SmartyException
      */
-    public function getContent()
+    private static function getConfig()
     {
-        $this->html = '<h2>' . $this->displayName . '</h2>';
-
-        if (Tools::isSubmit(self::SUBMIT_BUTTON)) {
-            $this->postValidation();
-            if (!count($this->postErrors)) {
-                $this->postProcess();
-            } else {
-                foreach ($this->postErrors as $err) {
-                    $this->html .= $this->displayError(html_entity_decode($err));
-                }
-            }
-        }
-
-        $this->context->smarty->assign(
-            array(
-                'module_dir' => $this->_path,
-                'ajax_configtest_url' => $this->context->module->link->getModuleLink('wirecardpaymentgateway', 'ajax')
-            )
-        );
-
-        $this->html .= $this->context->smarty->fetch(
-            dirname(__FILE__) . '/views/templates/admin/configuration.tpl'
-        );
-        $this->html .= $this->renderForm();
-
-        return $this->html;
+        return self::$config;
     }
 }

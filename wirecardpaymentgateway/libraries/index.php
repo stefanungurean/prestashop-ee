@@ -29,43 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 
-spl_autoload_register('wirecardee_autoload');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
-function wirecardee_autoload($class)
-{
-    $namespaces = array( 'Wirecard');
-    $namespace = null;
-    $modelNamespace = 'WirecardPaymentGateway';
-    $paymentNamespace = 'WirecardPaymentGatewayPayment';
-
-    foreach ($namespaces as $ns) {
-
-        if (strncmp($ns, $class, Tools::strlen($ns)) !== 0) {
-            continue;
-        } else {
-            $namespace = $ns;
-            break;
-        }
-    }
-    if ($namespace === null) {
-        return;
-    }
-
-    if (strcmp($class, $modelNamespace) > 0) {
-        $classWithUnderscore = 'Wirecard_PaymentGateway_';
-        if ((strcmp($paymentNamespace, Tools::substr($class, Tools::strlen($paymentNamespace))) >= 0)
-            && ((Tools::substr($class, Tools::strlen($paymentNamespace))) != '')
-        ) {
-            $classWithUnderscore .= 'Payment_' . Tools::substr($class, Tools::strlen($paymentNamespace));
-        } else {
-            $classWithUnderscore .= Tools::substr($class, Tools::strlen($modelNamespace));
-        }
-        $class = $classWithUnderscore;
-    }
-
-    $file = str_replace(array('\\', '_'), '/', $class) . '.php';
-
-    require_once $file;
-}
-
+header('Location: ../../../');
+exit;

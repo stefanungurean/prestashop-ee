@@ -29,23 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-/**
- * Class Prestashop_Gateway_Wirecard_Payment_Gateway
- */
-class PrestashopGatewayWirecardPaymentGateway extends PrestashopPaymentGateway
-{
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 
-    public function __construct()
-    {
-        $this->id                 = 'prestashop_wirecard_payment_gateway';
-        $this->method_title       = 'Wirecard Payment Gateway';
-        $this->method_description = 'Payment Gateway';
-        $this->has_fields         = true;
-        $this->init_form_fields();
-        $this->init_settings();
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
-        // if any of the payment types are enabled, set this to "yes", otherwise "no"
-        $this->enabled = 'yes';
-        $this->title   = 'Wirecard Payment Gateway';
-    }
-}
+header('Location: ../../../');
+exit;

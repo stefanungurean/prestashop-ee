@@ -1,4 +1,5 @@
-{**
+<?php
+/**
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -26,16 +27,14 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
- * @author Wirecard AG
- * @copyright Wirecard AG
- * @license GPLv3
- *}
+ */
 
-<div class="wirecardpaymentgateway-wrapper">
-    <img class="wirecardpaymentgateway-logo" src="{$module_dir|escape:'htmlall':'UTF-8'}views/img/wirecard-logo.png" alt="Wirecard CEE" border="0"/><br/>
-    <p class="wirecardpaymentgateway-intro">{l s='Wirecard - Your Full Service Payment Provider - Comprehensive solutions from one single source' mod='wirecardpaymentgateway'}</p>
-    {l s='Wirecard is one of the world´s leading providers of outsourcing and white label solutions for electronic payment transactions.' mod='wirecardpaymentgateway'}
-    <br/><br/>
-    {l s='As independent provider of payment solutions, we accompany our customers along the entire business development. Our payment solutions are perfectly tailored to suit e-Commerce requirements and have made us Austria´s leading payment service provider. Customization, competence, and commitment.' mod='wirecardpaymentgateway'}<br/>
-    <br/>
-</div>
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
+header('Location: ../../../');
+exit;

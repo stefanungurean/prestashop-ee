@@ -27,21 +27,23 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-require_once __DIR__ . '/../../libraries/Logger.php';
-require_once __DIR__ . '/../../libraries/ConfigurationSettings.php';
+require_once dirname(__FILE__) . '/../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../libraries/Logger.php';
+require_once dirname(__FILE__) . '/../../libraries/ConfigurationSettings.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontController
 {
-  /**
+    /**
      * @see FrontController::postProcess()
      */
-
     public function postProcess()
     {
         $logger = new Logger();
@@ -49,7 +51,7 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
             case 'TestConfig':
                 $method = Tools::getValue('method');
                 $status = 'ok';
-                $message = $this->l('The merchant configuration was successfuly tested.');
+                $message = $this->l('The merchant configuration was successfuly tested');
 
                 $baseUrl = Tools::getValue(ConfigurationSettings::buildParamName($method, 'wirecard_server_url'));
                 $httpUser = Tools::getValue(ConfigurationSettings::buildParamName($method, 'http_user'));
@@ -68,7 +70,6 @@ class WirecardPaymentGatewayAjaxModuleFrontController extends ModuleFrontControl
                         'message' => htmlspecialchars($message)
                     )
                 ));
-                break;
         }
     }
 }

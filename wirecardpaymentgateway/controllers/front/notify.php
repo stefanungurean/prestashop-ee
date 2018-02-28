@@ -27,10 +27,14 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../../libraries/Logger.php';
-require_once __DIR__.'/../../libraries/ExceptionEE.php';
+
+require_once dirname(__FILE__) . '/../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../libraries/Logger.php';
+require_once dirname(__FILE__) . '/../../libraries/ExceptionEE.php';
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -49,42 +53,50 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
             }
+
             $orderNumber = Tools::getValue('order');
             $order = new Order($orderNumber);
-            if ($orderNumber == null || $order == null) {
-                throw new ExceptionEE($this->l(sprintf(
-                    'Order %s do not exist',
+            if ($orderNumber == null || empty($order)) {
+                throw new ExceptionEE(sprintf(
+                    $this->l('Order %s do not exist'),
                     $orderNumber
-                )));
+                ));
             }
 
             $paymentType = $this->module->getConfig()->getPaymentType($order->payment);
             if ($paymentType === null) {
-                throw new ExceptionEE($this->l('This payment method is not available.'));
+                throw new ExceptionEE($this->l('This payment method is not available'));
             }
             if (!$paymentType->isAvailable()) {
-                throw new ExceptionEE($this->l('Payment method not enabled.'));
+                throw new ExceptionEE($this->l('Payment method not enabled'));
             }
             if (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
 
-            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+            $paymentType->setCertificate(dirname(__FILE__) . '/../../certificates/api-test.wirecard.com.crt');
             $service = new TransactionService($paymentType->getConnection(), $logger);
-            $notification = $service->handleNotification(file_get_contents('php://input'));
+            $notification = $service->handleNotification(Tools::file_get_contents('php://input'));
             $this->processResponse($notification);
         } catch (Exception $e) {
-            $message=$e->getMessage();
+            $message = $e->getMessage();
         }
 
-        if ($message!="") {
+        if ($message != "") {
             $logger->error($message);
         }
         exit;
     }
 
-
-    public function processResponse($notification)
+    /**
+     * process response from skd
+     *
+     * @since 0.0.3
+     *
+     * @param $notification
+     *
+     */
+    private function processResponse($notification)
     {
         $logger = new Logger();
         if (!$notification->isValidSignature()) {
@@ -93,34 +105,36 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         if ($notification instanceof SuccessResponse) {
             $responseArray = $notification->getData();
             $orderId = $notification->getCustomFields()->get('customOrderNumber');
-            if ($orderId!=Tools::getValue('order')) {
+            if ($orderId != Tools::getValue('order')) {
                 throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
             }
+
             $order = new Order($orderId);
             if ($order->current_state == $this->getStatus($responseArray['transaction-state']) ||
                 $order->current_state == _PS_OS_PAYMENT_ ||
                 $order->current_state == _PS_OS_CANCELED_) {
-                throw new ExceptionEE($this->l(sprintf(
-                    'Order with id %s was already notified',
+                throw new ExceptionEE(sprintf(
+                    $this->l('Order with id %s was already notified'),
                     $orderId
-                )));
+                ));
             }
+
             $this->module->getOrderMangement()->updateOrder(
                 $orderId,
                 $this->getStatus($responseArray['transaction-state'])
             );
             $logger->info(sprintf(
-                'Order with id %s was notified',
+                $this->l('Order with id %s was notified'),
                 $orderId
             ));
         }
         if ($notification instanceof FailureResponse) {
             foreach ($notification->getStatusCollection() as $status) {
-                $severity = ucfirst($status->getSeverity());
+                $severity = Tools::ucfirst($status->getSeverity());
                 $code = $status->getCode();
                 $description = $status->getDescription();
                 $logger->warning(sprintf(
-                    '%s with code %s and message "%s" occurred.<br>',
+                    $this->l('%s with code %s and message "%s" occurred'),
                     $severity,
                     $code,
                     $description
@@ -129,17 +143,27 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
         }
     }
 
+    /**
+     * transform response status to prestashop status
+     *
+     * @since 0.0.3
+     *
+     * @param $status
+     *
+     * @return string
+     */
     private function getStatus($status)
     {
         switch ($status) {
             case "error ":
             case "failure":
-                $statusResult=_PS_OS_ERROR_;
+                $statusResult = _PS_OS_ERROR_;
                 break;
             default:
-                $statusResult=_PS_OS_PAYMENT_;
+                $statusResult = _PS_OS_PAYMENT_;
                 break;
         }
+
         return $statusResult;
     }
 }

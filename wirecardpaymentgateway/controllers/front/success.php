@@ -27,10 +27,14 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../../libraries/Logger.php';
-require_once __DIR__.'/../../libraries/ExceptionEE.php';
+
+require_once dirname(__FILE__) . '/../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../libraries/Logger.php';
+require_once dirname(__FILE__) . '/../../libraries/ExceptionEE.php';
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -50,28 +54,31 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             if (!$this->module->active) {
                 throw new ExceptionEE($this->l('Module is not activ'));
             }
+
             $orderNumber =  Tools::getValue('order');
             $order = new Order($orderNumber);
-            if ($orderNumber == null || $order == null) {
-                throw new ExceptionEE($this->l(sprintf(
-                    'Order %s do not exist',
+            if ($orderNumber == null || empty($order)) {
+                throw new ExceptionEE(sprintf(
+                    $this->l('Order %s do not exist'),
                     $orderNumber
-                )));
+                ));
             }
+
             $paymentType = $this->module->getConfig()->getPaymentType($order->payment);
             if ($paymentType === null) {
                 throw new ExceptionEE($this->l('This payment method is not available.'));
             }
             if (!$paymentType->isAvailable()) {
-                throw new ExceptionEE($this->l('Payment method not enabled.'));
+                throw new ExceptionEE($this->l('Payment method not enabled'));
             }
             if (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
-            if (!isset($_POST)) {
-                throw new ExceptionEE($this->l('The order has been cancelled.'));
+            if (!$_POST) {
+                throw new ExceptionEE($this->l('The order has been cancelled'));
             }
-            $paymentType->setCertificate(__DIR__ . '/../../certificates/api-test.wirecard.com.crt');
+
+            $paymentType->setCertificate(dirname(__FILE__) . '/../../certificates/api-test.wirecard.com.crt');
             $service = new TransactionService($paymentType->getConnection(), $logger);
             $response = $service->handleResponse($_POST);
             $this->processResponse($response);
@@ -79,16 +86,25 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             $message=$e->getMessage();
         }
 
-        if ($message!="") {
+        if ($message != "") {
             $logger->error($message);
         }
         $this->context->smarty->assign(array(
             'message' => $message
         ));
+
         $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation.tpl');
     }
 
-    public function processResponse($response)
+    /**
+     * process response from skd
+     *
+     * @since 0.0.3
+     *
+     * @param $response
+     *
+     */
+    private function processResponse($response)
     {
         $logger = new Logger();
         if (!$response->isValidSignature()) {
@@ -97,17 +113,18 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
 
         if ($response instanceof SuccessResponse) {
             $orderId = $response->getCustomFields()->get('customOrderNumber');
-            if ($orderId!= Tools::getValue('order')) {
+            if ($orderId != Tools::getValue('order')) {
                 throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
             }
+
             $order = new Order($orderId);
-            $logger->log(1, sprintf(
-                'Order %s confirm successfully ',
+            $logger->info(sprintf(
+                $this->l('Order %s confirm successfully'),
                 $orderId
             ));
+
             $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
             $customer = new Customer($order->id_customer);
-
             $this->context->smarty->assign(array(
                 'email' => $customer->email,
                 'reference' => $order->reference,
@@ -118,16 +135,16 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
         }
         if ($response instanceof FailureResponse) {
             foreach ($response->getStatusCollection() as $status) {
-                $severity = ucfirst($status->getSeverity());
+                $severity = Tools::ucfirst($status->getSeverity());
                 $code = $status->getCode();
                 $description = $status->getDescription();
                 $logger->warning(sprintf(
-                    '%s with code %s and message "%s" occurred.<br>',
+                    $this->l('%s with code %s and message "%s" occurred'),
                     $severity,
                     $code,
                     $description
                 ));
-                throw new ExceptionEE($this->l($description));
+                throw new ExceptionEE($description);
             }
         }
     }

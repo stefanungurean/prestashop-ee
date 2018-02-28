@@ -27,6 +27,9 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
 use \Wirecard\PaymentSdk\Transaction\SofortTransaction;
@@ -35,14 +38,29 @@ class WirecardPaymentGatewayPaymentSofort extends WirecardPaymentGatewayPayment
 {
     protected $paymentMethod = 'Sofort';
 
-    public function getTransaction()
+    /**
+     * get default sofort transaction data
+     *
+     * @since 0.0.3
+     *
+     * @return SofortTransaction
+     */
+    protected function getTransaction()
     {
-        $transaction= new SofortTransaction();
+        $transaction = new SofortTransaction();
         $transaction->setDescriptor('test');
+
         return $transaction;
     }
 
-    public function getTransactionName()
+    /**
+     * get default sofort transaction name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
+    protected function getTransactionName()
     {
         return SofortTransaction::NAME;
     }

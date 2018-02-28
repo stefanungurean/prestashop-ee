@@ -27,9 +27,12 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  */
 
-require_once __DIR__.'/../../../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../../vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Basket;
@@ -45,12 +48,30 @@ class WirecardPaymentGatewayCart
     /** @var  WirecardPaymentGateway */
     public $module;
 
+    /**
+     * initiate cart transaction
+     *
+     * @since 0.0.3
+     *
+     * @param $module
+     *
+     */
     public function __construct($module)
     {
         $this->module = $module;
     }
 
-    public function getUrlParameters($cart, $orderNumber)
+    /**
+     * get redirect parameters
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     * @param $orderNumber
+     *
+     * @return array
+     */
+    private function getUrlParameters($cart, $orderNumber)
     {
         return array(
             'id_cart' => (int)$cart->id,
@@ -60,18 +81,40 @@ class WirecardPaymentGatewayCart
         );
     }
 
+    /**
+     * get redirect url
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     * @param $orderNumber
+     *
+     * @return Redirect
+     */
     public function getRedirect($cart, $orderNumber)
     {
-        $params=$this->getUrlParameters($cart, $orderNumber);
+        $params = $this->getUrlParameters($cart, $orderNumber);
+
         return new Redirect(
             $this->module->getContext()->link->getModuleLink($this->module->getName(), 'success', $params, true),
             $this->module->getContext()->link->getModuleLink($this->module->getName(), 'cancel', $params, true)
         );
     }
 
+    /**
+     * get notification url
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     * @param $orderNumber
+     *
+     * @return string
+     */
     public function getNotification($cart, $orderNumber)
     {
-        $params=$this->getUrlParameters($cart, $orderNumber);
+        $params = $this->getUrlParameters($cart, $orderNumber);
+
         return $this->module->getContext()->link->getModuleLink(
             $this->module->getName(),
             'notify',
@@ -80,6 +123,15 @@ class WirecardPaymentGatewayCart
         );
     }
 
+    /**
+     * get consumer data
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     *
+     * @return AccountHolder
+     */
     public function getConsumerData($cart)
     {
         $customer = new Customer($cart->id_customer);
@@ -97,10 +149,19 @@ class WirecardPaymentGatewayCart
         return $customerData;
     }
 
+    /**
+     * get shipping data
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     *
+     * @return AccountHolder
+     */
     public function getShippingData($cart)
     {
         $carrier = new Carrier($cart->id_carrier);
-        $addressDelivery = new Address(intval($cart->id_address_delivery));
+        $addressDelivery = new Address((int)$cart->id_address_delivery);
 
         $shippingData = new AccountHolder();
         $shippingData->setFirstName($addressDelivery->firstname);
@@ -111,22 +172,41 @@ class WirecardPaymentGatewayCart
         return $shippingData;
     }
 
+    /**
+     * get device data
+     *
+     * @since 0.0.3
+     *
+     * @param $id_customer
+     *
+     * @return Device
+     */
     public function getDevice($id_customer)
     {
-        $Device=new Device();
+        $Device = new Device();
         $Device->setFingerprint(md5($id_customer . "_" . microtime()));
+
         return $Device;
     }
 
+    /**
+     * get cart basket data
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     *
+     * @return Basket
+     */
     public function getBasket($cart)
     {
         $currency = new CurrencyCore($cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
-        $basket = new Basket();
 
+        $basket = new Basket();
         foreach ($cart->getProducts() as $product) {
-            $price_wt=$product['price_wt'];
-            $price=$product['price'];
+            $price_wt = $product['price_wt'];
+            $price = $product['price'];
             $tax = ($price_wt - $price) * 100 / $price;
 
             $productInfo = new Item(
@@ -159,7 +239,6 @@ class WirecardPaymentGatewayCart
             );
             $basket->add($productInfo);
         }
-
         if ($cart->getTotalShippingCost() != 0) {
             $shipping = new Item(
                 'Shipping',
@@ -174,7 +253,6 @@ class WirecardPaymentGatewayCart
                 ),
                 '1'
             );
-
             $shipping->setDescription($this->module->l('Shipping'));
             $shipping->setTaxRate(
                 number_format(
@@ -186,21 +264,48 @@ class WirecardPaymentGatewayCart
             );
             $basket->add($shipping);
         }
+
         return $basket;
     }
 
+    /**
+     * get customer ip
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
     public function getConsumerIpAddress()
     {
         return Tools::getRemoteAddr();
     }
 
+    /**
+     * get cart total amount
+     *
+     * @since 0.0.3
+     *
+     * @param $cart
+     *
+     * @return Amount
+     */
     public function getTotalAmount($cart)
     {
         $currency = new CurrencyCore($cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
+
         return new Amount($cart->getOrderTotal(true), $currencyIsoCode);
     }
 
+    /**
+     * get custom fields collection
+     *
+     * @since 0.0.3
+     *
+     * @param $CustomFieldArray
+     *
+     * @return CustomFieldCollection
+     */
     public function setCustomField($CustomFieldArray)
     {
         $customFields = new CustomFieldCollection();
@@ -210,10 +315,20 @@ class WirecardPaymentGatewayCart
                 $customFields->add($customOrderNumber);
             }
         }
+
         return $customFields;
     }
 
-    protected function getAddress($source)
+    /**
+     * get address
+     *
+     * @since 0.0.3
+     *
+     * @param $source
+     *
+     * @return Address
+     */
+    private function getAddress($source)
     {
         $country = new Country($source->id_country);
 

@@ -1,4 +1,4 @@
-{*
+{**
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -26,45 +26,48 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
+ * @author Wirecard AG
+ * @copyright Wirecard AG
+ * @license GPLv3
  *}
 
 {extends file="helpers/form/form.tpl"}
 
 {block name="input"}
     {if $input.type == 'linkbutton'}
-		<a class="btn btn-default" id="{$input.id}" href="#">
+		<a class="btn btn-default" id="{$input.id|escape:'htmlall':'UTF-8'}" href="#">
 			<i class="icon-check"></i>
             {l s=$input.buttonText mod='wirecardpaymentgateway'}
 		</a>
 		<script type="text/javascript">
             $(function () {
-                $('#{$input.id}').on('click', function() {
+                $('#{$input.id|escape:'htmlall':'UTF-8'}').on('click', function() {
                     $.ajax({
                         type: 'POST',
-                        {** this url doesn't work when escaped *}
-                        url: '{$ajax_configtest_url}',
+                        url: '{$ajax_configtest_url|escape:'htmlall':'UTF-8'}',
                         dataType: 'json',
                         data: {
                             action: 'TestConfig',
-                    {foreach $input.send as $datasend}
-                    {$datasend}:$('input[name={$datasend}]').val(),
-                    {/foreach}
-                        method: '{$input.method}',
-                        ajax: true
-                },
-                    success: function (jsonData) {
-                        if (jsonData) {
-                            $.fancybox({
-                                fitToView: true,
-                                content: '<div><fieldset><legend>{l s='Test result' mod='wirecardceecheckoutseamless'}</legend>' +
-                                '<label>{l s='Status' mod='wirecardpaymentgateway'}:</label>' +
-                                '<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
-                                '<label>{l s='Message' mod='wirecardpaymentgateway'}:</label>' +
-                                '<div class="margin-form" style="text-align:left;">' + jsonData.message + '</div></fieldset></div>'
-                            });
+                            {foreach $input.send as $datasend}
+                                {$datasend|escape:'htmlall':'UTF-8'}:
+                                $('input[name={$datasend|escape:'htmlall':'UTF-8'}]').val(),
+                            {/foreach}
+                            method: '{$input.method|escape:'htmlall':'UTF-8'}',
+                            ajax: true
+                         },
+                        success: function (jsonData) {
+                            if (jsonData) {
+                                $.fancybox({
+                                    fitToView: true,
+                                    content: '<div><fieldset><legend>{l s='Test result' mod='wirecardpaymentgateway'}</legend>' +
+                                    '<label>{l s='Status' mod='wirecardpaymentgateway'}:</label>' +
+                                    '<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
+                                    '<label>{l s='Message' mod='wirecardpaymentgateway'}:</label>' +
+                                    '<div class="margin-form" style="text-align:left;">' + jsonData.message + '</div></fieldset></div>'
+                                });
+                            }
                         }
-                    }
-                });
+                    });
                 });
             });
 		</script>
