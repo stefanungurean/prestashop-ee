@@ -124,10 +124,6 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
                 $this->getStatus($responseArray['transaction-state']),
                 true
             );
-            $logger->info(sprintf(
-                $this->l('Order with id %s was notified'),
-                $orderId
-            ));
         }
         if ($notification instanceof FailureResponse) {
             foreach ($notification->getStatusCollection() as $status) {

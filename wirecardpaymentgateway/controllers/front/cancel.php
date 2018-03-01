@@ -77,10 +77,6 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
             }
 
             $this->module->getOrderMangement()->updateOrder($order->id, _PS_OS_CANCELED_);
-            $logger->info(sprintf(
-                $this->l('Cancelled order %s'),
-                $orderNumber
-            ));
         } catch (Exception $e) {
             $message = $e->getMessage();
         }

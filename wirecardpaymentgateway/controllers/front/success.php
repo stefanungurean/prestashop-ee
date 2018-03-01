@@ -118,11 +118,6 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             }
 
             $order = new Order($orderId);
-            $logger->info(sprintf(
-                $this->l('Order %s confirm successfully'),
-                $orderId
-            ));
-
             $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
             $customer = new Customer($order->id_customer);
             $this->context->smarty->assign(array(
