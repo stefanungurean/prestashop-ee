@@ -246,24 +246,24 @@ class WirecardEEPaymentGatewayPayment
         if ($response instanceof InteractionResponse) {
             die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
         } elseif ($response instanceof FailureResponse) {
-                $errors = array();
-                foreach ($response->getStatusCollection() as $status) {
-                    $severity = Tools::ucfirst($status->getSeverity());
-                    $code = $status->getCode();
-                    $description = $status->getDescription();
-                    $errors[] = $description;
-                    $logger = new Logger();
-                    $logger->warning(sprintf(
-                        $this->module->l('%s with code %s and message "%s" occurred'),
-                        $severity,
-                        $code,
-                        $description
-                    ));
-                }
-                $message = implode(',', $errors);
-                if (Tools::strlen($message)) {
-                    throw new ExceptionEE($message);
-                }
+            $errors = array();
+            foreach ($response->getStatusCollection() as $status) {
+                $severity = Tools::ucfirst($status->getSeverity());
+                $code = $status->getCode();
+                $description = $status->getDescription();
+                $errors[] = $description;
+                $logger = new Logger();
+                $logger->warning(sprintf(
+                    $this->module->l('%s with code %s and message "%s" occurred'),
+                    $severity,
+                    $code,
+                    $description
+                ));
+            }
+            $message = implode(',', $errors);
+            if (Tools::strlen($message)) {
+                throw new ExceptionEE($message);
+            }
         }
     }
 
@@ -300,6 +300,4 @@ class WirecardEEPaymentGatewayPayment
     {
         return $_POST;
     }
-
-
 }
