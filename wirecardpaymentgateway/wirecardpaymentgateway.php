@@ -153,7 +153,7 @@ class WirecardPaymentGateway extends PaymentModule
     {
         $this->html = '<h2>' . $this->displayName . '</h2>';
 
-        if (Tools::isSubmit('btnSubmit')) {
+        if (Tools::isSubmit(ConfigurationSettings::SUBMIT_BUTTON)) {
             $this->getConfig()->postValidation();
             if (!count($this->postErrors)) {
                 $this->html .= $this->getConfig()->postProcess();

@@ -59,7 +59,7 @@
                             if (jsonData) {
                                 $.fancybox({
                                     fitToView: true,
-                                    content: '<div><fieldset><legend>{l s='Test result' mod='wirecardpaymentgateway'}</legend>' +
+                                    content: '<div><fieldset><legend>{l s='Test result: %method%' sprintf=['%method%' => $input.method] mod='wirecardpaymentgateway'}</legend>' +
                                     '<label>{l s='Status' mod='wirecardpaymentgateway'}:</label>' +
                                     '<div class="margin-form" style="text-align:left;">' + jsonData.status + '</div><br />' +
                                     '<label>{l s='Message' mod='wirecardpaymentgateway'}:</label>' +

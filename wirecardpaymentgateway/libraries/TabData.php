@@ -36,26 +36,39 @@ require_once dirname(__FILE__) .'/ConfigurationSettings.php';
 
 class TabData
 {
-    //repetitive data specific labels
-    const LABEL_WIRECARD_SERVER_URL = 'Wirecard server url';
-    const LABEL_HTTP_PASS = 'Http password';
-    const LABEL_HTTP_USER = 'Http user';
-    const LABEL_SECRET = 'Secret';
-    const LABEL_MAID = 'Maid';
-    const LABEL_ENABLE = 'Enable';
+    //input labels
+    const INPUT_LABEL_ENABLE_METHOD = 'Enable';
+    const INPUT_LABEL_WIRECARD_SERVER_URL = 'Wirecard server url';
+    const INPUT_LABEL_HTTP_PASS = 'Http password';
+    const INPUT_LABEL_HTTP_USER = 'Http user';
+    const INPUT_LABEL_SECRET = 'Secret';
+    const INPUT_LABEL_MAID = 'Maid';
+    const INPUT_LABEL_TRANSACTION_TYPE = 'Transaction type';
+    const INPUT_LABEL_DESCRIPTOR = 'Send descriptor';
 
-
+    //input names
+    const INPUT_NAME_ENABLE_METHOD = 'enable_method';
     const INPUT_NAME_WIRECARD_SERVER_URL = 'wirecard_server_url';
     const INPUT_NAME_HTTP_PASS = 'http_password';
     const INPUT_NAME_HTTP_USER = 'http_user';
     const INPUT_NAME_SECRET = 'secret';
     const INPUT_NAME_MAID = 'maid';
+    const INPUT_NAME_TRANSACTION_TYPE = 'transaction_type';
+    const INPUT_NAME_DESCRIPTOR = 'descriptor';
+    const INPUT_NAME_BASKET_SEND = 'basket_send';
 
-    const INPUT_NAME_WIRECARD_SERVER_URL_VALUE = 'https://api-test.wirecard.com';
-    const INPUT_NAME_HTTP_PASS_VALUE = 'qD2wzQ_hrc!8';
-    const INPUT_NAME_HTTP_USER_VALUE = '70000-APITEST-AP';
+    //input default values
+    const INPUT_VALUE_ENABLE_METHOD = '0';
+    const INPUT_VALUE_WIRECARD_SERVER_URL = 'https://api-test.wirecard.com';
+    const INPUT_VALUE_HTTP_PASS = 'qD2wzQ_hrc!8';
+    const INPUT_VALUE_HTTP_USER = '70000-APITEST-AP';
+    const INPUT_VALUE_TRANSACTION_TYPE = 'purchase';
+    const INPUT_VALUE_DESCRIPTOR = '1';
+    const INPUT_VALUE_BASKET_SEND = '0';
 
-    private $module;
+    const INPUT_TRANSACTION_TYPE_FUNCTION = 'getTransactionTypes';
+
+    private $tabs = array('paypal','sofort','iDEAL');
 
     /**
      * initiate store data
@@ -83,85 +96,88 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            ConfigurationSettings::TAB_TEXT => $MethodName,
-            ConfigurationSettings::FIELDS_TEXT => array(
+            ConfigurationSettings::TEXT_TAB => $MethodName,
+            ConfigurationSettings::TEXT_FIELDS => array(
                 array(
-                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
-                    ConfigurationSettings::VALIDATE_DEFAULT => '0',
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
-                    ConfigurationSettings::LOGO_TEXT  => 'paypal.png',
-                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_ENABLE_METHOD,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
+                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_LOGO  => 'paypal.png',
+                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_WIRECARD_SERVER_URL,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MAID),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_SECRET),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_USER,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_USER),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_USER,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_PASS,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_PASS),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_PASS,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'transaction_type',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Transaction type'),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::SELECT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'purchase',
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_TRANSACTION_TYPE,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_TRANSACTION_TYPE),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_SELECT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_TRANSACTION_TYPE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    'options' => 'getTransactionTypes'
+                    'options' => self::INPUT_TRANSACTION_TYPE_FUNCTION
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'descriptor',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Send descriptor'),
-                    ConfigurationSettings::VALIDATE_DEFAULT => '1',
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_DESCRIPTOR,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_DESCRIPTOR),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_DESCRIPTOR,
                     ConfigurationSettings::VALIDATE_REQUIRED => true
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'basket_send',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Send basket data'),
-                    ConfigurationSettings::VALIDATE_DEFAULT => '0',
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_BASKET_SEND,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_NAME_BASKET_SEND),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_BASKET_SEND,
                     ConfigurationSettings::VALIDATE_REQUIRED => true
                 ),
                 array(
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test paypal configuration'),
-                    ConfigurationSettings::ID_TEXT => 'paypalConfig',
-                    ConfigurationSettings::METHOD_NAME  => $methodName,
-                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
+                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
+                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
+                        $methodName
+                    ),
+                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
+                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
+                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -180,64 +196,66 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            ConfigurationSettings::TAB_TEXT => $MethodName,
-            ConfigurationSettings::FIELDS_TEXT => array(
+            ConfigurationSettings::TEXT_TAB => $MethodName,
+            ConfigurationSettings::TEXT_FIELDS => array(
                 array(
-                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
-                    ConfigurationSettings::VALIDATE_DEFAULT => '0',
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
-                    ConfigurationSettings::LOGO_TEXT  => 'sofortbanking.png',
-                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_ENABLE_METHOD,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
+                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_LOGO  => 'sofortbanking.png',
+                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_WIRECARD_SERVER_URL,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MAID),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_SECRET),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_USER,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_USER),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_USER,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_PASS,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_PASS),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_PASS,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::VALIDATE_REQUIRED => false,
-                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test sofort configuration'),
-                    ConfigurationSettings::ID_TEXT => 'sofortConfig',
-                    ConfigurationSettings::METHOD_NAME => $methodName,
-                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
+                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
+                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
+                        $methodName
+                    ),
+                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
+                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
+                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -256,65 +274,66 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            ConfigurationSettings::TAB_TEXT => $MethodName,
-            ConfigurationSettings::FIELDS_TEXT => array(
+            ConfigurationSettings::TEXT_TAB => $MethodName,
+            ConfigurationSettings::TEXT_FIELDS => array(
                 array(
-                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
-                    ConfigurationSettings::VALIDATE_DEFAULT => '0',
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
-                    ConfigurationSettings::CLASS_NAME => $MethodName,
-                    ConfigurationSettings::LOGO_TEXT  => 'ideal.png',
-                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_ENABLE_METHOD,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
+                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_LOGO  => 'ideal.png',
+                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_WIRECARD_SERVER_URL,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
-
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MAID),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'b4ca14c0-bb9a-434d-8ce3-65fbff2c2267',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_SECRET),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_USER,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_USER),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_USER,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_PASS,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_PASS),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_PASS,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::VALIDATE_REQUIRED => false,
-                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test iDEAL configuration'),
-                    ConfigurationSettings::ID_TEXT => 'iDEALConfig',
-                    ConfigurationSettings::METHOD_NAME => $methodName,
-                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
+                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
+                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
+                        $methodName
+                    ),
+                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
+                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
+                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -348,9 +367,11 @@ class TabData
     public function getConfig()
     {
         $configurationArray = array();
-        $configurationArray['paypal'] = $this->paypal();
-        $configurationArray['sofort'] = $this->sofort();
-        $configurationArray['iDEAL'] = $this->iDEAL();
+        foreach ($this->tabs as $tab){
+            if(method_exists($this,$tab)) {
+                $configurationArray[$tab] = $this->{$tab}();
+            }
+        }
 
         return $configurationArray;
     }

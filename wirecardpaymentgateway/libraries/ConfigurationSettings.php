@@ -41,16 +41,15 @@ class ConfigurationSettings
     private static $config;
     private static $tabData;
 
-    const CLASS_NAME = "className";
-    const METHOD_NAME = "method";
+    const CLASS_NAME_TEXT = "className";
+    const METHOD_NAME_TEXT = "method";
 
     //inputs names
     const LINK_BUTTON = 'linkbutton';
     const INPUT_ON_OFF = 'onoff';
     const SUBMIT_BUTTON = 'btnSubmit';
     const INPUT_TEXT = 'text';
-    const SELECT_TEXT = 'select';
-
+    const INPUT_SELECT = 'select';
 
     //validation names
     const VALIDATE_REQUIRED = 'required';
@@ -60,24 +59,25 @@ class ConfigurationSettings
     const SANITIZE_TRIM = 'trim';
 
     //labels names
-    const VALUE_TEXT = 'value';
-    const LABEL_TEXT = 'label';
-    const PARAM_TEXT = 'param_name';
-    const FIELDS_TEXT = 'fields';
-    const MULTIPLE_TEXT = 'multiple';
-    const CLASS_TEXT = 'class';
-    const OPTION_TEXT = 'options';
-    const GROUP_TEXT = 'group';
-    const NAME_TEXT = 'name';
-    const TYPE_TEXT = 'type';
-    const LOGO_TEXT = 'logo';
-    const CLASS_METHOD_TEXT = 'labelMethod';
-    const INPUT_NAME_ENABLE_METHOD_TEXT = 'enable_method';
-    const BUTTON_TEXT_TEXT = 'buttonText';
-    const ID_TEXT = 'id';
-    const SEND_TEXT = 'send';
+    const TEXT_VALUE = 'value';
+    const TEXT_LABEL = 'label';
+    const TEXT_PARAM = 'param_name';
+    const TEXT_FIELDS = 'fields';
+    const TEXT_MULTIPLE = 'multiple';
+    const TEXT_CLASS = 'class';
+    const TEXT_OPTION = 'options';
+    const TEXT_GROUP = 'group';
+    const TEXT_NAME = 'name';
+    const TEXT_TYPE = 'type';
+    const TEXT_LOGO = 'logo';
+    const TEXT_CLASS_METHOD = 'labelMethod';
 
-    const TAB_TEXT = 'tab';
+    const TEXT_BUTTON_TEXT = 'buttonText';
+    const TEXT_ID = 'id';
+    const TEXT_SEND = 'send';
+    const TEXT_LINK_BUTTON = 'Test %s configuration';
+
+    const TEXT_TAB = 'tab';
     /**
      * initiate the configuration settings
      *
@@ -117,32 +117,32 @@ class ConfigurationSettings
         $configGroup = $groupKey;
         $label = "";
 
-        if (isset($f[self::GROUP_TEXT])) {
-            $configGroup = $f[self::GROUP_TEXT];
+        if (isset($f[self::TEXT_GROUP])) {
+            $configGroup = $f[self::TEXT_GROUP];
         }
-        if (isset($f[self::CLASS_TEXT])) {
+        if (isset($f[self::TEXT_CLASS])) {
             $configGroup = 'pt';
         }
 
-        if (isset($f[self::LABEL_TEXT])) {
-            $label = $f[self::LABEL_TEXT];
+        if (isset($f[self::TEXT_LABEL])) {
+            $label = $f[self::TEXT_LABEL];
         }
 
         $name = "";
-        if (isset($f[self::NAME_TEXT])) {
-            $name = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
+        if (isset($f[self::TEXT_NAME])) {
+            $name = self::buildParamName($configGroup, $f[self::TEXT_NAME]);
         }
 
         $elem = array(
-            self::NAME_TEXT => $name,
-            self::LABEL_TEXT => $label,
-            self::TAB_TEXT => $groupKey,
-            self::TYPE_TEXT => $f[self::TYPE_TEXT],
+            self::TEXT_NAME => $name,
+            self::TEXT_LABEL => $label,
+            self::TEXT_TAB => $groupKey,
+            self::TEXT_TYPE => $f[self::TEXT_TYPE],
             self::VALIDATE_REQUIRED => isset($f[self::VALIDATE_REQUIRED ]) && $f[self::VALIDATE_REQUIRED ]
         );
 
         if (isset($f['cssclass'])) {
-            $elem[self::CLASS_TEXT] = $f['cssclass'];
+            $elem[self::TEXT_CLASS] = $f['cssclass'];
         }
 
         $elem = $this->processInputDoc($f, $elem);
@@ -207,39 +207,39 @@ class ConfigurationSettings
         $radio_type = 'switch';
         $radio_options = array(
             array(
-                self::ID_TEXT => 'active_on',
-                self::VALUE_TEXT => 1,
-                self::LABEL_TEXT => $this->module->l('Enabled')
+                self::TEXT_ID => 'active_on',
+                self::TEXT_VALUE => 1,
+                self::TEXT_LABEL => $this->module->l('Enabled')
             ),
             array(
-                self::ID_TEXT => 'active_off',
-                self::VALUE_TEXT => 0,
-                self::LABEL_TEXT => $this->module->l('Disabled')
+                self::TEXT_ID => 'active_off',
+                self::TEXT_VALUE => 0,
+                self::TEXT_LABEL => $this->module->l('Disabled')
             )
         );
 
-        switch ($f[self::TYPE_TEXT]) {
+        switch ($f[self::TEXT_TYPE]) {
             case self::LINK_BUTTON:
-                $elem[self::BUTTON_TEXT_TEXT] = $f[self::BUTTON_TEXT_TEXT];
-                $elem[self::ID_TEXT] = $f[self::ID_TEXT];
-                $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
-                $elem[self::SEND_TEXT] = $f[self::SEND_TEXT];
+                $elem[self::TEXT_BUTTON_TEXT] = $f[self::TEXT_BUTTON_TEXT];
+                $elem[self::TEXT_ID] = $f[self::TEXT_ID];
+                $elem[self::METHOD_NAME_TEXT] = $f[self::METHOD_NAME_TEXT];
+                $elem[self::TEXT_SEND] = $f[self::TEXT_SEND];
                 break;
             case self::INPUT_ON_OFF:
-                $elem[self::TYPE_TEXT] = $radio_type;
-                $elem[self::CLASS_TEXT] = 't';
+                $elem[self::TEXT_TYPE] = $radio_type;
+                $elem[self::TEXT_CLASS] = 't';
                 $elem['is_bool'] = true;
                 $elem['values'] = $radio_options;
                 break;
-            case 'text':
-                if (!isset($elem[self::CLASS_TEXT])) {
-                    $elem[self::CLASS_TEXT] = 'fixed-width-xl';
+            case self::INPUT_TEXT:
+                if (!isset($elem[self::TEXT_CLASS])) {
+                    $elem[self::TEXT_CLASS] = 'fixed-width-xl';
                 }
                 if (isset($f[self::VALIDATE_MAX_CHAR])) {
                     $elem['maxlength'] = $elem[self::VALIDATE_MAX_CHAR] = $f[self::VALIDATE_MAX_CHAR];
                 }
                 break;
-            case 'select':
+            case self::INPUT_SELECT:
                 $elem = $this->processInputTypeSelect($f, $elem);
                 break;
             default:
@@ -261,14 +261,14 @@ class ConfigurationSettings
      */
     private function processInputTypeSelect($f, $elem)
     {
-        if (isset($f[self::MULTIPLE_TEXT])) {
-            $elem[self::MULTIPLE_TEXT] = $f[self::MULTIPLE_TEXT];
+        if (isset($f[self::TEXT_MULTIPLE])) {
+            $elem[self::TEXT_MULTIPLE] = $f[self::TEXT_MULTIPLE];
         }
         if (isset($f['size'])) {
             $elem['size'] = $f['size'];
         }
-        if (isset($f[self::OPTION_TEXT])) {
-            $optfunc = $f[self::OPTION_TEXT];
+        if (isset($f[self::TEXT_OPTION])) {
+            $optfunc = $f[self::TEXT_OPTION];
             $options = array();
             if (is_array($optfunc)) {
                 $options = $optfunc;
@@ -277,10 +277,10 @@ class ConfigurationSettings
                 $options = self::$tabData->$optfunc();
             }
 
-            $elem[self::OPTION_TEXT] = array(
+            $elem[self::TEXT_OPTION] = array(
                 'query' => $options,
-                self::ID_TEXT => 'key',
-                self::NAME_TEXT => self::VALUE_TEXT
+                self::TEXT_ID => 'key',
+                self::TEXT_NAME => self::TEXT_VALUE
             );
         }
 
@@ -300,8 +300,8 @@ class ConfigurationSettings
         $tabs = array();
 
         foreach (self::getConfig() as $groupKey => $group) {
-            $tabs[$groupKey] = $group[self::TAB_TEXT];
-            foreach ($group[self::FIELDS_TEXT] as $f) {
+            $tabs[$groupKey] = $group[self::TEXT_TAB];
+            foreach ($group[self::TEXT_FIELDS] as $f) {
                 $elem = $this->processInput($f, $groupKey);
                 $input_fields[] = $elem;
             }
@@ -354,8 +354,8 @@ class ConfigurationSettings
     {
         $values = array();
         foreach ($this->getAllConfigurationParameters() as $parameter) {
-            $val = Configuration::get($parameter[self::PARAM_TEXT]);
-            if (isset($parameter[self::MULTIPLE_TEXT]) && $parameter[self::MULTIPLE_TEXT]) {
+            $val = Configuration::get($parameter[self::TEXT_PARAM]);
+            if (isset($parameter[self::TEXT_MULTIPLE]) && $parameter[self::TEXT_MULTIPLE]) {
                 if (!is_array($val)) {
                     $val = Tools::strlen($val) ? Tools::jsonDecode($val) : array();
                 }
@@ -364,10 +364,10 @@ class ConfigurationSettings
                 foreach ($val as $v) {
                     $x[$v] = $v;
                 }
-                $pname = $parameter[self::PARAM_TEXT] . '[]';
+                $pname = $parameter[self::TEXT_PARAM] . '[]';
                 $values[$pname] = $x;
             } else {
-                $values[$parameter[self::PARAM_TEXT]] = $val;
+                $values[$parameter[self::TEXT_PARAM]] = $val;
             }
         }
 
@@ -385,17 +385,17 @@ class ConfigurationSettings
     {
         $params = array();
         foreach (self::getConfig() as $groupKey => $group) {
-            foreach ($group[self::FIELDS_TEXT] as $f) {
-                $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
+            foreach ($group[self::TEXT_FIELDS] as $f) {
+                $configGroup = isset($f[self::TEXT_GROUP]) ? $f[self::TEXT_GROUP] : $groupKey;
 
-                if (isset($f[self::CLASS_TEXT])) {
+                if (isset($f[self::TEXT_CLASS])) {
                     $configGroup = 'pt';
                 }
 
-                if (isset($f[self::NAME_TEXT])) {
-                    $f[self::PARAM_TEXT] = $this->buildParamName(
+                if (isset($f[self::TEXT_NAME])) {
+                    $f[self::TEXT_PARAM] = $this->buildParamName(
                         $configGroup,
-                        $f[self::NAME_TEXT]
+                        $f[self::TEXT_NAME]
                     );
                     $params[] = $f;
                 }
@@ -435,7 +435,7 @@ class ConfigurationSettings
      */
     private function validateValue($parameter)
     {
-        $val = Tools::getValue($parameter[self::PARAM_TEXT]);
+        $val = Tools::getValue($parameter[self::TEXT_PARAM]);
 
         if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
             $val = trim($val);
@@ -444,7 +444,7 @@ class ConfigurationSettings
         if (isset($parameter[self::VALIDATE_REQUIRED ]) &&
             $parameter[self::VALIDATE_REQUIRED ] &&
             !Tools::strlen($val)) {
-            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l('is required');
+            $this->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l('is required');
         }
 
         if (!isset($parameter['validator'])) {
@@ -452,7 +452,7 @@ class ConfigurationSettings
         }
 
         if ($parameter['validator'] == 'numeric' && Tools::strlen($val) && !is_numeric($val)) {
-            $this->postErrors[] = $parameter[self::LABEL_TEXT] . ' ' . $this->module->l(' must be a number');
+            $this->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l(' must be a number');
         }
 
         return true;
@@ -468,7 +468,7 @@ class ConfigurationSettings
     {
         if (Tools::isSubmit(self::SUBMIT_BUTTON)) {
             foreach ($this->getAllConfigurationParameters() as $parameter) {
-                $val = Tools::getValue($parameter[self::PARAM_TEXT]);
+                $val = Tools::getValue($parameter[self::TEXT_PARAM]);
 
                 if (isset($parameter[self::VALIDATE_SANITIZE]) &&
                     $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
@@ -478,7 +478,7 @@ class ConfigurationSettings
                 if (is_array($val)) {
                     $val = Tools::jsonEncode($val);
                 }
-                Configuration::updateValue($parameter[self::PARAM_TEXT], $val);
+                Configuration::updateValue($parameter[self::TEXT_PARAM], $val);
             }
         }
 
@@ -495,7 +495,7 @@ class ConfigurationSettings
     public static function setDefaults()
     {
         foreach (self::getConfig() as $groupKey => $group) {
-            foreach ($group[self::FIELDS_TEXT] as $f) {
+            foreach ($group[self::TEXT_FIELDS] as $f) {
                 if (array_key_exists(self::VALIDATE_DEFAULT, $f) && !self::setDefaultValue($f, $groupKey)) {
                     return false;
                 }
@@ -517,12 +517,12 @@ class ConfigurationSettings
      */
     private static function setDefaultValue($f, $groupKey)
     {
-        $configGroup = isset($f[self::GROUP_TEXT]) ? $f[self::GROUP_TEXT] : $groupKey;
-        if (isset($f[self::CLASS_TEXT])) {
+        $configGroup = isset($f[self::TEXT_GROUP]) ? $f[self::TEXT_GROUP] : $groupKey;
+        if (isset($f[self::TEXT_CLASS])) {
             $configGroup = 'pt';
         }
 
-        $p = self::buildParamName($configGroup, $f[self::NAME_TEXT]);
+        $p = self::buildParamName($configGroup, $f[self::TEXT_NAME]);
         $defVal = $f[self::VALIDATE_DEFAULT];
         if (is_array($defVal)) {
             $defVal = Tools::jsonEncode($defVal);
@@ -548,15 +548,14 @@ class ConfigurationSettings
     {
         $types = array();
         foreach (self::getConfig() as $group) {
-            foreach ($group[self::FIELDS_TEXT] as $f) {
-                $classNameIndex = self::CLASS_NAME;
-                if (array_key_exists($classNameIndex, $f)) {
+            foreach ($group[self::TEXT_FIELDS] as $f) {
+                if (array_key_exists(self::CLASS_NAME_TEXT, $f)) {
                     if ($paymentType !== null &&
-                        (!isset($f[$classNameIndex]) || $f[$classNameIndex] != $paymentType)) {
+                        (!isset($f[self::CLASS_NAME_TEXT]) || $f[self::CLASS_NAME_TEXT] != $paymentType)) {
                         continue;
                     }
-                    $className = 'WEEPaymentGatewayPayment' . $f[$classNameIndex];
-                    $f[self::GROUP_TEXT] = 'pt';
+                    $className = 'WEEPaymentGatewayPayment' . $f[self::CLASS_NAME_TEXT];
+                    $f[self::TEXT_GROUP] = 'pt';
                     $pt = new $className($this->module, $f);
                     $types[] = $pt;
                 }

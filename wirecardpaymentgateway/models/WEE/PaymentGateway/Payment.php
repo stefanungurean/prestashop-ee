@@ -78,19 +78,7 @@ class WEEPaymentGatewayPayment
      */
     public function isAvailable()
     {
-        return (bool)ConfigurationSettings::getConfigValue($this->paymentMethod, 'enable_method');
-    }
-
-    /**
-     * get payment name
-     *
-     * @since 0.0.3
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->config['name'];
+        return (bool)ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_ENABLE_METHOD);
     }
 
     /**
@@ -102,7 +90,7 @@ class WEEPaymentGatewayPayment
      */
     public function getLabel()
     {
-        return $this->config['labelMethod'];
+        return $this->config[ConfigurationSettings::TEXT_CLASS_METHOD];
     }
 
     /**
@@ -114,7 +102,7 @@ class WEEPaymentGatewayPayment
      */
     public function getLogo()
     {
-        return $this->config['logo'];
+        return $this->config[ConfigurationSettings::TEXT_LOGO];
     }
 
     /**
@@ -141,11 +129,11 @@ class WEEPaymentGatewayPayment
         $currency = new CurrencyCore($this->module->getContext()->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
 
-        $baseUrl = ConfigurationSettings::getConfigValue($this->paymentMethod, 'wirecard_server_url');
-        $httpUser = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_user');
-        $httpPass = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_password');
-        $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, 'maid');
-        $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret') ;
+        $baseUrl = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_WIRECARD_SERVER_URL);
+        $httpUser = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_HTTP_USER);
+        $httpPass = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_HTTP_PASS);
+        $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_MAID);
+        $key = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_SECRET) ;
 
         $this->connection = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger();
