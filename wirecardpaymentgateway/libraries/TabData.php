@@ -37,9 +37,23 @@ require_once dirname(__FILE__) .'/ConfigurationSettings.php';
 class TabData
 {
     //repetitive data specific labels
-    const WIRECARD_SERVER_URL = 'wirecard_server_url';
-    const HTTP_PASS = 'http_password';
-    const HTTP_USER = 'http_user';
+    const LABEL_WIRECARD_SERVER_URL = 'Wirecard server url';
+    const LABEL_HTTP_PASS = 'Http password';
+    const LABEL_HTTP_USER = 'Http user';
+    const LABEL_SECRET = 'Secret';
+    const LABEL_MAID = 'Maid';
+    const LABEL_ENABLE = 'Enable';
+
+
+    const INPUT_NAME_WIRECARD_SERVER_URL = 'wirecard_server_url';
+    const INPUT_NAME_HTTP_PASS = 'http_password';
+    const INPUT_NAME_HTTP_USER = 'http_user';
+    const INPUT_NAME_SECRET = 'secret';
+    const INPUT_NAME_MAID = 'maid';
+
+    const INPUT_NAME_WIRECARD_SERVER_URL_VALUE = 'https://api-test.wirecard.com';
+    const INPUT_NAME_HTTP_PASS_VALUE = 'qD2wzQ_hrc!8';
+    const INPUT_NAME_HTTP_USER_VALUE = '70000-APITEST-AP';
 
     private $module;
 
@@ -69,61 +83,61 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            'tab' => $MethodName,
-            'fields' => array(
+            ConfigurationSettings::TAB_TEXT => $MethodName,
+            ConfigurationSettings::FIELDS_TEXT => array(
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'enable_method',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Enable'),
+                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
                     ConfigurationSettings::VALIDATE_DEFAULT => '0',
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::CLASS_NAME => $MethodName,
-                    'logo' => 'paypal.png',
-                    'labelMethod' => $MethodName
+                    ConfigurationSettings::LOGO_TEXT  => 'paypal.png',
+                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('URL of Wirecard server'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'https://api-test.wirecard.com',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'maid',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('MAID'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => '9abf05c1-c266-46ae-8eac-7f87ca97af28',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => 'secret',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Secret'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::HTTP_USER,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP user'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => '70000-APITEST-AP',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::NAME_TEXT => self::HTTP_PASS,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP Password'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'qD2wzQ_hrc!8',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
                     ConfigurationSettings::NAME_TEXT => 'transaction_type',
                     ConfigurationSettings::LABEL_TEXT => $this->module->l('Transaction type'),
-                    ConfigurationSettings::TYPE_TEXT => 'select',
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::SELECT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'purchase',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     'options' => 'getTransactionTypes'
@@ -144,10 +158,10 @@ class TabData
                 ),
                 array(
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
-                    'buttonText' => $this->module->l('Test paypal configuration'),
-                    'id' => 'paypalConfig',
+                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test paypal configuration'),
+                    ConfigurationSettings::ID_TEXT => 'paypalConfig',
                     ConfigurationSettings::METHOD_NAME  => $methodName,
-                    'send' => $this->getCheckArray($methodName)
+                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -166,64 +180,64 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            'tab' => $MethodName,
-            'fields' => array(
+            ConfigurationSettings::TAB_TEXT => $MethodName,
+            ConfigurationSettings::FIELDS_TEXT => array(
                 array(
-                    'name' => 'enable_method',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Enable'),
+                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
                     ConfigurationSettings::VALIDATE_DEFAULT => '0',
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::CLASS_NAME => $MethodName,
-                    'logo' => 'sofortbanking.png',
-                    'labelMethod' => $MethodName
+                    ConfigurationSettings::LOGO_TEXT  => 'sofortbanking.png',
+                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
                 ),
                 array(
-                    'name' => self::WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('URL of Wirecard server'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'https://api-test.wirecard.com',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => 'maid',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('MAID'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'c021a23a-49a5-4987-aa39-e8e858d29bad',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => 'secret',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Secret'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd39968',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => self::HTTP_USER,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP user'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => '70000-APITEST-AP',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => self::HTTP_PASS,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP Password'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'qD2wzQ_hrc!8',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
                     ConfigurationSettings::VALIDATE_REQUIRED => false,
-                    'buttonText' => $this->module->l('Test sofort configuration'),
-                    'id' => 'sofortConfig',
+                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test sofort configuration'),
+                    ConfigurationSettings::ID_TEXT => 'sofortConfig',
                     ConfigurationSettings::METHOD_NAME => $methodName,
-                    'send' => $this->getCheckArray($methodName)
+                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -242,64 +256,65 @@ class TabData
         $MethodName = ucfirst($methodName);
 
         return array(
-            'tab' => $MethodName,
-            'fields' => array(
+            ConfigurationSettings::TAB_TEXT => $MethodName,
+            ConfigurationSettings::FIELDS_TEXT => array(
                 array(
-                    'name' => 'enable_method',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Enable'),
+                    ConfigurationSettings::NAME_TEXT => ConfigurationSettings::INPUT_NAME_ENABLE_METHOD_TEXT,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_ENABLE),
                     ConfigurationSettings::VALIDATE_DEFAULT => '0',
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::CLASS_NAME => $MethodName,
-                    'logo' => 'ideal.png',
-                    'labelMethod' => $MethodName
+                    ConfigurationSettings::LOGO_TEXT  => 'ideal.png',
+                    ConfigurationSettings::CLASS_METHOD_TEXT => $MethodName
                 ),
                 array(
-                    'name' => self::WIRECARD_SERVER_URL,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('URL of Wirecard server'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'https://api-test.wirecard.com',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_WIRECARD_SERVER_URL_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
+
                 array(
-                    'name' => 'maid',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('MAID'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_MAID),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'b4ca14c0-bb9a-434d-8ce3-65fbff2c2267',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => 'secret',
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Secret'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_SECRET),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => self::HTTP_USER,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP user'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => '70000-APITEST-AP',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_USER ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_USER),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_USER_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    'name' => self::HTTP_PASS,
-                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP Password'),
-                    ConfigurationSettings::TYPE_TEXT => 'text',
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'qD2wzQ_hrc!8',
+                    ConfigurationSettings::NAME_TEXT => self::INPUT_NAME_HTTP_PASS ,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l(self::LABEL_HTTP_PASS),
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_NAME_HTTP_PASS_VALUE,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
-                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
                     ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
                     ConfigurationSettings::VALIDATE_REQUIRED => false,
-                    'buttonText' => $this->module->l('Test iDEAL configuration'),
-                    'id' => 'iDEALConfig',
+                    ConfigurationSettings::BUTTON_TEXT_TEXT => $this->module->l('Test iDEAL configuration'),
+                    ConfigurationSettings::ID_TEXT => 'iDEALConfig',
                     ConfigurationSettings::METHOD_NAME => $methodName,
-                    'send' => $this->getCheckArray($methodName)
+                    ConfigurationSettings::SEND_TEXT => $this->getCheckArray($methodName)
                 )
             )
         );
@@ -317,9 +332,9 @@ class TabData
     private function getCheckArray($methodName)
     {
         return array(
-            ConfigurationSettings::buildParamName($methodName, self::WIRECARD_SERVER_URL),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_USER),
-            ConfigurationSettings::buildParamName($methodName, self::HTTP_PASS)
+            ConfigurationSettings::buildParamName($methodName, self::INPUT_NAME_WIRECARD_SERVER_URL),
+            ConfigurationSettings::buildParamName($methodName, self::INPUT_NAME_HTTP_USER),
+            ConfigurationSettings::buildParamName($methodName, self::INPUT_NAME_HTTP_PASS)
         );
     }
 

@@ -48,13 +48,16 @@ class ConfigurationSettings
     const LINK_BUTTON = 'linkbutton';
     const INPUT_ON_OFF = 'onoff';
     const SUBMIT_BUTTON = 'btnSubmit';
+    const INPUT_TEXT = 'text';
+    const SELECT_TEXT = 'select';
+
 
     //validation names
     const VALIDATE_REQUIRED = 'required';
     const VALIDATE_SANITIZE = 'sanitize';
     const VALIDATE_MAX_CHAR = 'maxchar';
     const VALIDATE_DEFAULT = 'default';
-
+    const SANITIZE_TRIM = 'trim';
 
     //labels names
     const VALUE_TEXT = 'value';
@@ -67,7 +70,14 @@ class ConfigurationSettings
     const GROUP_TEXT = 'group';
     const NAME_TEXT = 'name';
     const TYPE_TEXT = 'type';
+    const LOGO_TEXT = 'logo';
+    const CLASS_METHOD_TEXT = 'labelMethod';
+    const INPUT_NAME_ENABLE_METHOD_TEXT = 'enable_method';
+    const BUTTON_TEXT_TEXT = 'buttonText';
+    const ID_TEXT = 'id';
+    const SEND_TEXT = 'send';
 
+    const TAB_TEXT = 'tab';
     /**
      * initiate the configuration settings
      *
@@ -126,7 +136,7 @@ class ConfigurationSettings
         $elem = array(
             self::NAME_TEXT => $name,
             self::LABEL_TEXT => $label,
-            'tab' => $groupKey,
+            self::TAB_TEXT => $groupKey,
             self::TYPE_TEXT => $f[self::TYPE_TEXT],
             self::VALIDATE_REQUIRED => isset($f[self::VALIDATE_REQUIRED ]) && $f[self::VALIDATE_REQUIRED ]
         );
@@ -197,12 +207,12 @@ class ConfigurationSettings
         $radio_type = 'switch';
         $radio_options = array(
             array(
-                'id' => 'active_on',
+                self::ID_TEXT => 'active_on',
                 self::VALUE_TEXT => 1,
                 self::LABEL_TEXT => $this->module->l('Enabled')
             ),
             array(
-                'id' => 'active_off',
+                self::ID_TEXT => 'active_off',
                 self::VALUE_TEXT => 0,
                 self::LABEL_TEXT => $this->module->l('Disabled')
             )
@@ -210,10 +220,10 @@ class ConfigurationSettings
 
         switch ($f[self::TYPE_TEXT]) {
             case self::LINK_BUTTON:
-                $elem['buttonText'] = $f['buttonText'];
-                $elem['id'] = $f['id'];
+                $elem[self::BUTTON_TEXT_TEXT] = $f[self::BUTTON_TEXT_TEXT];
+                $elem[self::ID_TEXT] = $f[self::ID_TEXT];
                 $elem[self::METHOD_NAME ] = $f[self::METHOD_NAME ];
-                $elem['send'] = $f['send'];
+                $elem[self::SEND_TEXT] = $f[self::SEND_TEXT];
                 break;
             case self::INPUT_ON_OFF:
                 $elem[self::TYPE_TEXT] = $radio_type;
@@ -269,7 +279,7 @@ class ConfigurationSettings
 
             $elem[self::OPTION_TEXT] = array(
                 'query' => $options,
-                'id' => 'key',
+                self::ID_TEXT => 'key',
                 self::NAME_TEXT => self::VALUE_TEXT
             );
         }
@@ -290,7 +300,7 @@ class ConfigurationSettings
         $tabs = array();
 
         foreach (self::getConfig() as $groupKey => $group) {
-            $tabs[$groupKey] = $group['tab'];
+            $tabs[$groupKey] = $group[self::TAB_TEXT];
             foreach ($group[self::FIELDS_TEXT] as $f) {
                 $elem = $this->processInput($f, $groupKey);
                 $input_fields[] = $elem;
@@ -427,7 +437,7 @@ class ConfigurationSettings
     {
         $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-        if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == "trim") {
+        if (isset($parameter[self::VALIDATE_SANITIZE])&& $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
             $val = trim($val);
         }
 
@@ -460,7 +470,7 @@ class ConfigurationSettings
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-                if (isset($parameter[self::VALIDATE_SANITIZE]) && $parameter[self::VALIDATE_SANITIZE] == "trim") {
+                if (isset($parameter[self::VALIDATE_SANITIZE]) && $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
                     $val = trim($val);
                 }
 
