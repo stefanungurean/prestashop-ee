@@ -32,7 +32,7 @@
  * @license GPLv3
  */
 
-spl_autoload_register('wirecardEEAutoload');
+spl_autoload_register('WEEAutoload');
 
 /**
  * include class page
@@ -42,12 +42,14 @@ spl_autoload_register('wirecardEEAutoload');
  * @param $class
  *
  */
-function wirecardEEAutoload($class)
+function WEEAutoload($class)
 {
-    $namespaces = array('WirecardEE');
+
+
+    $namespaces = array('WEE');
     $namespace = null;
-    $modelNamespace = 'WirecardEEPaymentGateway';
-    $paymentNamespace = 'WirecardEEPaymentGatewayPayment';
+    $modelNamespace = 'WEEPaymentGateway';
+    $paymentNamespace = 'WEEPaymentGatewayPayment';
 
     foreach ($namespaces as $ns) {
         if (strncmp($ns, $class, Tools::strlen($ns)) !== 0) {
@@ -63,7 +65,7 @@ function wirecardEEAutoload($class)
     }
 
     if (strcmp($class, $modelNamespace) > 0) {
-        $classWithUnderscore = 'WirecardEE_PaymentGateway_';
+        $classWithUnderscore = 'WEE_PaymentGateway_';
         if ((strcmp($paymentNamespace, Tools::substr($class, Tools::strlen($paymentNamespace))) >= 0)
             && ((Tools::substr($class, Tools::strlen($paymentNamespace))) != '')
         ) {
@@ -76,5 +78,5 @@ function wirecardEEAutoload($class)
 
     $file = str_replace(array('\\', '_'), '/', $class) . '.php';
 
-    require_once $file;
+    include_once $file;
 }

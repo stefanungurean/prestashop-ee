@@ -43,7 +43,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
-class WirecardEEPaymentGatewayPayment
+class WEEPaymentGatewayPayment
 {
     /** @var  array */
     protected $config;
@@ -212,7 +212,7 @@ class WirecardEEPaymentGatewayPayment
     {
         $this->cart = $cart;
         $this->orderNumber = $orderNumber;
-        $CartData = new WirecardPaymentGatewayCart($this->module);
+        $CartData = new WEEPaymentGatewayCart($this->module);
 
         $transaction =$this->getTransaction();
         $transaction->setRedirect($CartData->getRedirect($cart, $orderNumber));

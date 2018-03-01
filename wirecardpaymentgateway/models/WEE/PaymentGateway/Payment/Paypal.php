@@ -32,29 +32,40 @@
  * @license GPLv3
  */
 
-use \Wirecard\PaymentSdk\Transaction\SofortTransaction;
+use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 
-class WirecardEEPaymentGatewayPaymentSofort extends WirecardEEPaymentGatewayPayment
+class WEEPaymentGatewayPaymentPaypal extends WEEPaymentGatewayPayment
 {
-    protected $paymentMethod = 'Sofort';
+    protected $paymentMethod = 'Paypal';
 
     /**
-     * get default sofort transaction data
+     * get default paypal transaction data
      *
      * @since 0.0.3
      *
-     * @return SofortTransaction
+     * @return PayPalTransaction
      */
     protected function getTransaction()
     {
-        $transaction = new SofortTransaction();
-        $transaction->setDescriptor('test');
+        $orderDetail = $this->module->getDisplayName();
+        $descriptor = '';
+        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
+            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
+        }
+
+        $transaction = new PayPalTransaction();
+        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
+            $transaction->setBasket($this->getBasket($this->cart));
+        }
+        $transaction->setOrderDetail($orderDetail);
+        $transaction->setEntryMode('ecommerce');
+        $transaction->setDescriptor($descriptor);
 
         return $transaction;
     }
 
     /**
-     * get default sofort transaction name
+     * get default paypal transaction name
      *
      * @since 0.0.3
      *
@@ -62,6 +73,6 @@ class WirecardEEPaymentGatewayPaymentSofort extends WirecardEEPaymentGatewayPaym
      */
     protected function getTransactionName()
     {
-        return SofortTransaction::NAME;
+        return PayPalTransaction::NAME;
     }
 }

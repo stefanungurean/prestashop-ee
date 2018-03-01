@@ -43,7 +43,7 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Entity\Device;
 use Wirecard\PaymentSdk\Entity\Amount;
 
-class WirecardPaymentGatewayCart
+class WEEPaymentGatewayCart
 {
     /** @var  WirecardPaymentGateway */
     public $module;

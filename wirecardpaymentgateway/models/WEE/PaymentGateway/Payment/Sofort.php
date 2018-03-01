@@ -32,25 +32,23 @@
  * @license GPLv3
  */
 
-use \Wirecard\PaymentSdk\Transaction\IdealTransaction;
-use \Wirecard\PaymentSdk\Entity\IdealBic;
+use \Wirecard\PaymentSdk\Transaction\SofortTransaction;
 
-class WirecardEEPaymentGatewayPaymentIDEAL extends WirecardEEPaymentGatewayPayment
+class WEEPaymentGatewayPaymentSofort extends WEEPaymentGatewayPayment
 {
-    protected $paymentMethod = 'IDEAL';
+    protected $paymentMethod = 'Sofort';
 
     /**
      * get default sofort transaction data
      *
      * @since 0.0.3
      *
-     * @return IdealTransaction
+     * @return SofortTransaction
      */
     protected function getTransaction()
     {
-        $transaction = new IdealTransaction();
-        $transaction->setDescriptor('customer-statement');
-        $transaction->setBic(IdealBic::INGBNL2A);
+        $transaction = new SofortTransaction();
+        $transaction->setDescriptor('test');
 
         return $transaction;
     }
@@ -64,11 +62,6 @@ class WirecardEEPaymentGatewayPaymentIDEAL extends WirecardEEPaymentGatewayPayme
      */
     protected function getTransactionName()
     {
-        return IdealTransaction::NAME;
-    }
-
-    public function getResponseData()
-    {
-        return $_GET;
+        return SofortTransaction::NAME;
     }
 }
