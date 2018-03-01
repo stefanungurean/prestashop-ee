@@ -41,8 +41,6 @@ class ConfigurationSettings
     private static $config;
     private static $tabData;
 
-    const CLASS_NAME_TEXT = "className";
-    const METHOD_NAME_TEXT = "method";
 
     //inputs names
     const LINK_BUTTON = 'linkbutton';
@@ -70,7 +68,9 @@ class ConfigurationSettings
     const TEXT_NAME = 'name';
     const TEXT_TYPE = 'type';
     const TEXT_LOGO = 'logo';
-    const TEXT_CLASS_METHOD = 'labelMethod';
+    const TEXT_METHOD = "method";
+    const TEXT_METHOD_LABEL = 'labelMethod';
+    const TEXT_CLASS_NAME = "className";
 
     const TEXT_BUTTON_TEXT = 'buttonText';
     const TEXT_ID = 'id';
@@ -222,7 +222,7 @@ class ConfigurationSettings
             case self::LINK_BUTTON:
                 $elem[self::TEXT_BUTTON_TEXT] = $f[self::TEXT_BUTTON_TEXT];
                 $elem[self::TEXT_ID] = $f[self::TEXT_ID];
-                $elem[self::METHOD_NAME_TEXT] = $f[self::METHOD_NAME_TEXT];
+                $elem[self::TEXT_METHOD] = $f[self::TEXT_METHOD];
                 $elem[self::TEXT_SEND] = $f[self::TEXT_SEND];
                 break;
             case self::INPUT_ON_OFF:
@@ -549,12 +549,12 @@ class ConfigurationSettings
         $types = array();
         foreach (self::getConfig() as $group) {
             foreach ($group[self::TEXT_FIELDS] as $f) {
-                if (array_key_exists(self::CLASS_NAME_TEXT, $f)) {
+                if (array_key_exists(self::TEXT_CLASS_NAME, $f)) {
                     if ($paymentType !== null &&
-                        (!isset($f[self::CLASS_NAME_TEXT]) || $f[self::CLASS_NAME_TEXT] != $paymentType)) {
+                        (!isset($f[self::TEXT_CLASS_NAME]) || $f[self::TEXT_CLASS_NAME] != $paymentType)) {
                         continue;
                     }
-                    $className = 'WEEPaymentGatewayPayment' . $f[self::CLASS_NAME_TEXT];
+                    $className = 'WEEPaymentGatewayPayment' . $f[self::TEXT_CLASS_NAME];
                     $f[self::TEXT_GROUP] = 'pt';
                     $pt = new $className($this->module, $f);
                     $types[] = $pt;

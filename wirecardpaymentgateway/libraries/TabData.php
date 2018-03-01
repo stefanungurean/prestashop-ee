@@ -103,9 +103,9 @@ class TabData
                     ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
-                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'paypal.png',
-                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -169,16 +169,7 @@ class TabData
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_BASKET_SEND,
                     ConfigurationSettings::VALIDATE_REQUIRED => true
                 ),
-                array(
-                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
-                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
-                        $methodName
-                    ),
-                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
-                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
-                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
-                )
+                $this->buildCheckButon($methodName)
             )
         );
     }
@@ -203,9 +194,9 @@ class TabData
                     ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
-                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'sofortbanking.png',
-                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -247,16 +238,7 @@ class TabData
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
-                array(
-                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
-                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
-                        $methodName
-                    ),
-                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
-                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
-                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
-                )
+                $this->buildCheckButon($methodName)
             )
         );
     }
@@ -281,9 +263,9 @@ class TabData
                     ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
-                    ConfigurationSettings::CLASS_NAME_TEXT => $MethodName,
+                    ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'ideal.png',
-                    ConfigurationSettings::TEXT_CLASS_METHOD => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -325,17 +307,31 @@ class TabData
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
-                array(
-                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
-                    ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
-                        $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
-                        $methodName
-                    ),
-                    ConfigurationSettings::TEXT_ID => $methodName.'Config',
-                    ConfigurationSettings::METHOD_NAME_TEXT  => $methodName,
-                    ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
-                )
+                $this->buildCheckButon($methodName)
             )
+        );
+    }
+
+    /**
+     * return check button array
+     *
+     * @since 0.0.3
+     *
+     * @param $methodName
+     *
+     * @return array
+     */
+    private function buildCheckButon($methodName)
+    {
+        return array(
+            ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::LINK_BUTTON,
+            ConfigurationSettings::TEXT_BUTTON_TEXT => sprintf(
+                $this->module->l(ConfigurationSettings::TEXT_LINK_BUTTON),
+                $methodName
+            ),
+            ConfigurationSettings::TEXT_ID => $methodName.'Config',
+            ConfigurationSettings::TEXT_METHOD => $methodName,
+            ConfigurationSettings::TEXT_SEND => $this->getCheckArray($methodName)
         );
     }
 

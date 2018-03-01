@@ -90,7 +90,7 @@ class WEEPaymentGatewayPayment
      */
     public function getLabel()
     {
-        return $this->config[ConfigurationSettings::TEXT_CLASS_METHOD];
+        return $this->config[ConfigurationSettings::TEXT_METHOD_LABEL];
     }
 
     /**
