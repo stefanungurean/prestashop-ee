@@ -86,13 +86,17 @@ class OrderMangement
      *
      * @param $orderNumber
      * @param $orderStatus
+     * @param $sendEmail
      *
      */
-    public function updateOrder($orderNumber, $orderStatus)
+    public function updateOrder($orderNumber, $orderStatus, $sendEmail = false)
     {
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;
         $history->changeIdOrderState(($orderStatus), $orderNumber, true);
+        if ($sendEmail) {
+            $history->addWithemail();
+        }
     }
 
     /**

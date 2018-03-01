@@ -121,7 +121,8 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
 
             $this->module->getOrderMangement()->updateOrder(
                 $orderId,
-                $this->getStatus($responseArray['transaction-state'])
+                $this->getStatus($responseArray['transaction-state']),
+                true
             );
             $logger->info(sprintf(
                 $this->l('Order with id %s was notified'),
