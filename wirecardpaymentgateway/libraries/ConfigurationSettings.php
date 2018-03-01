@@ -470,7 +470,8 @@ class ConfigurationSettings
             foreach ($this->getAllConfigurationParameters() as $parameter) {
                 $val = Tools::getValue($parameter[self::PARAM_TEXT]);
 
-                if (isset($parameter[self::VALIDATE_SANITIZE]) && $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
+                if (isset($parameter[self::VALIDATE_SANITIZE]) &&
+                    $parameter[self::VALIDATE_SANITIZE] == SELF::SANITIZE_TRIM) {
                     $val = trim($val);
                 }
 
