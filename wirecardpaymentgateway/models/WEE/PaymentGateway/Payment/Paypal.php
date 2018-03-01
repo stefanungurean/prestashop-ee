@@ -49,12 +49,18 @@ class WEEPaymentGatewayPaymentPaypal extends WEEPaymentGatewayPayment
     {
         $orderDetail = $this->module->getDisplayName();
         $descriptor = '';
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_DESCRIPTOR))) {
+        if (Configuration::get(ConfigurationSettings::getConfigValue(
+            $this->paymentMethod,
+            TabData::INPUT_NAME_DESCRIPTOR
+        ))) {
             $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
         }
 
         $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_BASKET_SEND))) {
+        if (Configuration::get(ConfigurationSettings::getConfigValue(
+            $this->paymentMethod,
+            TabData::INPUT_NAME_BASKET_SEND
+        ))) {
             $transaction->setBasket($this->getBasket($this->cart));
         }
         $transaction->setOrderDetail($orderDetail);

@@ -367,8 +367,8 @@ class TabData
     public function getConfig()
     {
         $configurationArray = array();
-        foreach ($this->tabs as $tab){
-            if(method_exists($this,$tab)) {
+        foreach ($this->tabs as $tab) {
+            if (method_exists($this, $tab)) {
                 $configurationArray[$tab] = $this->{$tab}();
             }
         }
