@@ -32,49 +32,36 @@
  * @license GPLv3
  */
 
-spl_autoload_register('wirecardEEAutoload');
+use \Wirecard\PaymentSdk\Transaction\SofortTransaction;
 
-/**
- * include class page
- *
- * @since 0.0.3
- *
- * @param $class
- *
- */
-function wirecardEEAutoload($class)
+class WirecardEEPaymentGatewayPaymentSofort extends WirecardEEPaymentGatewayPayment
 {
-    $namespaces = array('WirecardEE');
-    $namespace = null;
-    $modelNamespace = 'WirecardEEPaymentGateway';
-    $paymentNamespace = 'WirecardEEPaymentGatewayPayment';
+    protected $paymentMethod = 'Sofort';
 
-    foreach ($namespaces as $ns) {
-        if (strncmp($ns, $class, Tools::strlen($ns)) !== 0) {
-            continue;
-        } else {
-            $namespace = $ns;
-            break;
-        }
+    /**
+     * get default sofort transaction data
+     *
+     * @since 0.0.3
+     *
+     * @return SofortTransaction
+     */
+    protected function getTransaction()
+    {
+        $transaction = new SofortTransaction();
+        $transaction->setDescriptor('test');
+
+        return $transaction;
     }
 
-    if ($namespace === null) {
-        return;
+    /**
+     * get default sofort transaction name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
+    protected function getTransactionName()
+    {
+        return SofortTransaction::NAME;
     }
-
-    if (strcmp($class, $modelNamespace) > 0) {
-        $classWithUnderscore = 'WirecardEE_PaymentGateway_';
-        if ((strcmp($paymentNamespace, Tools::substr($class, Tools::strlen($paymentNamespace))) >= 0)
-            && ((Tools::substr($class, Tools::strlen($paymentNamespace))) != '')
-        ) {
-            $classWithUnderscore .= 'Payment_' . Tools::substr($class, Tools::strlen($paymentNamespace));
-        } else {
-            $classWithUnderscore .= Tools::substr($class, Tools::strlen($modelNamespace));
-        }
-        $class = $classWithUnderscore;
-    }
-
-    $file = str_replace(array('\\', '_'), '/', $class) . '.php';
-
-    require_once $file;
 }

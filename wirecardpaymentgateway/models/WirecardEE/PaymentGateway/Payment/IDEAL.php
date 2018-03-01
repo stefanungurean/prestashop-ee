@@ -32,40 +32,31 @@
  * @license GPLv3
  */
 
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use \Wirecard\PaymentSdk\Transaction\IdealTransaction;
+use \Wirecard\PaymentSdk\Entity\IdealBic;
 
-class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
+class WirecardEEPaymentGatewayPaymentIDEAL extends WirecardEEPaymentGatewayPayment
 {
-    protected $paymentMethod = 'Paypal';
+    protected $paymentMethod = 'IDEAL';
 
     /**
-     * get default paypal transaction data
+     * get default sofort transaction data
      *
      * @since 0.0.3
      *
-     * @return PayPalTransaction
+     * @return IdealTransaction
      */
     protected function getTransaction()
     {
-        $orderDetail = $this->module->getDisplayName();
-        $descriptor = '';
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'descriptor'))) {
-            $descriptor = Configuration::get('PS_SHOP_NAME') . $this->orderNumber;
-        }
-
-        $transaction = new PayPalTransaction();
-        if (Configuration::get(ConfigurationSettings::getConfigValue($this->paymentMethod, 'basket_send'))) {
-            $transaction->setBasket($this->getBasket($this->cart));
-        }
-        $transaction->setOrderDetail($orderDetail);
-        $transaction->setEntryMode('ecommerce');
-        $transaction->setDescriptor($descriptor);
+        $transaction = new IdealTransaction();
+        $transaction->setDescriptor('customer-statement');
+        $transaction->setBic(IdealBic::INGBNL2A);
 
         return $transaction;
     }
 
     /**
-     * get default paypal transaction name
+     * get default sofort transaction name
      *
      * @since 0.0.3
      *
@@ -73,6 +64,11 @@ class WirecardPaymentGatewayPaymentPaypal extends WirecardPaymentGatewayPayment
      */
     protected function getTransactionName()
     {
-        return PayPalTransaction::NAME;
+        return IdealTransaction::NAME;
+    }
+
+    public function getResponseData()
+    {
+        return $_GET;
     }
 }

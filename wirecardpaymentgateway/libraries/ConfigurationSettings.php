@@ -544,7 +544,7 @@ class ConfigurationSettings
                         (!isset($f[$classNameIndex]) || $f[$classNameIndex] != $paymentType)) {
                         continue;
                     }
-                    $className = 'WirecardPaymentGatewayPayment' . $f[$classNameIndex];
+                    $className = 'WirecardEEPaymentGatewayPayment' . $f[$classNameIndex];
                     $f[self::GROUP_TEXT] = 'pt';
                     $pt = new $className($this->module, $f);
                     $types[] = $pt;

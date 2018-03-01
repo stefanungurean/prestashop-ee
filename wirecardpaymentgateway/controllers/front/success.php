@@ -74,13 +74,13 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             if (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
-            if (!$_POST) {
+            if (!$paymentType->getResponseData()) {
                 throw new ExceptionEE($this->l('The order has been cancelled'));
             }
 
             $paymentType->setCertificate(dirname(__FILE__) . '/../../certificates/api-test.wirecard.com.crt');
             $service = new TransactionService($paymentType->getConnection(), $logger);
-            $response = $service->handleResponse($_POST);
+            $response = $service->handleResponse($paymentType->getResponseData());
             $this->processResponse($response);
         } catch (Exception $e) {
             $message=$e->getMessage();

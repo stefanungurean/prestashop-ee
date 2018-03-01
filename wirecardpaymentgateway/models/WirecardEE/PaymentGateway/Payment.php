@@ -43,7 +43,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
-class WirecardPaymentGatewayPayment
+class WirecardEEPaymentGatewayPayment
 {
     /** @var  array */
     protected $config;
@@ -246,24 +246,24 @@ class WirecardPaymentGatewayPayment
         if ($response instanceof InteractionResponse) {
             die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
         } elseif ($response instanceof FailureResponse) {
-            $errors = array();
-            foreach ($response->getStatusCollection() as $status) {
-                $severity = Tools::ucfirst($status->getSeverity());
-                $code = $status->getCode();
-                $description = $status->getDescription();
-                $errors[] = $description;
-                $logger = new Logger();
-                $logger->warning(sprintf(
-                    $this->module->l('%s with code %s and message "%s" occurred'),
-                    $severity,
-                    $code,
-                    $description
-                ));
-            }
-            $message = implode(',', $errors);
-            if (Tools::strlen($message)) {
-                throw new ExceptionEE($message);
-            }
+                $errors = array();
+                foreach ($response->getStatusCollection() as $status) {
+                    $severity = Tools::ucfirst($status->getSeverity());
+                    $code = $status->getCode();
+                    $description = $status->getDescription();
+                    $errors[] = $description;
+                    $logger = new Logger();
+                    $logger->warning(sprintf(
+                        $this->module->l('%s with code %s and message "%s" occurred'),
+                        $severity,
+                        $code,
+                        $description
+                    ));
+                }
+                $message = implode(',', $errors);
+                if (Tools::strlen($message)) {
+                    throw new ExceptionEE($message);
+                }
         }
     }
 
@@ -283,9 +283,23 @@ class WirecardPaymentGatewayPayment
      *
      * @since 0.0.3
      *
-     * @return PayPalTransaction
+     * @return string
      */
     protected function getTransaction()
     {
     }
+
+    /**
+     * return response data
+     *
+     * @since 0.0.3
+     *
+     * @return array
+     */
+    public function getResponseData()
+    {
+        return $_POST;
+    }
+
+
 }

@@ -230,6 +230,82 @@ class TabData
     }
 
     /**
+     * return iDEAL payment method data
+     *
+     * @since 0.0.3
+     *
+     * @return array
+     */
+    private function iDEAL()
+    {
+        $methodName = __FUNCTION__;
+        $MethodName = ucfirst($methodName);
+
+        return array(
+            'tab' => $MethodName,
+            'fields' => array(
+                array(
+                    'name' => 'enable_method',
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Enable'),
+                    ConfigurationSettings::VALIDATE_DEFAULT => '0',
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::CLASS_NAME => $MethodName,
+                    'logo' => 'ideal.png',
+                    'labelMethod' => $MethodName
+                ),
+                array(
+                    'name' => self::WIRECARD_SERVER_URL,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('URL of Wirecard server'),
+                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'https://api-test.wirecard.com',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                ),
+                array(
+                    'name' => 'maid',
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('MAID'),
+                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'b4ca14c0-bb9a-434d-8ce3-65fbff2c2267',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                ),
+                array(
+                    'name' => 'secret',
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('Secret'),
+                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                ),
+                array(
+                    'name' => self::HTTP_USER,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP user'),
+                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::VALIDATE_DEFAULT => '70000-APITEST-AP',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                ),
+                array(
+                    'name' => self::HTTP_PASS,
+                    ConfigurationSettings::LABEL_TEXT => $this->module->l('HTTP Password'),
+                    ConfigurationSettings::TYPE_TEXT => 'text',
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'qD2wzQ_hrc!8',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => 'trim'
+                ),
+                array(
+                    ConfigurationSettings::TYPE_TEXT => ConfigurationSettings::LINK_BUTTON,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    'buttonText' => $this->module->l('Test iDEAL configuration'),
+                    'id' => 'iDEALConfig',
+                    ConfigurationSettings::METHOD_NAME => $methodName,
+                    'send' => $this->getCheckArray($methodName)
+                )
+            )
+        );
+    }
+
+    /**
      * return check payment method data
      *
      * @since 0.0.3
@@ -259,6 +335,7 @@ class TabData
         $configurationArray = array();
         $configurationArray['paypal'] = $this->paypal();
         $configurationArray['sofort'] = $this->sofort();
+        $configurationArray['iDEAL'] = $this->iDEAL();
 
         return $configurationArray;
     }
