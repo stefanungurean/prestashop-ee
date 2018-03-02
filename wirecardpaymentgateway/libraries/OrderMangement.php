@@ -32,7 +32,7 @@
  * @license GPLv3
  */
 
-class OrderMangement
+class OrderMangement extends Module
 {
     const WDEE_OS_AWAITING = 'WDEE_OS_AWAITING';
     const WDEE_OS_FRAUD = 'WDEE_OS_FRAUD';
@@ -91,6 +91,9 @@ class OrderMangement
      */
     public function updateOrder($orderNumber, $orderStatus, $sendEmail = false)
     {
+        $this->module->changeModuleNameByOrder($orderNumber);
+        self::$_INSTANCE[$this->module->name]=$this->module;
+
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;
         $history->changeIdOrderState(($orderStatus), $orderNumber, true);

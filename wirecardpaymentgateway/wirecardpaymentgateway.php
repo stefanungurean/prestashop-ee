@@ -241,6 +241,18 @@ class WirecardPaymentGateway extends PaymentModule
     }
 
     /**
+     * set module display name
+     *
+     * @since 0.0.3
+     *
+     * @return string
+     */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+    }
+
+    /**
      * get module name
      *
      * @since 0.0.3
@@ -383,5 +395,22 @@ class WirecardPaymentGateway extends PaymentModule
         );
 
         return $helper->generateForm(array($fields_form_settings));
+    }
+
+    /**
+     *  change module name by order payment method
+     *
+     * @since 0.0.3
+     *
+     * @param $orderNumber
+     *
+     * @return WirecardEEPaymentGateway
+     */
+    public function changeModuleNameByOrder($orderNumber)
+    {
+        $order = new Order($orderNumber);
+        $paymentType = $this->getConfig()->getPaymentType($order->payment);
+        $this->setDisplayName($paymentType->getLabel());
+        return $this;
     }
 }
