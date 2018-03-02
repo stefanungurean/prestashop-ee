@@ -241,18 +241,6 @@ class WirecardPaymentGateway extends PaymentModule
     }
 
     /**
-     * set module display name
-     *
-     * @since 0.0.3
-     *
-     * @return string
-     */
-    public function setDisplayName($displayName)
-    {
-        $this->displayName = $displayName;
-    }
-
-    /**
      * get module name
      *
      * @since 0.0.3
@@ -410,7 +398,8 @@ class WirecardPaymentGateway extends PaymentModule
     {
         $order = new Order($orderNumber);
         $paymentType = $this->getConfig()->getPaymentType($order->payment);
-        $this->setDisplayName($paymentType->getLabel());
+        $this->displayName = $paymentType->getLabel();
+
         return $this;
     }
 }

@@ -91,8 +91,7 @@ class OrderMangement extends Module
      */
     public function updateOrder($orderNumber, $orderStatus, $sendEmail = false)
     {
-        $this->module->changeModuleNameByOrder($orderNumber);
-        self::$_INSTANCE[$this->module->name]=$this->module;
+        self::$_INSTANCE[$this->module->name] = $this->module->changeModuleNameByOrder($orderNumber);
 
         $history = new OrderHistory();
         $history->id_order = (int)$orderNumber;
