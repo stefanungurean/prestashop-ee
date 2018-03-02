@@ -10,7 +10,7 @@ interface PaymentService
 {
     function initiatePayment($context, $module);
     function prepareTransaction($params);
-    function getConfiguration($maid, $key);
+    function getConfiguration();
 
     /**
      * Termina di estrarre payment nei vari metodi e lascia il comune nel trait

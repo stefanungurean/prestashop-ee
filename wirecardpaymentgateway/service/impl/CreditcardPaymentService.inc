@@ -33,7 +33,7 @@ class CreditCardPaymentService implements PaymentService
         return $transaction;
     }
 
-    function getConfiguration($maid, $key)
+    function getConfiguration()
     {
         $paymentConfig = new CreditCardConfiguration();
         return $paymentConfig->getConfiguration();

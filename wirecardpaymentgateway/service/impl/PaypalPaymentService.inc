@@ -33,7 +33,7 @@ class PaypalPaymentService implements PaymentService
         return $transaction;
     }
 
-    function getConfiguration($maid, $key)
+    function getConfiguration()
     {
         $paymentConfig = new PaypalConfiguration();
         return $paymentConfig->getConfiguration();
