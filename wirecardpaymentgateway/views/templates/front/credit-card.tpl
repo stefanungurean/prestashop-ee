@@ -67,13 +67,12 @@
         }
 
     </style>
-    <form id="payment-form-creditcard" method="post" action="{$action}">
+    <form id="payment-form" onsubmit="return getTokenIdFromWirecard();" method="post" action="{$action}">
 
         <input type="hidden" name="tokenId" id="tokenId" value="">
         <input type="hidden" name="payment-type" id="payment-type" value="creditcard">
 
         <div id="creditcard-form-div"></div>
-        <button type="button"   id="sendRequest" class="btn btn-primary">Save</button>
     </form>
 </div>
 <script type="application/javascript">
@@ -93,27 +92,23 @@
         console.log(response);
     }
 
-    // ### Submit handler for the form
 
-    // To prevent the data to be submitted on any other server than the Wirecard server, the credit card UI form
-    // is sent to Wirecard via javascript. You receive a token ID which you need for processing the payment.
-    $('#sendRequest').on('click', submit);
-
-    function submit(event) {
+    function getTokenIdFromWirecard(event) {
 
         // We check if the field for the token ID already got a value.
         if ($('#tokenId').val() == '') {
 
             // If not, we will prevent the submission of the form and submit the form of credit card UI instead.
-            event.preventDefault();
 
             WirecardPaymentPage.seamlessSubmitForm({
                 onSuccess: setParentTransactionId,
                 onError: logCallback
             })
+            return false;
         } else {
             console.log('Sending the following request to your server..');
             console.log($(event.target).serialize());
+            return false;
         }
     }
 
@@ -122,7 +117,7 @@
     function setParentTransactionId(response) {
         console.log(response);
         $('#tokenId').val(response.token_id);
-        $('#payment-form-creditcard').submit();
+        $('#payment-form').submit();
     }
 
 </script>

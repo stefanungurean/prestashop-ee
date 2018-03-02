@@ -177,13 +177,14 @@ class WirecardPaymentGateway extends PaymentModule
                         ]]);
                     $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
                 } else {
-                    $paymentOption->setBinary(true);
+                    //$paymentOption->setBinary(true);
                     require_once __DIR__ . '/service/impl/' . ucfirst($key) . 'Form.inc';
                     $formClassName = ucfirst($key) . "Form";
                     $formClass = new $formClassName();
                     $paymentOption->setForm($formClass->generateForm());
                 }
                 $payment_options[] = $paymentOption;
+
             }
 
         }
