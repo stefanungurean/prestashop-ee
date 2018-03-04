@@ -291,6 +291,92 @@ class WirecardPaymentGateway extends PaymentModule
                     )
                 )
             ),
+            'ideal' => array(
+                'is_form' => false,
+                'tab' => $this->l('ideal'),
+                'fields' => array(
+                    array(
+                        'name' => 'enable_method',
+                        'label' => $this->l('Enable'),
+                        'default' => '0',
+                        'type' => 'onoff'
+                    ),
+                    array(
+                        'name' => 'wirecard_server_url',
+                        'label' => $this->l('URL of Wirecard server'),
+                        'type' => 'text',
+                        'default' => 'https://api-test.wirecard.com',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'maid',
+                        'label' => $this->l('MAID'),
+                        'type' => 'text',
+                        'default' => 'b4ca14c0-bb9a-434d-8ce3-65fbff2c2267',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'secret',
+                        'label' => $this->l('Secret'),
+                        'type' => 'text',
+                        'default' => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_user',
+                        'label' => $this->l('HTTP user'),
+                        'type' => 'text',
+                        'default' => '70000-APITEST-AP',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'http_password',
+                        'label' => $this->l('HTTP Password'),
+                        'type' => 'text',
+                        'default' => 'qD2wzQ_hrc!8',
+                        'required' => true,
+                        'sanitize' => 'trim'
+                    ),
+                    array(
+                        'name' => 'transaction_type',
+                        'label' => $this->l('Transaction type'),
+                        'type' => 'select',
+                        'default' => 'purchase',
+                        'required' => true,
+                        'options' => 'getTransactionTypes'
+                    ),
+                    array(
+                        'name' => 'descriptor',
+                        'label' => $this->l('Send descriptor'),
+                        'default' => '1',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'name' => 'basket_send',
+                        'label' => $this->l('Send basket data'),
+                        'default' => '0',
+                        'type' => 'onoff',
+                        'required' => true
+                    ),
+                    array(
+                        'type' => 'linkbutton',
+                        'required' => false,
+                        'buttonText' => $this->l('Test paypal configuration'),
+                        'id' => 'idealConfig',
+                        'method' => 'ideal',
+                        'send' => array(
+                            $this->buildParamName('paypal', 'wirecard_server_url'),
+                            $this->buildParamName('paypal', 'http_user'),
+                            $this->buildParamName('paypal', 'http_password')
+                        )
+                    )
+                )
+            ),
             'creditcard' => array(
                 'is_form' => true,
                 'tab' => $this->l('Credit Card'),
