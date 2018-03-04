@@ -15,7 +15,6 @@ class TransactionParams
     private $orderNumber;
     private $orderDetail;
     private $descriptor;
-    private $tokenId;
     private $amount;
 
     /**
@@ -130,14 +129,6 @@ class TransactionParams
     public function setDescriptor($descriptor)
     {
         $this->descriptor = $descriptor;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTokenId()
-    {
-        return $this->tokenId;
     }
 
     /**

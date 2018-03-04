@@ -28,7 +28,7 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require __DIR__.'/../../vendor/autoload.php';
+require _WPC_MODULE_DIR_.'/vendor/autoload.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -48,24 +48,8 @@ class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        if($_GET["id_order"]) {
-            $orderId = $_GET["id_order"];
-            $this->updateStatus($orderId, _PS_OS_CANCELED_);
-
-
-            $customer = $this->context->customer;
-
-            Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-detail&id_module='. $this->module->id .'&id_order=' . $orderId);
-            //update status order
-
-        }
-
-        Tools::redirectLink(__PS_BASE_URI__ . 'index.php');
+        $responseHandler = new ResponseHandlerServiceImpl();
+        $responseHandler->cancelOrder();
     }
 
-    private function updateStatus($orderNumber, $status) {
-        $history = new OrderHistory();
-        $history->id_order = (int)$orderNumber;
-        $history->changeIdOrderState(($status), $history->id_order, true);
-    }
 }

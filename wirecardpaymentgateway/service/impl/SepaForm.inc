@@ -6,7 +6,7 @@
  * Time: 07:20 AM
  */
 
-require_once __DIR__ . '/../PaymentForm.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentForm.inc';
 
 class SepaForm implements PaymentForm
 {

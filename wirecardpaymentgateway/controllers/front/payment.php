@@ -59,7 +59,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
             Tools::redirect($this->context->link->getPageLink('order', true, $this->context->cart->id_lang, $params));
         }
 
-        require_once __DIR__ . '/../../service/impl/' . $this->paymentMethod . 'PaymentService.inc';
+        require_once _WPC_MODULE_DIR_ . '/service/impl/' . $this->paymentMethod . 'PaymentService.inc';
         $className = ucfirst($this->paymentMethod) . 'PaymentService';
         $paymentService = new $className;
 

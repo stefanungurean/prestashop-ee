@@ -1,9 +1,9 @@
 <?php
 
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-require_once __DIR__ . '/../PaymentService.inc';
-require_once __DIR__ . '/../PaymentServiceTrait.inc';
-require_once __DIR__ . '/../../models/PaypalConfiguration.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentServiceTrait.inc';
+require_once _WPC_MODULE_DIR_ . '/models/PaypalConfiguration.inc';
 /**
  * Created by IntelliJ IDEA.
  * User: iustin.morosan

@@ -16,10 +16,10 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
-require_once __DIR__ .'/../vendor/autoload.php';
-require_once __DIR__ .'/../libraries/Logger.php';
-require_once __DIR__ .'/../includes/module.common.inc';
-require_once __DIR__ .'/../models/TransactionParams.inc';
+require _WPC_MODULE_DIR_ .'/vendor/autoload.php';
+require _WPC_MODULE_DIR_ .'/libraries/Logger.php';
+require _WPC_MODULE_DIR_ .'/service/impl/ResponseHandlerServiceImpl.php';
+require _WPC_MODULE_DIR_ .'/models/TransactionParams.inc';
 
 
 trait PaymentServiceTrait
@@ -28,6 +28,7 @@ trait PaymentServiceTrait
     protected $config;
     protected $context;
     protected $module;
+    protected $basket;
 
     public function initiatePayment($context, $module) {
         $this->context = $context;
@@ -68,7 +69,7 @@ trait PaymentServiceTrait
                         $descriptor = Configuration::get('PS_SHOP_NAME') . $orderNumber;
                     }
                     if (Configuration::get($this->module->buildParamName($this->paymentMethod, 'basket_send'))) {
-                        $basket = new Basket();
+                        $this->basket = new Basket();
 
                         foreach ($cart->getProducts() as $product) {
                             $productInfo = new Item(
@@ -100,7 +101,7 @@ trait PaymentServiceTrait
                                     ''
                                 )
                             );
-                            $basket->add($productInfo);
+                            $this->basket->add($productInfo);
                         }
 
                         if ($cart->getTotalShippingCost() != 0) {
@@ -126,7 +127,7 @@ trait PaymentServiceTrait
                                     ''
                                 )
                             );
-                            $basket->add($shipping);
+                            $this->basket->add($shipping);
                         }
                     }
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
@@ -153,11 +154,10 @@ trait PaymentServiceTrait
                     $params = new TransactionParams();
                     $params->setNotificationUrl($notificationUrl);
                     $params->setRedirectUrls($redirectUrls);
-                    $params->setBasket($basket);
+                    $params->setBasket($this->basket);
                     $params->setOrderNumber($orderNumber);
                     $params->setOrderDetail($orderDetail);
                     $params->setDescriptor($descriptor);
-                    $params->setTokenId($_POST['tokenId']);
                     $params->setAmount($amount);
 
                     $transaction = $this->prepareTransaction($params);
@@ -190,6 +190,7 @@ trait PaymentServiceTrait
                     // In case of an `InteractionResponse`, a browser interaction by the consumer is required
                     // in order to continue the payment process. In this example we proceed with a header redirect
                     // to the given _redirectUrl_. IFrame integration using this URL is also possible.
+                    $responseHandler = new ResponseHandlerServiceImpl();
                     if ($response instanceof FormInteractionResponse) {
                         die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
                     } elseif ($response instanceof InteractionResponse) {
@@ -197,25 +198,13 @@ trait PaymentServiceTrait
                         // The failure state is represented by a FailureResponse object.
                         // In this case the returned errors should be stored in your system.
                     } elseif ($response instanceof SuccessResponse) {
-                        manageResponse($response, $this->context, $this->module);
+
+                        $responseHandler->successfulResponse($response, $this->context, $this->module);
                         die();
                     } elseif ($response instanceof FailureResponse) {
                         //alter order status to error and return to products quantities
-                        $history = new OrderHistory();
-                        $history->id_order = (int)$orderNumber;
-                        $history->changeIdOrderState((_PS_OS_ERROR_), $history->id_order, true);
+                        $errors = $responseHandler->failResponse();
 
-                        // In our example we iterate over all errors and echo them out. You should display them as
-                        // error, warning or information based on the given severity.
-                        $errors = array();
-
-                        foreach ($response->getStatusCollection() as $status) {
-                            /**
-                             * @var $status \Wirecard\PaymentSdk\Entity\Status
-                             */
-                            $description = $status->getDescription();
-                            $errors[] = $description;
-                        }
 
                         $messageTemp = implode(',', $errors);
                         if (Tools::strlen($messageTemp)) {

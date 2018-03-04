@@ -33,6 +33,10 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+if (!defined('_WPC_MODULE_DIR_')) {
+    define('_WPC_MODULE_DIR_', _PS_MODULE_DIR_ . '/wirecardpaymentgateway');
+}
+
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 /**
@@ -167,7 +171,7 @@ class WirecardPaymentGateway extends PaymentModule
             if(Configuration::get($this->buildParamName($key, 'enable_method'))) {
                 $paymentOption = new PaymentOption();
                 $paymentOption->setCallToActionText($key . " Payment");
-                $paymentOption->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/paymenttypes/' . $key . '.png'));
+                $paymentOption->setLogo(Media::getMediaPath(_WPC_MODULE_DIR_ . '/views/img/paymenttypes/' . $key . '.png'));
                 if(!$value['is_form']) {
                     $paymentOption->setInputs([
                         'payment-type' => [
@@ -178,7 +182,7 @@ class WirecardPaymentGateway extends PaymentModule
                     $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
                 } else {
                     //$paymentOption->setBinary(true);
-                    require_once __DIR__ . '/service/impl/' . ucfirst($key) . 'Form.inc';
+                    require_once _WPC_MODULE_DIR_ . '/service/impl/' . ucfirst($key) . 'Form.inc';
                     $formClassName = ucfirst($key) . "Form";
                     $formClass = new $formClassName();
                     $paymentOption->setForm($formClass->generateForm());

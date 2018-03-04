@@ -28,11 +28,7 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../../includes/module.common.inc';
-use Wirecard\PaymentSdk\Config\Config;
-use \Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\TransactionService;
+require _WPC_MODULE_DIR_ . '/service/ResponseHandlerServiceImpl.php';
 
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
@@ -44,15 +40,15 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
+
+        $responseHandler = new ResponseHandlerServiceImpl();
         $config = new Config();
+        $config->setPublicKey(Tools::get_file_contents(_WPC_MODULE_DIR_ . '/certificates/api-test.wirecard.com.crt'));
         $service = new TransactionService($config);
-        if($_POST) {
-            $response = $service->handleResponse($_POST);
-            if($response instanceof SuccessResponse) {
-                manageResponse($response, $this->context, $this->module);
-            }
-        }
-        Tools::redirect("order-confirmation");
+
+        $response = $service->handleResponse(Tools::get_file_contents("php://input"));
+        $responseHandler->handleResponse($response, $this->context, $this->module );
+
     }
 
 

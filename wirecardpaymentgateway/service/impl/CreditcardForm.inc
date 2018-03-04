@@ -11,8 +11,8 @@ include(dirname(__FILE__) . '/../../vendor/autoload.php');
  * @new-payment
  * Add the config class for the payment
  */
-require_once __DIR__ . '/../PaymentForm.inc';
-require_once __DIR__ . '/../../models/CreditcardConfiguration.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentForm.inc';
+require_once _WPC_MODULE_DIR_ . '/models/CreditcardConfiguration.inc';
 use Wirecard\PaymentSdk\TransactionService;
 
 

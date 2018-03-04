@@ -1,13 +1,13 @@
 <?php
 
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-require_once __DIR__ . '/../PaymentService.inc';
-require_once __DIR__ . '/../PaymentServiceTrait.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
+require_once _WPC_MODULE_DIR_ . '/service/PaymentServiceTrait.inc';
 /**
  * @new-payment
  * Add the config class for the payment
  */
-require_once __DIR__ . '/../../models/CreditcardConfiguration.inc';
+require_once _WPC_MODULE_DIR_ . '/models/CreditcardConfiguration.inc';
 /**
  * Created by IntelliJ IDEA.
  * User: iustin.morosan
@@ -25,7 +25,7 @@ class CreditCardPaymentService implements PaymentService
     {
         $transaction = new CreditCardTransaction();
         $transaction->setAmount($params->getAmount());
-        $transaction->setTokenId($params->getTokenId());
+        $transaction->setTokenId(Tools::getValue('tokenId'));
         $transaction->setTermUrl($params->getRedirectUrls());
         if (Configuration::get($this->module->buildParamName($this->paymentMethod, 'basket_send'))) {
             $transaction->setBasket($params->getBasket());

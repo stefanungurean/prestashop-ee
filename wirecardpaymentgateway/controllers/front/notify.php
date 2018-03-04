@@ -28,7 +28,8 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require __DIR__.'/../../vendor/autoload.php';
+require _WPC_MODULE_DIR_.'/vendor/autoload.php';
+require _WPC_MODULE_DIR_ . '/service/ResponseHandlerServiceImpl.php';
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -48,61 +49,15 @@ class WirecardPaymentGatewayNotifyModuleFrontController extends ModuleFrontContr
      */
     public function postProcess()
     {
-        error_log("start process notify");
+
+        $responseHandler = new ResponseHandlerServiceImpl();
+
         $config = new Config();
+        $config->setPublicKey(Tools::get_file_contents(_WPC_MODULE_DIR_ . '/certificates/api-test.wirecard.com.crt'));
         $service = new TransactionService($config);
-        if($_POST) {
 
-            $response = $service->handleResponse($_POST);
-            error_log(var_dump($response, true));
-            if($response instanceof SuccessResponse) {
-                $xmlResponse = new SimpleXMLElement($response->getRawData());
-                $responseArray = json_decode(json_encode($xmlResponse), 1);
-                switch ( $response->getPaymentMethod() ) {
-                    case PAYPAL_PAYMENTH_METHOD:
-                        $this->payPalResponse($responseArray);
-                        break;
-                    case SEPA_PAYMENT_METHOD:
-                        $this->sepaResponse($responseArray);
-                        break;
-                    case CREDIT_CARD_METHOD:
-                        $this->creditCardResponse($responseArray);
-                        break;
-                }
-            }
-        }
-        Tools::redirect("order-confirmation");
-    }
+        $response = $service->handleNotification(Tools::get_file_contents("php://input"));
+        $responseHandler->notifyResponse($response, $this->context, $this->module);
 
-    private function payPalResponse($response) {
-        error_log(var_dump($response, true));
-        if($response["statuses"] != null &&
-            $response["statuses"]["status"] != null &&
-            $response["statuses"]["status"]["@attributes"] != null &&
-            $response["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
-
-        }
-        $this->updateStatus($response["order-number"], _PS_OS_PAYMENT_);
-
-        die();
-        //update status order
-        //create payment for order
-
-    }
-
-    private function sepaResponse($response) {
-//update status order
-        //create payment for order
-    }
-
-    private function creditCardResponse($response) {
-//update status order
-        //create payment for order
-    }
-
-    private function updateStatus($orderNumber, $status) {
-        $history = new OrderHistory();
-        $history->id_order = (int)$orderNumber;
-        $history->changeIdOrderState(($status), $history->id_order, true);
     }
 }
