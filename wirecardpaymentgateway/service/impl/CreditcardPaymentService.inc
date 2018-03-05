@@ -2,7 +2,7 @@
 
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
-require_once _WPC_MODULE_DIR_ . '/service/PaymentServiceTrait.inc';
+require_once _WPC_MODULE_DIR_ . '/service/traits/PaymentServiceTrait.inc';
 /**
  * @new-payment
  * Add the config class for the payment

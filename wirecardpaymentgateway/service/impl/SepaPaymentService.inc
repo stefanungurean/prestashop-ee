@@ -7,7 +7,7 @@
  * Time: 07:18 AM
  */
 require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
-require_once _WPC_MODULE_DIR_ . '/service/PaymentServiceTrait.inc';
+require_once _WPC_MODULE_DIR_ . '/service/traits/PaymentServiceTrait.inc';
 require_once _WPC_MODULE_DIR_ . '/models/SepaConfiguration.php';
 
 use Wirecard\PaymentSdk\Entity\AccountHolder;

@@ -2,7 +2,7 @@
 
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
-require_once _WPC_MODULE_DIR_ . '/service/PaymentServiceTrait.inc';
+require_once _WPC_MODULE_DIR_ . '/service/traits/PaymentServiceTrait.inc';
 require_once _WPC_MODULE_DIR_ . '/models/PaypalConfiguration.inc';
 /**
  * Created by IntelliJ IDEA.

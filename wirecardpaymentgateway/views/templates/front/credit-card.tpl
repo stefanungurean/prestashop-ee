@@ -67,7 +67,7 @@
         }
 
     </style>
-    <form id="payment-form" onsubmit="return getTokenIdFromWirecard();" method="post" action="{$action}">
+    <form id="payment-form-cc" onsubmit="return getTokenIdFromWirecard();" method="post" action="{$action}">
 
         <input type="hidden" name="tokenId" id="tokenId" value="">
         <input type="hidden" name="payment-type" id="payment-type" value="creditcard">
@@ -105,11 +105,9 @@
                 onError: logCallback
             })
             return false;
-        } else {
-            console.log('Sending the following request to your server..');
-            console.log($(event.target).serialize());
-            return false;
         }
+        return true;
+
     }
 
     // If the submit to Wirecard is successful, `seamlessSubmitForm` will set the field for the token ID
@@ -117,7 +115,7 @@
     function setParentTransactionId(response) {
         console.log(response);
         $('#tokenId').val(response.token_id);
-        $('#payment-form').submit();
+        $('#payment-form-cc').submit();
     }
 
 </script>

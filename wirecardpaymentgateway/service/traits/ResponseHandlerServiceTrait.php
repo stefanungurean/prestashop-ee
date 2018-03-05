@@ -6,7 +6,7 @@
  * Time: 5:09 PM
  */
 
-require _WPC_MODULE_DIR_ . '/libraries/Logger.php';
+require_once _WPC_MODULE_DIR_ . '/libraries/Logger.php';
 require _WPC_MODULE_DIR_.'/vendor/autoload.php';
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
@@ -33,7 +33,7 @@ trait ResponseHandlerServiceTrait
                 $this->failResponse($response, $context, $module);
             }
         }else {
-            $this->cancelOrder($response->customFields->get('orderId'));
+            $this->cancelOrder($response->getCustomFields()->get('orderId'));
         }
     }
 
@@ -45,8 +45,8 @@ trait ResponseHandlerServiceTrait
     public function successfulResponse($response, $context, $module)
     {
         $this->logResponseStatuses($response);
-        $responseArray = $response->getDate();
-        $orderId = $response->customFields->get("order_id");
+        $responseArray = $response->getData();
+        $orderId = $response->getCustomFields()->get("order_id");
         if($responseArray["statuses"] != null &&
             $responseArray["statuses"]["status"] != null &&
             $responseArray["statuses"]["status"]["@attributes"] != null &&
@@ -56,7 +56,7 @@ trait ResponseHandlerServiceTrait
 
         $customer = $context->customer;
 
-        Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . $response->customFields->get("cart_id") .'&id_module='. $module->id .'&id_order=' . $orderId . '&key=' . $customer->secure_key);
+        Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . $response->getCustomFields()->get("cart_id") .'&id_module='. $module->id .'&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
     }
 
@@ -77,7 +77,7 @@ trait ResponseHandlerServiceTrait
 
     public function failResponse($response, $context, $module)
     {
-        $orderId = $response->customFields->get("order_id");
+        $orderId = $response->getCustomFields()->get("order_id");
         $this->updateStatus($orderId,_PS_OS_ERROR_);
         $errors = $this->logResponseStatuses($response);
         return $errors;
@@ -106,7 +106,7 @@ trait ResponseHandlerServiceTrait
             $errors[] = $description;
             $logger->warning(sprintf(
 
-                $this->l('%s with code %s and message "%s" occurred'),
+                '%s with code %s and message "%s" occurred',
 
                 $severity,
 

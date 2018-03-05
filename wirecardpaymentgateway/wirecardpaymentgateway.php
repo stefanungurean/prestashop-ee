@@ -34,7 +34,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 if (!defined('_WPC_MODULE_DIR_')) {
-    define('_WPC_MODULE_DIR_', _PS_MODULE_DIR_ . '/wirecardpaymentgateway');
+    define('_WPC_MODULE_DIR_', _PS_MODULE_DIR_ . 'wirecardpaymentgateway');
 }
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
@@ -179,7 +179,7 @@ class WirecardPaymentGateway extends PaymentModule
                             'type' =>'hidden',
                             'value' => $key,
                         ]]);
-                    $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
+
                 } else {
                     //$paymentOption->setBinary(true);
                     require_once _WPC_MODULE_DIR_ . '/service/impl/' . ucfirst($key) . 'Form.inc';
@@ -187,6 +187,7 @@ class WirecardPaymentGateway extends PaymentModule
                     $formClass = new $formClassName();
                     $paymentOption->setForm($formClass->generateForm());
                 }
+                $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
                 $payment_options[] = $paymentOption;
 
             }

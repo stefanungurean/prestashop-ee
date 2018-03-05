@@ -10,6 +10,6 @@ interface ResponseHandlerService
 {
     function handleResponse($response, $context, $module);
     function notifyResponse($response, $context, $module);
-    function cancelOrder();
+    function cancelOrder($orderId);
 
 }

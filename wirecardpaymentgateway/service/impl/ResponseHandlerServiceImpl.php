@@ -8,7 +8,6 @@
 
 require _WPC_MODULE_DIR_ . '/service/ResponseHandlerService.php';
 require _WPC_MODULE_DIR_ . '/service/traits/ResponseHandlerServiceTrait.php';
-require _WPC_MODULE_DIR_ . '/libraries/Logger.php';
 
 class ResponseHandlerServiceImpl implements ResponseHandlerService
 {
