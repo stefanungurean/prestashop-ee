@@ -20,8 +20,8 @@ class TabDataTest extends \PHPUnit_Framework_TestCase
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
         $TabData = new TabData($module);
         $config = $TabData->getConfig();
-        foreach($TabData->getTabs() as $tab){
-            $this->assertArrayHasKey($tab,$config);
+        foreach ($TabData->getTabs() as $tab) {
+            $this->assertArrayHasKey($tab, $config);
         }
     }
 }

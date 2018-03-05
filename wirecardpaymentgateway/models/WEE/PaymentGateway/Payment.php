@@ -150,7 +150,6 @@ class WEEPaymentGatewayPayment
         $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, 'maid');
         $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret') ;
         return new PaymentMethodConfig($this->getTransactionName(), $MAID, $key);
-
     }
 
     /**
@@ -289,7 +288,6 @@ class WEEPaymentGatewayPayment
         if (Tools::strlen($message)) {
             throw new ExceptionEE($message);
         }
-
     }
 
     /**
@@ -324,14 +322,11 @@ class WEEPaymentGatewayPayment
     public function getResponseData()
     {
         return $_POST;
-
     }
+
     public function getForm()
     {
 
         return $this->config[ConfigurationSettings::TEXT_IS_FORM];
     }
-
-
-
 }

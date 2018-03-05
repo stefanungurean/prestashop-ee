@@ -133,8 +133,10 @@ class WirecardPaymentGateway extends PaymentModule
                     array(),
                     true
                 ));
-                if($paymentType->getForm()){
-                    $payment->setAdditionalInformation($this->fetch('module:'.$this->name.'/views/templates/hook/methods/'.$paymentType->getMethod().'.tpl'));
+                if ($paymentType->getForm()) {
+                    $payment->setAdditionalInformation($this->fetch(
+                        'module:'.$this->name.'/views/templates/hook/methods/'.$paymentType->getMethod().'.tpl'
+                    ));
                 }
                 $payment_options[] = $payment;
             }
@@ -290,7 +292,6 @@ class WirecardPaymentGateway extends PaymentModule
                 throw new ExceptionEE($validation['message']);
             }
 
-            //$orderNumber = rand();
             $orderNumber = $this->getOrderMangement()->addOrder($this->getContext()->cart, $paymentType->getMethod());
             $paymentType->initiate($this->getContext()->cart, $orderNumber);
         } catch (Exception $e) {
@@ -402,7 +403,5 @@ class WirecardPaymentGateway extends PaymentModule
         $order = new Order($orderNumber);
         $paymentType = $this->getConfig()->getPaymentType($order->payment);
         $this->displayName = $paymentType->getLabel();
-
-
     }
 }

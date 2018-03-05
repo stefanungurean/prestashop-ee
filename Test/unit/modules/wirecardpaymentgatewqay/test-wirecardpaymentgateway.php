@@ -19,16 +19,18 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     public function testInstall()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        if ($module->id)
+        if ($module->id) {
             $module->uninstall();
+        }
         $this->assertTrue($module->install());
     }
 
     public function testUninstall()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        if (!$module->id)
+        if (!$module->id) {
             $module->install();
+        }
         $this->assertTrue($module->uninstall());
     }
 
@@ -70,11 +72,10 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
         Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 1);
         $paymentOptions=$module->HookPaymentOptions();
-        $this->assertNotEquals(array(),$paymentOptions);
+        $this->assertNotEquals(array(), $paymentOptions);
 
         Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 0);
         $paymentOptions=$module->HookPaymentOptions();
-        $this->assertEquals(array(),$paymentOptions);
+        $this->assertEquals(array(), $paymentOptions);
     }
-
 }

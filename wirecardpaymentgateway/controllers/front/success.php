@@ -107,9 +107,6 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
     private function processResponse($response)
     {
         $logger = new Logger();
-        /*if (!$response->isValidSignature()) {
-            throw new ExceptionEE($this->l('The data has been modified by 3rd Party111'));
-        }*/
 
         if ($response instanceof SuccessResponse) {
             $orderId = $response->getCustomFields()->get('customOrderNumber');

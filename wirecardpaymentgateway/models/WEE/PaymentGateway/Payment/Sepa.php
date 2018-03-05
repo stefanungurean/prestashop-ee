@@ -72,7 +72,6 @@ class WEEPaymentGatewayPaymentSepa extends WEEPaymentGatewayPayment
     {
         $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, 'maid');
         $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret');
-        // $creditorid = ConfigurationSettings::getConfigValue($this->paymentMethod, 'creditorID');
         $creditorid = 'DE98ZZZ09999999999';
         $configsepa= new SepaConfig($MAID, $key);
         $configsepa->setCreditorId($creditorid);
@@ -86,9 +85,9 @@ class WEEPaymentGatewayPaymentSepa extends WEEPaymentGatewayPayment
             return false;
         } ?>
         <form id="sepa" method="<?= $response->getMethod(); ?>" action="<?= $response->getUrl(); ?>">
-            <?php foreach ($response->getFormFields() as $key => $value): ?>
+            <?php foreach ($response->getFormFields() as $key => $value) { ?>
                 <input type="hidden" name="<?= $key ?>" value="<?= $value ?>">
-            <?php endforeach;?>
+            <?php } ?>
        </form>
         <script>
             document.getElementById("sepa").submit();
