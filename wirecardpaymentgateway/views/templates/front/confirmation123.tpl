@@ -66,8 +66,8 @@
                                 <li>{l s='Order reference: %reference%' d='Shop.Theme.Checkout' sprintf=['%reference%' => $reference] mod='wirecardpaymentgateway'}</li>
                                 <li>{l s='Payment method: %payment%' d='Shop.Theme.Checkout' sprintf=['%payment%' => $payment] mod='wirecardpaymentgateway'}</li>
                                 <li>
-                                    {l s='Shipping method: %carrier%' d='Shop.Theme.Checkout' sprintf=['%carrier%' => $carrier] mod='wirecardpaymentgateway'}<br>
-                                    <em>{$delay|escape:'htmlall':'UTF-8'}</em>
+                                    {l s='Shipping method: %method%' d='Shop.Theme.Checkout' sprintf=['%method%' => $carrier] mod='wirecardpaymentgateway'}<br>
+                                    <em>{$delay}</em>
                                 </li>
                             </ul>
                         </div>

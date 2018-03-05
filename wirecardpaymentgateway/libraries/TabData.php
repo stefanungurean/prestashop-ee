@@ -43,8 +43,10 @@ class TabData
     const INPUT_LABEL_HTTP_USER = 'Http user';
     const INPUT_LABEL_SECRET = 'Secret';
     const INPUT_LABEL_MAID = 'Maid';
+
     const INPUT_LABEL_TRANSACTION_TYPE = 'Transaction type';
     const INPUT_LABEL_DESCRIPTOR = 'Send descriptor';
+    const INPUT_LABEL_CREDITOR_ID = 'Creditor ID';
 
     //input names
     const INPUT_NAME_ENABLE_METHOD = 'enable_method';
@@ -56,6 +58,7 @@ class TabData
     const INPUT_NAME_TRANSACTION_TYPE = 'transaction_type';
     const INPUT_NAME_DESCRIPTOR = 'descriptor';
     const INPUT_NAME_BASKET_SEND = 'basket_send';
+    const INPUT_NAME_CREDITOR_ID= 'creditorID';
 
     //input default values
     const INPUT_VALUE_ENABLE_METHOD = '0';
@@ -65,10 +68,11 @@ class TabData
     const INPUT_VALUE_TRANSACTION_TYPE = 'purchase';
     const INPUT_VALUE_DESCRIPTOR = '1';
     const INPUT_VALUE_BASKET_SEND = '0';
+    const INPUT_VALUE_CREDITOR_ID = 'DE98ZZZ09999999999';
 
     const INPUT_TRANSACTION_TYPE_FUNCTION = 'getTransactionTypes';
 
-    private $tabs = array('paypal','sofort','iDEAL');
+    private $tabs = array('paypal','sofort','iDEAL','sepa');
 
     /**
      * initiate store data
@@ -105,7 +109,8 @@ class TabData
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
                     ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'paypal.png',
-                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName,
+                    ConfigurationSettings::TEXT_IS_FORM => false
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -196,7 +201,8 @@ class TabData
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
                     ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'sofortbanking.png',
-                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName,
+                    ConfigurationSettings::TEXT_IS_FORM => false
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -265,7 +271,8 @@ class TabData
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
                     ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
                     ConfigurationSettings::TEXT_LOGO  => 'ideal.png',
-                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName,
+                    ConfigurationSettings::TEXT_IS_FORM => false
                 ),
                 array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
@@ -304,6 +311,85 @@ class TabData
                     ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_PASS),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
                     ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_PASS,
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                $this->buildCheckButon($methodName)
+            )
+        );
+    }
+
+    /**
+     * return sepa payment method data
+     *
+     * @since 0.0.3
+     *
+     * @return array
+     */
+    private function sepa()
+    {
+        $methodName = __FUNCTION__;
+        $MethodName = ucfirst($methodName);
+
+
+        return array(
+            ConfigurationSettings::TEXT_TAB => $MethodName,
+            ConfigurationSettings::TEXT_FIELDS => array(
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_ENABLE_METHOD,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_METHOD),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_METHOD,
+                    ConfigurationSettings::TEXT_CLASS_NAME => $MethodName,
+                    ConfigurationSettings::TEXT_LOGO  => 'sepadd.png',
+                    ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName,
+                    ConfigurationSettings::TEXT_IS_FORM => true
+                ),
+              array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_WIRECARD_SERVER_URL),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_WIRECARD_SERVER_URL,
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MAID,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MAID),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => '4c901196-eff7-411e-82a3-5ef6b6860d64',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_SECRET,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_SECRET),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'ecdf5990-0372-47cd-a55d-037dccfe9d25',
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_USER,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_USER),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_USER,
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_HTTP_PASS,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_HTTP_PASS),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_HTTP_PASS,
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => 'creditorID',
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l('CreditorID'),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => 'DE98ZZZ09999999999',
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
@@ -385,5 +471,10 @@ class TabData
             array('key' => 'authorization', 'value' => $this->module->l('Authorization')),
             array('key' => 'purchase', 'value' => $this->module->l('Purchase'))
         );
+    }
+
+    public function getTabs()
+    {
+        return $this->tabs;
     }
 }

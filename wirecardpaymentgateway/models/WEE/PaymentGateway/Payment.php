@@ -129,11 +129,9 @@ class WEEPaymentGatewayPayment
         $currency = new CurrencyCore($this->module->getContext()->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
 
-        $baseUrl = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_WIRECARD_SERVER_URL);
-        $httpUser = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_HTTP_USER);
-        $httpPass = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_HTTP_PASS);
-        $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_MAID);
-        $key = ConfigurationSettings::getConfigValue($this->paymentMethod, TabData::INPUT_NAME_SECRET) ;
+        $baseUrl = ConfigurationSettings::getConfigValue($this->paymentMethod, 'wirecard_server_url');
+        $httpUser = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_user');
+        $httpPass = ConfigurationSettings::getConfigValue($this->paymentMethod, 'http_password');
 
         $this->connection = new Config($baseUrl, $httpUser, $httpPass, $currencyIsoCode);
         $logger = new Logger();
@@ -141,10 +139,18 @@ class WEEPaymentGatewayPayment
         if (!$transactionService->checkCredentials()) {
             return false;
         }
-        $Config = new PaymentMethodConfig($this->getTransactionName(), $MAID, $key);
+        $Config = $this->configMethod();
         $this->connection->add($Config);
 
         return true;
+    }
+
+    public function configMethod()
+    {
+        $MAID = ConfigurationSettings::getConfigValue($this->paymentMethod, 'maid');
+        $key = ConfigurationSettings::getConfigValue($this->paymentMethod, 'secret') ;
+        return new PaymentMethodConfig($this->getTransactionName(), $MAID, $key);
+
     }
 
     /**
@@ -231,28 +237,59 @@ class WEEPaymentGatewayPayment
      */
     protected function processResponse($response)
     {
-        if ($response instanceof InteractionResponse) {
-            die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
-        } elseif ($response instanceof FailureResponse) {
-            $errors = array();
-            foreach ($response->getStatusCollection() as $status) {
-                $severity = Tools::ucfirst($status->getSeverity());
-                $code = $status->getCode();
-                $description = $status->getDescription();
-                $errors[] = $description;
-                $logger = new Logger();
-                $logger->warning(sprintf(
-                    $this->module->l('%s with code %s and message "%s" occurred'),
-                    $severity,
-                    $code,
-                    $description
-                ));
-            }
-            $message = implode(',', $errors);
-            if (Tools::strlen($message)) {
-                throw new ExceptionEE($message);
-            }
+        if (!$this->processResponseSuccess($response)) {
+            $this->processResponseFailed($response);
         }
+    }
+
+    /**
+     * process payment response success
+     *
+     * @since 0.0.3
+     *
+     * @param $response
+     *
+     * @return boolean
+     */
+    protected function processResponseSuccess($response)
+    {
+        if (!($response instanceof InteractionResponse)) {
+            return false;
+        }
+        die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
+    }
+
+    /**
+     * process payment response failed
+     *
+     * @since 0.0.3
+     *
+     * @param $response
+     * @param $orderNumber
+     *
+     * @throw ExceptionEE
+     */
+    protected function processResponseFailed($response)
+    {
+        $errors = array();
+        foreach ($response->getStatusCollection() as $status) {
+            $severity = Tools::ucfirst($status->getSeverity());
+            $code = $status->getCode();
+            $description = $status->getDescription();
+            $errors[] = $description;
+            $logger = new Logger();
+            $logger->warning(sprintf(
+                $this->module->l('%s with code %s and message "%s" occurred'),
+                $severity,
+                $code,
+                $description
+            ));
+        }
+        $message = implode(',', $errors);
+        if (Tools::strlen($message)) {
+            throw new ExceptionEE($message);
+        }
+
     }
 
     /**
@@ -287,5 +324,14 @@ class WEEPaymentGatewayPayment
     public function getResponseData()
     {
         return $_POST;
+
     }
+    public function getForm()
+    {
+
+        return $this->config[ConfigurationSettings::TEXT_IS_FORM];
+    }
+
+
+
 }

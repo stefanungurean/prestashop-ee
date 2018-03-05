@@ -93,7 +93,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
             'message' => $message
         ));
 
-        $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation.tpl');
+        $this->setTemplate('module:wirecardpaymentgateway/views/templates/front/confirmation123.tpl');
     }
 
     /**
@@ -107,14 +107,14 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
     private function processResponse($response)
     {
         $logger = new Logger();
-        if (!$response->isValidSignature()) {
-            throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
-        }
+        /*if (!$response->isValidSignature()) {
+            throw new ExceptionEE($this->l('The data has been modified by 3rd Party111'));
+        }*/
 
         if ($response instanceof SuccessResponse) {
             $orderId = $response->getCustomFields()->get('customOrderNumber');
             if ($orderId != Tools::getValue('order')) {
-                throw new ExceptionEE($this->l('The data has been modified by 3rd Party'));
+                throw new ExceptionEE($this->l('The data has been modified by 3rd Party2222'));
             }
 
             $order = new Order($orderId);
@@ -128,6 +128,7 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
                 'delay' => $carrier->delay
             ));
         }
+
         if ($response instanceof FailureResponse) {
             foreach ($response->getStatusCollection() as $status) {
                 $severity = Tools::ucfirst($status->getSeverity());

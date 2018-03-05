@@ -71,6 +71,7 @@ class ConfigurationSettings
     const TEXT_METHOD = "method";
     const TEXT_METHOD_LABEL = 'labelMethod';
     const TEXT_CLASS_NAME = "className";
+    const TEXT_IS_FORM = "is_form";
 
     const TEXT_BUTTON_TEXT = 'buttonText';
     const TEXT_ID = 'id';
@@ -444,7 +445,7 @@ class ConfigurationSettings
         if (isset($parameter[self::VALIDATE_REQUIRED ]) &&
             $parameter[self::VALIDATE_REQUIRED ] &&
             !Tools::strlen($val)) {
-            $this->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l('is required');
+            $this->module->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l('is required');
         }
 
         if (!isset($parameter['validator'])) {
@@ -452,7 +453,7 @@ class ConfigurationSettings
         }
 
         if ($parameter['validator'] == 'numeric' && Tools::strlen($val) && !is_numeric($val)) {
-            $this->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l(' must be a number');
+            $this->module->postErrors[] = $parameter[self::TEXT_VALUE] . ' ' . $this->module->l(' must be a number');
         }
 
         return true;

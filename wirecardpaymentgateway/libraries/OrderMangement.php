@@ -64,6 +64,7 @@ class OrderMangement extends Module
      */
     public function addOrder($cart, $paymentMethod)
     {
+        //$cart->getOrderTotal(true),
         $this->module->validateOrder(
             $cart->id,
             Configuration::get(self::WDEE_OS_AWAITING),
@@ -75,7 +76,6 @@ class OrderMangement extends Module
             false,
             $cart->secure_key
         );
-
         return $this->module->currentOrder;
     }
 
@@ -88,6 +88,7 @@ class OrderMangement extends Module
      * @param $orderStatus
      * @param $sendEmail
      *
+     * @return boolean
      */
     public function updateOrder($orderNumber, $orderStatus, $sendEmail = false)
     {
@@ -99,12 +100,16 @@ class OrderMangement extends Module
         if ($sendEmail) {
             $history->addWithemail();
         }
+        return true;
     }
 
     /**
      *  add order status to prestashop
      *
      * @since 0.0.3
+     *
+     * @return boolean
+     *
      */
     public function setStatus()
     {
@@ -146,5 +151,6 @@ class OrderMangement extends Module
                 (int)($orderState->id)
             );
         }
+        return true;
     }
 }

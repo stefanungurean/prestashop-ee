@@ -43,9 +43,8 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
  */
 class WirecardPaymentGateway extends PaymentModule
 {
-    private $postErrors;
+    public $postErrors;
     private $config;
-
     /**
      * initiate module
      *
@@ -115,7 +114,7 @@ class WirecardPaymentGateway extends PaymentModule
      *
      * @return array
      */
-    public function hookPaymentOptions($params)
+    public function hookPaymentOptions()
     {
         $payment_options = array();
         if (!$this->active) {
@@ -134,6 +133,9 @@ class WirecardPaymentGateway extends PaymentModule
                     array(),
                     true
                 ));
+                if($paymentType->getForm()){
+                    $payment->setAdditionalInformation($this->fetch('module:'.$this->name.'/views/templates/hook/methods/'.$paymentType->getMethod().'.tpl'));
+                }
                 $payment_options[] = $payment;
             }
         }
@@ -249,6 +251,7 @@ class WirecardPaymentGateway extends PaymentModule
      */
     public function getName()
     {
+        Module::getInstanceByName();
         return $this->name;
     }
 
@@ -287,6 +290,7 @@ class WirecardPaymentGateway extends PaymentModule
                 throw new ExceptionEE($validation['message']);
             }
 
+            //$orderNumber = rand();
             $orderNumber = $this->getOrderMangement()->addOrder($this->getContext()->cart, $paymentType->getMethod());
             $paymentType->initiate($this->getContext()->cart, $orderNumber);
         } catch (Exception $e) {
@@ -381,7 +385,6 @@ class WirecardPaymentGateway extends PaymentModule
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id
         );
-
         return $helper->generateForm(array($fields_form_settings));
     }
 
@@ -400,6 +403,6 @@ class WirecardPaymentGateway extends PaymentModule
         $paymentType = $this->getConfig()->getPaymentType($order->payment);
         $this->displayName = $paymentType->getLabel();
 
-        return $this;
+
     }
 }
