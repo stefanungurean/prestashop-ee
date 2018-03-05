@@ -29,6 +29,7 @@ class OrderMangementTest extends \PHPUnit_Framework_TestCase
                 $module->getContext()->cart =
                     new Cart($module->getContext()->cookie->id_cart);
             }
+
             if (is_null($module->getContext()->cart->id_currency)) {
                 $module->getContext()->cart->id_currency = $module->getContext()->cookie->id_currency;
             }
@@ -51,7 +52,6 @@ class OrderMangementTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertNotFalse($currentOrder);
-        //$this->assertNotEquals("");
     }
 
     public function testSetStatus()
