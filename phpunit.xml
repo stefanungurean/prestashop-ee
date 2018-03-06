@@ -12,11 +12,29 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./wirecardpaymentgateway/*</directory>
-            <exclude>
-                <directory>wirecardpaymentgateway/vendor</directory>
-                <file>wirecardpaymentgateway/controllers/index.php</file>
-                <file>wirecardpaymentgateway/controllers/front/index.php</file>
-            </exclude>
+		    <exclude>
+			    <directory>wirecardpaymentgateway/vendor</directory>
+			    <file>wirecardpaymentgateway/controllers/index.php</file>
+			    <file>wirecardpaymentgateway/controllers/front/index.php</file>
+			    <file>wirecardpaymentgateway/certificates/index.php</file>
+			    <file>wirecardpaymentgateway/libraries/index.php</file>
+			    <file>wirecardpaymentgateway/models/index.php</file>
+			    <file>wirecardpaymentgateway/models/WEE/index.php</file>
+			    <file>wirecardpaymentgateway/models/WEE/PaymentGateway/index.php</file>
+			    <file>wirecardpaymentgateway/models/WEE/PaymentGateway/Payment/index.php</file>
+			    <file>wirecardpaymentgateway/views/index.php</file>
+			    <file>wirecardpaymentgateway/views/css/index.php</file>
+			    <file>wirecardpaymentgateway/views/img/index.php</file>
+			    <file>wirecardpaymentgateway/views/img/paymenttypes/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/admin/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/admin/_configure/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/admin/_configure/helpers/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/admin/_configure/helpers/form/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/front/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/hook/index.php</file>
+			    <file>wirecardpaymentgateway/views/templates/hook/methods/index.php</file>
+			</exclude> 
         </whitelist>
     </filter>
 </phpunit>

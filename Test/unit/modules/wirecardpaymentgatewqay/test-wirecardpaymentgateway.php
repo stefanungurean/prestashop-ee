@@ -38,13 +38,13 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     public function testGetName()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        $this->assertTrue($module->name == 'wirecardpaymentgateway');
+        $this->assertEquals('wirecardpaymentgateway', $module->name);
     }
 
     public function testGetDisplayName()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        $this->assertTrue($module->displayName == 'Wirecard payment proccesing gateway');
+        $this->assertEquals('Wirecard payment proccesing gateway', $module->displayName);
     }
 
     public function testGetOrderMangement()
