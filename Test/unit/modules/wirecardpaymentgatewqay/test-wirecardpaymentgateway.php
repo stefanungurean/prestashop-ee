@@ -11,10 +11,11 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     public function testInitiateModule()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        $this->assertNotFalse($module);
+        $this->assertNotNull($module);
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway11'));
-        $this->assertFalse($module);
+        $this->assertNull($module);
     }
+
 
     public function testInstall()
     {
@@ -43,8 +44,7 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     public function testGetDisplayName()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-
-         //$this->assertTrue($module->displayName == 'Wirecard payment proccesing gateway');
+        $this->assertTrue($module->displayName == 'Wirecard payment proccesing gateway');
     }
 
     public function testGetOrderMangement()
@@ -71,11 +71,10 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
         Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 1);
-        $paymentOptions=$module->HookPaymentOptions();
+        $paymentOptions = $module->HookPaymentOptions();
         $this->assertNotEquals(array(), $paymentOptions);
-
         Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 0);
-        $paymentOptions=$module->HookPaymentOptions();
+        $paymentOptions = $module->HookPaymentOptions();
         $this->assertEquals(array(), $paymentOptions);
     }
 }
