@@ -28,8 +28,10 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
-require _WPC_MODULE_DIR_ . '/service/ResponseHandlerServiceImpl.php';
+require_once(_WPC_MODULE_DIR_.'/service/impl/ResponseHandlerServiceImpl.php');
 
+use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\TransactionService;
 
 class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontController
 {
@@ -40,13 +42,27 @@ class WirecardPaymentGatewaySuccessModuleFrontController extends ModuleFrontCont
      */
     public function postProcess()
     {
-
         $responseHandler = new ResponseHandlerServiceImpl();
-        $config = new Config();
-        $config->setPublicKey(Tools::get_file_contents(_WPC_MODULE_DIR_ . '/certificates/api-test.wirecard.com.crt'));
+        //var_dump($this->module);
+        //$baseUrl = Configuration::get($this->module->buildParamName($this->paymentMethod, 'wirecard_server_url'));
+       // var_dump($baseUrl);
+        $config = new Config('https://api-test.wirecard.com', '70000-APITEST-AP' , 'qD2wzQ_hrc!8', 'EUR' );
+        $config->setPublicKey(file_get_contents(_WPC_MODULE_DIR_ . '/certificates/api-test.wirecard.com.crt'));
+
+
         $service = new TransactionService($config);
 
-        $response = $service->handleResponse(Tools::get_file_contents("php://input"));
+        var_dump(get_class_methods($service));
+        die();
+        // la get da eroare ca n-are payment method;
+        // compar post cu get;
+
+        if(empty($_POST)){
+            $response = $service->handleResponse($_GET);
+        }else{
+            $response = $service->handleResponse($_POST);
+        }
+
         $responseHandler->handleResponse($response, $this->context, $this->module );
 
     }

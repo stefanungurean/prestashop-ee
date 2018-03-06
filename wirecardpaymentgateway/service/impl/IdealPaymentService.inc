@@ -3,9 +3,13 @@
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\IdealBic;
-require_once __DIR__ . '/../PaymentService.inc';
-require_once __DIR__ . '/../PaymentServiceTrait.inc';
-require_once __DIR__ . '/../../models/IdealConfiguration.inc';
+
+
+require_once _WPC_MODULE_DIR_ . '/service/PaymentService.inc';
+require_once _WPC_MODULE_DIR_ . '/service/traits/PaymentServiceTrait.inc';
+
+
+require_once _WPC_MODULE_DIR_ . '/models/IdealConfiguration.inc';
 
 
 /**

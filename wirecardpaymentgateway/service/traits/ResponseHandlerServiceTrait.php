@@ -46,13 +46,15 @@ trait ResponseHandlerServiceTrait
     {
         $this->logResponseStatuses($response);
         $responseArray = $response->getData();
+
         $orderId = $response->getCustomFields()->get("order_id");
-        if($responseArray["statuses"] != null &&
-            $responseArray["statuses"]["status"] != null &&
-            $responseArray["statuses"]["status"]["@attributes"] != null &&
-            $responseArray["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
-            $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
-        }
+        $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
+       // if($responseArray["statuses"] != null &&
+        //    $responseArray["statuses"]["status"] != null &&
+       //     $responseArray["statuses"]["status"]["@attributes"] != null &&
+       //     $responseArray["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
+       //     $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
+      //  }
 
         $customer = $context->customer;
 

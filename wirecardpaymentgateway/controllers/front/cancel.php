@@ -41,6 +41,8 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
+require_once(_WPC_MODULE_DIR_.'/service/impl/ResponseHandlerServiceImpl.php');
+
 class WirecardPaymentGatewayCancelModuleFrontController extends ModuleFrontController
 {
     /**
