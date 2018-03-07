@@ -7,8 +7,6 @@
  */
 
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\CustomField;
-use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
@@ -29,6 +27,7 @@ trait PaymentServiceTrait
     protected $context;
     protected $module;
     protected $basket;
+    protected $paymentMethod;
 
     public function initiatePayment($context, $module) {
         $this->context = $context;
@@ -51,7 +50,7 @@ trait PaymentServiceTrait
                         $cart->id,
                         Configuration::get('WDEE_OS_AWAITING'),
                         $cart->getOrderTotal(true),
-                        $this->module->getDisplayName(),
+                        Tools::getValue('payment-type'),
                         null,
                         array(),
                         null,
@@ -133,7 +132,12 @@ trait PaymentServiceTrait
                     $amount = new Amount($cart->getOrderTotal(true), $currencyIsoCode);
 
                     $redirectUrls = new Redirect(
-                        $this->context->link->getModuleLink($this->module->getName(), 'success', array(), true),
+                        $this->context->link->getModuleLink($this->module->getName(),
+                            'success',
+                            array("id_order" => $orderNumber,
+                                  "id_cart" => $this->context->cart->id,
+                                  "pm" => Tools::getValue('payment-type')),
+                            true),
                         $this->context->link->getModuleLink($this->module->getName(), 'cancel', array("id_order" =>$orderNumber), true)
                     );
 
@@ -144,12 +148,6 @@ trait PaymentServiceTrait
                         true
                     );
 
-                    $cartId = new CustomField("cart_id", $this->context->cart->id);
-                    $orderId = new CustomField("order_id", $orderNumber);
-                    $customFields = new CustomFieldCollection();
-                    $customFields->add($cartId);
-                    $customFields->add($orderId);
-                    // ## Transaction
 
                     $params = new TransactionParams();
                     $params->setNotificationUrl($notificationUrl);
@@ -161,8 +159,6 @@ trait PaymentServiceTrait
                     $params->setAmount($amount);
 
                     $transaction = $this->prepareTransaction($params);
-
-                    $transaction->setCustomFields($customFields);
 
                     // ### Transaction Service
 

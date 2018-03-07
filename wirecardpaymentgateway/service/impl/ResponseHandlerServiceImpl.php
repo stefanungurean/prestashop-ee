@@ -16,4 +16,15 @@ class ResponseHandlerServiceImpl implements ResponseHandlerService
     public function __constructor() {
         $this->logger = new Logger();
     }
+
+
+    function handleResponse($response, $context, $module)
+    {
+        $this->responseWirecardHandler($response, $context, $module);
+    }
+
+    function notifyResponse($response, $context, $module)
+    {
+        // TODO: Implement notifyResponse() method.
+    }
 }

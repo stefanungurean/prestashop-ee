@@ -45,7 +45,7 @@ class WirecardPaymentGatewayPaymentModuleFrontController extends ModuleFrontCont
     {
         $message = '';
 
-        if(empty($_POST['payment-type'])) {
+        if(empty(Tools::getValue('payment-type'))) {
             $message = $this->l('Payment method not selected');
         }
         $this->paymentMethod = $_POST['payment-type'];

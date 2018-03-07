@@ -16,16 +16,7 @@ trait ResponseHandlerServiceTrait
 
     protected $logger;
 
-    public function handleResponse($response, $context, $module) {
-        $this->responseHandler($response, $context, $module);
-    }
-
-    public function notifyResponse($response, $context, $module ){
-        $this->responseHandler($response, $context, $module);
-    }
-
-
-    private function responseHandler($response, $context, $module ) {
+    public function responseWirecardHandler($response, $context, $module ) {
         if($response->isValidSignature()) {
             if($response instanceof SuccessResponse) {
                 $this->successfulResponse($response, $context, $module );
@@ -33,7 +24,7 @@ trait ResponseHandlerServiceTrait
                 $this->failResponse($response, $context, $module);
             }
         }else {
-            $this->cancelOrder($response->getCustomFields()->get('orderId'));
+            $this->cancelOrder(Tools::getValue('id_order'));
         }
     }
 
@@ -45,20 +36,21 @@ trait ResponseHandlerServiceTrait
     public function successfulResponse($response, $context, $module)
     {
         $this->logResponseStatuses($response);
-        $responseArray = $response->getData();
+        $responseArray = $response->getDate();
+        $orderId = Tools::getValue("id_order");
+        $cartId = Tools::getValue("id_cart");
+        if($responseArray["statuses"] != null &&
+            $responseArray["statuses"]["status"] != null &&
+            $responseArray["statuses"]["status"]["@attributes"] != null &&
+            $responseArray["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
 
-        $orderId = $response->getCustomFields()->get("order_id");
-        $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
-       // if($responseArray["statuses"] != null &&
-        //    $responseArray["statuses"]["status"] != null &&
-       //     $responseArray["statuses"]["status"]["@attributes"] != null &&
-       //     $responseArray["statuses"]["status"]["@attributes"]["code"] == "201.0000") {
-       //     $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
-      //  }
+            $this->updateStatus($orderId, Configuration::get('WDEE_OS_PENDING'));
+            $customer = $context->customer;
 
-        $customer = $context->customer;
-
-        Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . $response->getCustomFields()->get("cart_id") .'&id_module='. $module->id .'&id_order=' . $orderId . '&key=' . $customer->secure_key);
+            $this->redirectToConfirm($cartId, $module->id, $orderId, $customer);
+        }else {
+            $this->cancelOrder($orderId);
+        }
 
     }
 
@@ -79,7 +71,7 @@ trait ResponseHandlerServiceTrait
 
     public function failResponse($response, $context, $module)
     {
-        $orderId = $response->getCustomFields()->get("order_id");
+        $orderId = Tools::getValue("id_order");
         $this->updateStatus($orderId,_PS_OS_ERROR_);
         $errors = $this->logResponseStatuses($response);
         return $errors;
@@ -120,6 +112,10 @@ trait ResponseHandlerServiceTrait
 
         }
         return $errors;
+    }
+
+    public function redirectToConfirm($cartId, $moduleId, $orderId, $customer) {
+        Tools::redirectLink(__PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart=' . $cartId .'&id_module='. $moduleId .'&id_order=' . $orderId . '&key=' . $customer->secure_key);
     }
 
     private function updateStatus($orderNumber, $status) {

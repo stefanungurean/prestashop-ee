@@ -19,8 +19,6 @@ class CreditCardPaymentService implements PaymentService
 {
     use PaymentServiceTrait;
 
-    protected $paymentMethod;
-
     function prepareTransaction($params)
     {
         $transaction = new CreditCardTransaction();
