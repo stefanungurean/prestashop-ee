@@ -7,19 +7,14 @@
  */
 
 
-class OrderState
+class OrderHistory
 {
-    public $id;
     public $id_order;
-    public function add()
-    {
-        $this->id= rand();
-    }
 
-    public function changeIdOrderState($status, $order)
+    public function changeIdOrderState($status, $orderNumber)
     {
-        $order= new Order($order);
-        $order->update($order, $status);
+        $order= new Order($orderNumber);
+        $order->update($orderNumber, $status);
     }
     public function addWithemail($sendEmail = false)
     {

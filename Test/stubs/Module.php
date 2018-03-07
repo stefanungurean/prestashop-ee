@@ -8,6 +8,7 @@
 
 class Module extends Smarty
 {
+    public static $_INSTANCE;
     private static $modules = array('wirecardpaymentgateway'=>"WirecardPaymentGateway");
 
     public $name;

@@ -7,11 +7,12 @@
  */
 
 
-class Language
+class HelperForm
 {
-    public $id;
-    public static function getLanguages()
+    public $id_order;
+
+    public function generateForm($array)
     {
-        return array();
+        return serialize($array);
     }
 }

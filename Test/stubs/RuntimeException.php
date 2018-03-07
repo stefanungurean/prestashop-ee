@@ -7,11 +7,6 @@
  */
 
 
-class Language
+class RuntimeException
 {
-    public $id;
-    public static function getLanguages()
-    {
-        return array();
-    }
 }

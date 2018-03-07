@@ -6,12 +6,8 @@
  * Time: 11:06 PM
  */
 
-class Link
+
+class Cookie
 {
-    public function getModuleLink()
-    {
-    }
-    public function getAdminLink()
-    {
-    }
+    public $eeMessage;
 }

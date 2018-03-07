@@ -11,6 +11,7 @@ namespace Prestashop\Prestashop\Core\Payment;
 class PaymentOption
 {
 
+
     public function setCallToActionText()
     {
         return $this;

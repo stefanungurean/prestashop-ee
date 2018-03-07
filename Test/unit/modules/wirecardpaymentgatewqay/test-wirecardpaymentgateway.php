@@ -77,4 +77,68 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
         $paymentOptions = $module->HookPaymentOptions();
         $this->assertEquals(array(), $paymentOptions);
     }
+
+    public function testGetContent()
+    {
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        $content = $module->getContent();
+        $this->assertNotEquals('', $content);
+    }
+
+    public function testHookActionFrontControllerSetMedia()
+    {
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        $module->getContext()->setController('order');
+        $module->hookActionFrontControllerSetMedia();
+        $this->assertNotEquals(
+            array(),
+            $module->getContext()->getController()->getStylesheet('module-' . $module->name . '-style')
+        );
+        $module->getContext()->getController()->clearStylesheet();
+        $module->getContext()->setController('order1');
+        $module->hookActionFrontControllerSetMedia();
+        $this->assertEquals(
+            array(),
+            $module->getContext()->getController()->getStylesheet('module-' . $module->name . '-style')
+        );
+    }
+    public function testhookDisplayHeader()
+    {
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        Context::$context=new Context();
+        Context::$context->cookie->eeMessage="Hello";
+        $module->hookDisplayHeader();
+
+        $this->assertNotEquals(array(), Context::getContext()->controller->errors);
+        Context::getContext()->controller->errors=array();
+        Context::$context->cookie->eeMessage=false;
+        $module->hookDisplayHeader();
+        $this->assertEquals(array(), Context::getContext()->controller->errors);
+    }
+    public function testInitiatePayment()
+    {
+        $this->assertTrue(true);
+    }
+
+    public function testHelperRender()
+    {
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        $render = $module->helperRender(array("test"=>"testdata"), array("test1"=>"testdata1"));
+        $this->assertNotEquals('', $render);
+    }
+
+    public function testChangeModuleNameByOrder()
+    {
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        $cart = new Cart();
+        $cart->secure_key =rand();
+        $cart->addProduct(2, 10);
+        $cart->addProduct(1, 15);
+
+        $orderManagement = new OrderMangement($module);
+        $currentOrder = $orderManagement->addOrder($cart, "Paypal");
+        Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 1);
+        $module->changeModuleNameByOrder($currentOrder);
+        $this->assertEquals('Paypal', $module->displayName);
+    }
 }

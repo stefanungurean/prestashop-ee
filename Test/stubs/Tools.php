@@ -38,4 +38,20 @@ class Tools
         }
         return substr($str, $start, ($length === false ? Tools::strlen($str) : (int)$length));
     }
+    public static function isSubmit()
+    {
+        return true;
+    }
+    public static function getValue()
+    {
+        return true;
+    }
+    public static function getAdminTokenLite()
+    {
+        return true;
+    }
+    public static function displayError($msg)
+    {
+        return $msg;
+    }
 }
