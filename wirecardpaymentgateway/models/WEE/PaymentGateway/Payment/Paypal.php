@@ -48,7 +48,7 @@ class WEEPaymentGatewayPaymentPaypal extends WEEPaymentGatewayPayment
     protected function getTransaction()
     {
         $orderDetail = $this->module->getDisplayName();
-        $descriptor = '';
+        $descriptor = 'Web Shop';
         if (Configuration::get(ConfigurationSettings::getConfigValue(
             $this->paymentMethod,
             TabData::INPUT_NAME_DESCRIPTOR

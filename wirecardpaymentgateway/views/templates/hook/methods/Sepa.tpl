@@ -35,12 +35,13 @@
     <input type="text" name="accountOwner" autocomplete="off" class="form-control accountowner"
            data-wcs-fieldname="accountOwner"/>
 </div>
-
-<div class="form-group required">
-    <label class="required"> {l s='BIC' mod='wirecardceecheckoutseamless'}</label>
-    <input type="tel" name="bankBic" autocomplete="off" class="form-control bankbic is_required wcs-validate"
-           data-wcs-fieldname="bankBic"/>
-</div>
+{if $bic=="1"}
+    <div class="form-group required">
+        <label class="required"> {l s='BIC' mod='wirecardceecheckoutseamless'}</label>
+        <input type="tel" name="bankBic" autocomplete="off" class="form-control bankbic is_required wcs-validate"
+               data-wcs-fieldname="bankBic"/>
+    </div>
+{/if}
 
 <div class="required form-group">
     <label class="required"> {l s='IBAN' mod='wirecardceecheckoutseamless'}</label>

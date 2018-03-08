@@ -10,4 +10,5 @@
 class Cookie
 {
     public $eeMessage;
+    public $id_cart;
 }

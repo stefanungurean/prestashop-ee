@@ -48,6 +48,8 @@ class ConfigurationSettings
     const SUBMIT_BUTTON = 'btnSubmit';
     const INPUT_TEXT = 'text';
     const INPUT_SELECT = 'select';
+    const INPUT_DATE = 'date';
+
 
     //validation names
     const VALIDATE_REQUIRED = 'required';
@@ -337,11 +339,11 @@ class ConfigurationSettings
      */
     public static function buildParamName($group, $name)
     {
-        return sprintf(
+        return strtoupper(sprintf(
             'WDEE_%s_%s',
             Tools::strtoupper($group),
             Tools::strtoupper($name)
-        );
+        ));
     }
 
     /**

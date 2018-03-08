@@ -10,8 +10,9 @@
 class Language
 {
     public $id;
+
     public static function getLanguages()
     {
-        return array();
+        return array(array('id_lang'=>1),array('id_lang'=>1));
     }
 }

@@ -1,17 +1,19 @@
 <?php
-//require_once __DIR__ . '/../wirecardpaymentgateway/vendor/autoload.php';
-
-//stub objects
-//require('/config.inc.php');
-//require('C:\xampp\htdocs\prestashop/config/config.inc.php');
 
 define('_TEST_DIR_', dirname(__FILE__));
 define('_PS_MODULE_DIR_', dirname(__FILE__)."/../wirecardpaymentgateway/");
 define('_PS_OS_CANCELED_', 1);
+define('_PS_OS_ERROR_', 2);
 
 require_once _TEST_DIR_ . '/../wirecardpaymentgateway/vendor/autoload.php';
 
 //stub objects
+require _TEST_DIR_ . '/stubs/Validate.php';
+require _TEST_DIR_ . '/stubs/Customer.php';
+require _TEST_DIR_ . '/stubs/Address.php';
+
+require _TEST_DIR_ . '/stubs/Carrier.php';
+require _TEST_DIR_ . '/stubs/Country.php';
 require _TEST_DIR_ . '/stubs/ModuleFrontController.php';
 require _TEST_DIR_ . '/stubs/HelperForm.php';
 require _TEST_DIR_ . '/stubs/Controller.php';

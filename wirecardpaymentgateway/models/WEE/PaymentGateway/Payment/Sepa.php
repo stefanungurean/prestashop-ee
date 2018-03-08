@@ -95,4 +95,18 @@ class WEEPaymentGatewayPaymentSepa extends WEEPaymentGatewayPayment
         <?php
         exit;
     }
+
+    public function setFormData()
+    {
+        $this->module->getContext()->smarty->assign(
+            array(
+                'bic' => Configuration::get(
+                    ConfigurationSettings::buildParamName(
+                        $this->paymentMethod,
+                        TabData::INPUT_NAME_ENABLE_BIC
+                    )
+                )
+            )
+        );
+    }
 }

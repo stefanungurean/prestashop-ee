@@ -70,6 +70,7 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     public function testHookPaymentOptions()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+        $module->install();
         Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 1);
         $paymentOptions = $module->HookPaymentOptions();
         $this->assertNotEquals(array(), $paymentOptions);
@@ -117,7 +118,68 @@ class WirecardPaymentGatewayTest extends \PHPUnit_Framework_TestCase
     }
     public function testInitiatePayment()
     {
-        $this->assertTrue(true);
+        $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
+
+        $module->initiatePayment("Paypal");
+        $this->assertEquals('Module is not active', $module->getContext()->cookie->eeMessage);
+
+        $module->install();
+        $cart = new Cart();
+        $cart->exists = true;
+        $module->getContext()->cart = $cart;
+        $module->initiatePayment("Paypal");
+        $this->assertEquals(
+            'Cart cannot be loaded or an order has already been placed using this cart',
+            $module->getContext()->cookie->eeMessage
+        );
+
+        $cart->exists = false;
+        $module->getContext()->cart = $cart;
+        $module->initiatePayment("Paypal");
+        $this->assertEquals('Unable to load basket', $module->getContext()->cookie->eeMessage);
+
+        $module->getContext()->cookie->id_cart = $cart->id;
+        $module->initiatePayment("Paypal1");
+        $this->assertEquals('This payment method is not available', $module->getContext()->cookie->eeMessage);
+
+        $module->initiatePayment("Paypal");
+        $this->assertEquals('Payment method not enabled', $module->getContext()->cookie->eeMessage);
+
+        $cart->id_currency = 1;
+        $module->getContext()->cart = $cart;
+        Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "enable_method"), 1);
+        Configuration::updateValue(ConfigurationSettings::buildParamName("paypal", "wirecard_server_url"), 1);
+        $module->initiatePayment("Paypal");
+        $this->assertEquals('The merchant configuration is incorrect', $module->getContext()->cookie->eeMessage);
+
+        Configuration::updateValue(
+            ConfigurationSettings::buildParamName(
+                "paypal",
+                "wirecard_server_url"
+            ),
+            'https://api-test.wirecard.com'
+        );
+        $cart->addProduct(200, 10);
+        $module->getContext()->cart = $cart;
+        $module->initiatePayment("Paypal");
+        $this->assertEquals('Products out of stock', $module->getContext()->cookie->eeMessage);
+
+        $cart = new Cart();
+        $cart->secure_key = rand();
+        $cart->id_currency = 1;
+        $cart->id_customer = 1;
+        $cart->id_lang = 1;
+        $cart->id_carrier = 1;
+        $cart->id_address_delivery = 1;
+        $cart->addProduct(2, 10);
+        $cart->addProduct(1, 15);
+        $module->getContext()->cart = $cart;
+        $module->getContext()->cookie->id_cart = $cart->id;
+        $module->initiatePayment("Paypal");
+        $log = new PrestaShopLogger();
+        $log = $log->getLast();
+        $this->assertEquals('The resource was successfully created.', $module->getContext()->cookie->eeMessage);
+        $this->assertContains('URL:', $log->message);
     }
 
     public function testHelperRender()

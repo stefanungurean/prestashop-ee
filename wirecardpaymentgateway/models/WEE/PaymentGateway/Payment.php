@@ -126,6 +126,7 @@ class WEEPaymentGatewayPayment
      */
     public function configuration()
     {
+
         $currency = new CurrencyCore($this->module->getContext()->cart->id_currency);
         $currencyIsoCode = $currency->iso_code;
 
@@ -203,13 +204,16 @@ class WEEPaymentGatewayPayment
      */
     public function initiate($cart, $orderNumber)
     {
+
         $this->cart = $cart;
         $this->orderNumber = $orderNumber;
         $CartData = new WEEPaymentGatewayCart($this->module);
 
         $transaction =$this->getTransaction();
+
         $transaction->setRedirect($CartData->getRedirect($cart, $orderNumber));
         $transaction->setNotificationUrl($CartData->getNotification($cart, $orderNumber));
+        $transaction->setLocale($cart->id_lang);
         $transaction->setAmount($CartData->getTotalAmount($cart));
         $transaction->setConsumerId($cart->id_customer);
         $transaction->setIpAddress($CartData->getConsumerIpAddress());
@@ -255,7 +259,7 @@ class WEEPaymentGatewayPayment
         if (!($response instanceof InteractionResponse)) {
             return false;
         }
-        die("<meta http-equiv='refresh' content='0;url={$response->getRedirectUrl()}'>");
+        Tools::redirect($response->getRedirectUrl());
     }
 
     /**
@@ -328,5 +332,17 @@ class WEEPaymentGatewayPayment
     {
 
         return $this->config[ConfigurationSettings::TEXT_IS_FORM];
+    }
+
+    public function setForm(&$pymentOption)
+    {
+        $this->setFormData();
+        $pymentOption->setAdditionalInformation($this->module->getContext()->smarty->fetch(
+            'module:'.$this->module->name.'/views/templates/hook/methods/'.$this->getMethod().'.tpl'
+        ));
+    }
+
+    public function setFormData()
+    {
     }
 }

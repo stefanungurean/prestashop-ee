@@ -71,6 +71,22 @@
                 });
             });
 		</script>
+    {elseif $input.type == 'date'}
+        <div class="row">
+            <div class="input-group fixed-width-xl">
+                <input
+                        id="{if isset($input.id)}{$input.id}{else}{$input.name}{/if}"
+                        type="text"
+                        data-hex="true"
+                        {if isset($input.class)} class="{$input.class}"
+                        {else}class="datepicker"{/if}
+                        name="{$input.name}"
+                        value="{$fields_value[$input.name]|date_format:'%d-%m-%Y'|escape:'html':'UTF-8'}" />
+                <span class="input-group-addon">
+						<i class="icon-calendar-empty"></i>
+					</span>
+            </div>
+        </div>
     {else}
         {$smarty.block.parent}
     {/if}

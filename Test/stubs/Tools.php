@@ -54,4 +54,18 @@ class Tools
     {
         return $msg;
     }
+    public static function redirect($link)
+    {
+        $logger = new Logger();
+        $logger->log(1, "URL:".$link);
+    }
+
+    public static function getRemoteAddr()
+    {
+        return "127.0.0.1";
+    }
+    public static function ucfirst($str)
+    {
+        return Tools::strtoupper(Tools::substr($str, 0, 1)).Tools::substr($str, 1);
+    }
 }

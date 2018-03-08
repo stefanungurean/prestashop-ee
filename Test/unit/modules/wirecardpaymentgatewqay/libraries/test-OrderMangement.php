@@ -37,14 +37,12 @@ class OrderMangementTest extends \PHPUnit_Framework_TestCase
     public function testUpdateOrder()
     {
         $module = Module::getInstanceByName(Tools::strtolower('wirecardpaymentgateway'));
-        if ($module->id) {
-            $module->uninstall();
-        }
-
+        $module->install();
         $cart = new Cart();
         $cart->secure_key =rand();
         $cart->addProduct(2, 10);
         $cart->addProduct(1, 15);
+        Configuration::updateValue(ConfigurationSettings::buildParamName("sepa", "enable_method"), 1);
 
         $orderManagement = new OrderMangement($module);
         $currentOrder = $orderManagement->addOrder($cart, "Sepa");

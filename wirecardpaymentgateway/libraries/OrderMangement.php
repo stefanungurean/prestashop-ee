@@ -64,7 +64,6 @@ class OrderMangement extends Module
      */
     public function addOrder($cart, $paymentMethod)
     {
-        //$cart->getOrderTotal(true),
         $this->module->validateOrder(
             $cart->id,
             Configuration::get(self::WDEE_OS_AWAITING),
@@ -76,6 +75,7 @@ class OrderMangement extends Module
             false,
             $cart->secure_key
         );
+
         return $this->module->currentOrder;
     }
 

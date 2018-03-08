@@ -134,9 +134,7 @@ class WirecardPaymentGateway extends PaymentModule
                     true
                 ));
                 if ($paymentType->getForm()) {
-                    $payment->setAdditionalInformation($this->fetch(
-                        'module:'.$this->name.'/views/templates/hook/methods/'.$paymentType->getMethod().'.tpl'
-                    ));
+                    $paymentType->setForm($payment);
                 }
                 $payment_options[] = $payment;
             }
@@ -253,7 +251,6 @@ class WirecardPaymentGateway extends PaymentModule
      */
     public function getName()
     {
-        Module::getInstanceByName();
         return $this->name;
     }
 
@@ -271,7 +268,7 @@ class WirecardPaymentGateway extends PaymentModule
             if (!$this->active) {
                 throw new ExceptionEE($this->l('Module is not active'));
             } elseif (!(Validate::isLoadedObject($this->getContext()->cart) &&
-                !$this->getContext()->cart->OrderExists())) {
+                !$this->getContext()->cart->orderExists())) {
                 throw new ExceptionEE($this->l(
                     'Cart cannot be loaded or an order has already been placed using this cart'
                 ));
@@ -287,6 +284,7 @@ class WirecardPaymentGateway extends PaymentModule
             } elseif (!$paymentType->configuration()) {
                 throw new ExceptionEE($this->l('The merchant configuration is incorrect'));
             }
+
             $validation = $paymentType->validations();
             if ($validation['status'] !== true) {
                 throw new ExceptionEE($validation['message']);
@@ -403,5 +401,7 @@ class WirecardPaymentGateway extends PaymentModule
         $order = new Order($orderNumber);
         $paymentType = $this->getConfig()->getPaymentType($order->payment);
         $this->displayName = $paymentType->getLabel();
+
+        return $this;
     }
 }

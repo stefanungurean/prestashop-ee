@@ -15,6 +15,7 @@ class Context
     public $controller;
     public $language;
     public $cookie;
+    public $cart;
 
     public function __construct()
     {
@@ -23,6 +24,7 @@ class Context
         $this->controller = new OrderController();
         $this->language = new Language();
         $this->cookie = new Cookie();
+        $this->cart = new Cart();
     }
 
     public static function getContext()

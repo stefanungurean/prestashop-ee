@@ -9,7 +9,7 @@
 class PaymentModule extends Module
 {
     public $id;
-    protected $active = true;
+    public $active = false;
     protected $context;
     public $currentOrder;
     public $_path;
@@ -23,10 +23,12 @@ class PaymentModule extends Module
 
     public static function l($text)
     {
+
         return $text;
     }
     public function install()
     {
+        $this->active = true;
         return true;
     }
     public function uninstall()

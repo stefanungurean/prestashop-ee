@@ -8,10 +8,14 @@
 
 class Link
 {
-    public function getModuleLink()
+    public function getModuleLink($module, $controller, $params = array(), $flag = array())
     {
+        return 'http://localhost/prestashop/'.$module.'/'.$controller."/";
     }
     public function getAdminLink()
+    {
+    }
+    public function getPageLink()
     {
     }
 }

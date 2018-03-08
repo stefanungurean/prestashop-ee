@@ -47,6 +47,12 @@ class TabData
     const INPUT_LABEL_TRANSACTION_TYPE = 'Transaction type';
     const INPUT_LABEL_DESCRIPTOR = 'Send descriptor';
     const INPUT_LABEL_CREDITOR_ID = 'Creditor ID';
+    const INPUT_LABEL_ENABLE_BIC = 'BIC';
+    const INPUT_LABEL_MANDATE_NAME = 'Mandate Name';
+    const INPUT_LABEL_MANDATE_ADDRESS = 'Mandate Address';
+    const INPUT_LABEL_MANDATE_TEXT_ONE = 'Mandate text one transaction';
+    const INPUT_LABEL_MANDATE_TEXT_MORE = 'Mandate text more transactions';
+    const INPUT_LABEL_MANDATE_DATE = 'Mandate data';
 
     //input names
     const INPUT_NAME_ENABLE_METHOD = 'enable_method';
@@ -55,10 +61,17 @@ class TabData
     const INPUT_NAME_HTTP_USER = 'http_user';
     const INPUT_NAME_SECRET = 'secret';
     const INPUT_NAME_MAID = 'maid';
+
     const INPUT_NAME_TRANSACTION_TYPE = 'transaction_type';
     const INPUT_NAME_DESCRIPTOR = 'descriptor';
     const INPUT_NAME_BASKET_SEND = 'basket_send';
     const INPUT_NAME_CREDITOR_ID= 'creditorID';
+    const INPUT_NAME_ENABLE_BIC = 'bic';
+    const INPUT_NAME_MANDATE_NAME = 'mandate_name';
+    const INPUT_NAME_MANDATE_ADDRESS = 'mandate_address';
+    const INPUT_NAME_MANDATE_TEXT_ONE = 'mandate_text_one';
+    const INPUT_NAME_MANDATE_TEXT_MORE = 'mandate_text_more';
+    const INPUT_NAME_MANDATE_DATE = 'mandate_data';
 
     //input default values
     const INPUT_VALUE_ENABLE_METHOD = '0';
@@ -69,6 +82,7 @@ class TabData
     const INPUT_VALUE_DESCRIPTOR = '1';
     const INPUT_VALUE_BASKET_SEND = '0';
     const INPUT_VALUE_CREDITOR_ID = 'DE98ZZZ09999999999';
+    const INPUT_VALUE_ENABLE_BIC = '0';
 
     const INPUT_TRANSACTION_TYPE_FUNCTION = 'getTransactionTypes';
 
@@ -345,7 +359,7 @@ class TabData
                     ConfigurationSettings::TEXT_METHOD_LABEL => $MethodName,
                     ConfigurationSettings::TEXT_IS_FORM => true
                 ),
-              array(
+                array(
                     ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_WIRECARD_SERVER_URL,
                     ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_WIRECARD_SERVER_URL),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
@@ -386,12 +400,61 @@ class TabData
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
                 ),
                 array(
-                    ConfigurationSettings::TEXT_NAME => 'creditorID',
-                    ConfigurationSettings::TEXT_LABEL => $this->module->l('CreditorID'),
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_TRANSACTION_TYPE,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_TRANSACTION_TYPE),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_SELECT,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_TRANSACTION_TYPE,
+                    ConfigurationSettings::VALIDATE_REQUIRED => true,
+                    'options' => self::INPUT_TRANSACTION_TYPE_FUNCTION
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_ENABLE_BIC,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_ENABLE_BIC),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_ON_OFF,
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_ENABLE_BIC,
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_CREDITOR_ID,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_CREDITOR_ID),
                     ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
-                    ConfigurationSettings::VALIDATE_DEFAULT => 'DE98ZZZ09999999999',
+                    ConfigurationSettings::VALIDATE_DEFAULT => self::INPUT_VALUE_CREDITOR_ID,
                     ConfigurationSettings::VALIDATE_REQUIRED => true,
                     ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MANDATE_NAME,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MANDATE_NAME),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MANDATE_ADDRESS,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MANDATE_ADDRESS),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MANDATE_TEXT_ONE,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MANDATE_TEXT_ONE),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MANDATE_TEXT_MORE,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MANDATE_TEXT_MORE),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_TEXT,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM
+                ),
+                array(
+                    ConfigurationSettings::TEXT_NAME => self::INPUT_NAME_MANDATE_DATE,
+                    ConfigurationSettings::TEXT_LABEL => $this->module->l(self::INPUT_LABEL_MANDATE_DATE),
+                    ConfigurationSettings::TEXT_TYPE => ConfigurationSettings::INPUT_DATE,
+                    ConfigurationSettings::VALIDATE_REQUIRED => false,
+                    ConfigurationSettings::VALIDATE_SANITIZE => ConfigurationSettings::SANITIZE_TRIM,
                 ),
                 $this->buildCheckButon($methodName)
             )
